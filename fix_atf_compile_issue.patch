@@ -1,0 +1,16 @@
+diff --git a/lib/stack_protector/stack_protector.mk b/lib/stack_protector/stack_protector.mk
+index 94e804b..b5aba15 100644
+--- a/lib/stack_protector/stack_protector.mk
++++ b/lib/stack_protector/stack_protector.mk
+@@ -11,7 +11,9 @@ ifeq (${ENABLE_STACK_PROTECTOR},0)
+   ENABLE_STACK_PROTECTOR := none
+ endif
+ 
+-ifneq (${ENABLE_STACK_PROTECTOR},none)
++ifeq (${ENABLE_STACK_PROTECTOR},none)
++  TF_CFLAGS            +=      -fno-stack-protector
++else
+   STACK_PROTECTOR_ENABLED := 1
+   BL_COMMON_SOURCES	+=	lib/stack_protector/stack_protector.c	\
+ 				lib/stack_protector/${ARCH}/asm_stack_protector.S
+
