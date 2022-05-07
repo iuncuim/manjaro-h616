@@ -4,8 +4,8 @@
 
 pkgname=uboot-opi3-lts
 pkgver=2022.04
-pkgrel=1
-_tfaver=2.5
+pkgrel=3
+_tfaver=2.2
 pkgdesc="U-Boot for OPI 3 LTS"
 arch=('aarch64')
 url='http://www.denx.de/wiki/U-Boot/WebHome'
@@ -19,8 +19,8 @@ source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
 	"1001-add-sun50i-h6-opi3-lts.patch"
 	"fix_atf_compile_issue.patch")
 md5sums=('a5a70f6c723d2601da7ea93ae95642f9'
-         'cd0455f0dcd4161201074bacb93446b1'
-         'ebbdf37b1079ddfb279d1193569bfe1e'
+         'abb0e05dd2e719f094841790c81efa57'
+         '9d1d849c376c8dacc85aa994264dfa0d'
          '0d38104fa5e5c598bcfca85cffa1d091')
 
 prepare() {
@@ -34,10 +34,10 @@ prepare() {
           patch -N -p1 < "../${PATCH}" || true
       done
   }
-#	cd "${srcdir}/trusted-firmware-a-$_tfaver"
-#	patch -N -p1 -i "${srcdir}/fix_atf_compile_issue.patch"
+	cd "${srcdir}/trusted-firmware-a-$_tfaver"
+	patch -N -p1 -i "${srcdir}/fix_atf_compile_issue.patch"
  	
-	cd u-boot-${pkgver/rc/-rc}
+	cd "${srcdir}/u-boot-${pkgver/rc/-rc}"
 	apply_patches 0
 	apply_patches 1
 }
