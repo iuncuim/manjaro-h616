@@ -1,45 +1,31 @@
-# U-Boot: Orange Pi 3
+# U-Boot: Orange Pi 3 LTS
 # Maintainer: Furkan Kardame  <f.kardame@manjaro.org>
 # Contributor: Kevin Mihelich <kevin@archlinuxarm.org>
+# Contributor: Dragan Simic <dsimic@buserror.io>
 
 pkgname=uboot-opi3-lts
 pkgver=2022.04
-pkgrel=3
+pkgrel=4
 _tfaver=2.2
-pkgdesc="U-Boot for OPI 3 LTS"
+pkgdesc="U-Boot for Orange Pi 3 LTS"
 arch=('aarch64')
 url='http://www.denx.de/wiki/U-Boot/WebHome'
 license=('GPL')
-makedepends=('bc' 'git' 'python-setuptools' 'swig' 'dtc')
+makedepends=('bc' 'python' 'python-setuptools' 'swig' 'dtc' 'arm-none-eabi-gcc' 'bison' 'flex')
 provides=('uboot')
 conflicts=('uboot')
 install=${pkgname}.install
 source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
-        "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-$_tfaver.tar.gz"
-	"1001-add-sun50i-h6-opi3-lts.patch"
-	"fix_atf_compile_issue.patch")
+        "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
+        "0001-add-sun50i-h6-opi3-lts.patch")
 md5sums=('a5a70f6c723d2601da7ea93ae95642f9'
          'abb0e05dd2e719f094841790c81efa57'
-         '9d1d849c376c8dacc85aa994264dfa0d'
-         '0d38104fa5e5c598bcfca85cffa1d091')
+         'ebbdf37b1079ddfb279d1193569bfe1e')
 
 prepare() {
-  apply_patches() {
-      local PATCH
-      for PATCH in "${source[@]}"; do
-          PATCH="${PATCH%%::*}"
-          PATCH="${PATCH##*/}"
-          [[ ${PATCH} = $1*.patch ]] || continue
-          msg2 "Applying patch: ${PATCH}..."
-          patch -N -p1 < "../${PATCH}" || true
-      done
-  }
-	cd "${srcdir}/trusted-firmware-a-$_tfaver"
-	patch -N -p1 -i "${srcdir}/fix_atf_compile_issue.patch"
- 	
-	cd "${srcdir}/u-boot-${pkgver/rc/-rc}"
-	apply_patches 0
-	apply_patches 1
+  cd u-boot-${pkgver/rc/-rc}
+
+  patch -N -p1 -i "${srcdir}/0001-add-sun50i-h6-opi3-lts.patch"
 }
 
 build() {
@@ -59,26 +45,30 @@ build() {
 
   unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
 
-  cd trusted-firmware-a-$_tfaver
+  cd trusted-firmware-a-${_tfaver}
 
-  echo -e "\nBuilding TF-A for OPI 3 LTS...\n"
-  make PLAT=sun50i_h6 bl31
+  echo -e "\nBuilding TF-A for Orange Pi 3 LTS...\n"
+  # Allwinner provides no plat_get_stack_protector_canary() hook,
+  # so explicitly disable stack protection checks in GCC; this is
+  # temporary and will be no longer needed with newer TF-A
+  make PLAT=sun50i_h6 ENABLE_STACK_PROTECTOR=none bl31
   cp build/sun50i_h6/release/bl31.bin ../u-boot-${pkgver/rc/-rc}
 
   cd ../u-boot-${pkgver/rc/-rc}
 
-  echo -e "\nBuilding U-Boot for OPI 3 LTS...\n"
-  make orangepi_3_lts_defconfig 
+  echo -e "\nBuilding U-Boot for Orange Pi 3 LTS...\n"
+  make orangepi_3_lts_defconfig
+
   update_config 'CONFIG_IDENT_STRING' '" Manjaro Linux ARM"'
   update_config 'CONFIG_OF_LIBFDT_OVERLAY' 'y'
+
   make EXTRAVERSION=-${pkgrel}
-  cp -a u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-opi3-lts.bin
+  cp u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-opi3-lts.bin
 }
 
 package() {
   cd u-boot-${pkgver/rc/-rc}
 
   mkdir -p "${pkgdir}/boot/extlinux"
-
-  install -D -m 0644 u-boot-sunxi-with-spl-opi3-lts.bin -t "${pkgdir}"/boot
+  install -D -m 0644 u-boot-sunxi-with-spl-opi3-lts.bin -t "${pkgdir}/boot"
 }
