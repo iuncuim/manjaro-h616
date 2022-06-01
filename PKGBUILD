@@ -18,15 +18,20 @@ replaces=('uboot-opi3-lts')
 install=${pkgname}.install
 source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
-        "0001-add-sun50i-h6-orangepi3-lts.patch")
+        "0001-Disable-stack-protection-explicitly.patch"
+        "0002-add-sun50i-h6-orangepi3-lts.patch")
 md5sums=('a5a70f6c723d2601da7ea93ae95642f9'
          'abb0e05dd2e719f094841790c81efa57'
+         '5519ebbfa6829d8b5a81350da2848e0d'
          'ebbdf37b1079ddfb279d1193569bfe1e')
 
 prepare() {
-  cd u-boot-${pkgver/rc/-rc}
+  # This is temporary and will be no longer needed with newer TF-A
+  cd trusted-firmware-a-${_tfaver}
+  patch -N -p1 -i "${srcdir}/0001-Disable-stack-protection-explicitly.patch"
 
-  patch -N -p1 -i "${srcdir}/0001-add-sun50i-h6-orangepi3-lts.patch"
+  cd ../u-boot-${pkgver/rc/-rc}
+  patch -N -p1 -i "${srcdir}/0002-add-sun50i-h6-orangepi3-lts.patch"
 }
 
 build() {
