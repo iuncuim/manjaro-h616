@@ -3,9 +3,9 @@
 # Contributor: Kevin Mihelich <kevin@archlinuxarm.org>
 # Contributor: Dragan Simic <dsimic@buserror.io>
 
-pkgname=uboot-opi3-lts
+pkgname=uboot-orangepi3-lts
 pkgver=2022.04
-pkgrel=4
+pkgrel=1
 _tfaver=2.2
 pkgdesc="U-Boot for Orange Pi 3 LTS"
 arch=('aarch64')
@@ -14,10 +14,11 @@ license=('GPL')
 makedepends=('bc' 'python' 'python-setuptools' 'swig' 'dtc' 'arm-none-eabi-gcc' 'bison' 'flex')
 provides=('uboot')
 conflicts=('uboot')
+replaces=('uboot-opi3-lts')
 install=${pkgname}.install
 source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
-        "0001-add-sun50i-h6-opi3-lts.patch")
+        "0001-add-sun50i-h6-orangepi3-lts.patch")
 md5sums=('a5a70f6c723d2601da7ea93ae95642f9'
          'abb0e05dd2e719f094841790c81efa57'
          'ebbdf37b1079ddfb279d1193569bfe1e')
@@ -25,7 +26,7 @@ md5sums=('a5a70f6c723d2601da7ea93ae95642f9'
 prepare() {
   cd u-boot-${pkgver/rc/-rc}
 
-  patch -N -p1 -i "${srcdir}/0001-add-sun50i-h6-opi3-lts.patch"
+  patch -N -p1 -i "${srcdir}/0001-add-sun50i-h6-orangepi3-lts.patch"
 }
 
 build() {
@@ -63,12 +64,12 @@ build() {
   update_config 'CONFIG_OF_LIBFDT_OVERLAY' 'y'
 
   make EXTRAVERSION=-${pkgrel}
-  cp u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-opi3-lts.bin
+  cp u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-orangepi3-lts.bin
 }
 
 package() {
   cd u-boot-${pkgver/rc/-rc}
 
   mkdir -p "${pkgdir}/boot/extlinux"
-  install -D -m 0644 u-boot-sunxi-with-spl-opi3-lts.bin -t "${pkgdir}/boot"
+  install -D -m 0644 u-boot-sunxi-with-spl-orangepi3-lts.bin -t "${pkgdir}/boot"
 }
