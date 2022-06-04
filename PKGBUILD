@@ -5,8 +5,8 @@
 
 pkgname=uboot-orangepi3-lts
 pkgver=2022.04
-pkgrel=1
-_tfaver=2.2
+pkgrel=2
+_tfaver=2.6
 pkgdesc="U-Boot for Orange Pi 3 LTS"
 arch=('aarch64')
 url='http://www.denx.de/wiki/U-Boot/WebHome'
@@ -18,20 +18,15 @@ replaces=('uboot-opi3-lts')
 install=${pkgname}.install
 source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
-        "0001-Disable-stack-protection-explicitly.patch"
-        "0002-add-sun50i-h6-orangepi3-lts.patch")
-md5sums=('a5a70f6c723d2601da7ea93ae95642f9'
-         'abb0e05dd2e719f094841790c81efa57'
-         '5519ebbfa6829d8b5a81350da2848e0d'
-         'ebbdf37b1079ddfb279d1193569bfe1e')
+        "0001-add-sun50i-h6-orangepi3-lts.patch")
+sha256sums=('68e065413926778e276ec3abd28bb32fa82abaa4a6898d570c1f48fbdb08bcd0'
+            '4e59f02ccb042d5d18c89c849701b96e6cf4b788709564405354b5d313d173f7'
+            '3773d2fd177a5d7b61778480755a26c476354ff882c521dde4b22c8b1e21b4f4')
 
 prepare() {
-  # This is temporary and will be no longer needed with newer TF-A
-  cd trusted-firmware-a-${_tfaver}
-  patch -N -p1 -i "${srcdir}/0001-Disable-stack-protection-explicitly.patch"
+  cd u-boot-${pkgver/rc/-rc}
 
-  cd ../u-boot-${pkgver/rc/-rc}
-  patch -N -p1 -i "${srcdir}/0002-add-sun50i-h6-orangepi3-lts.patch"
+  patch -N -p1 -i "${srcdir}/0001-add-sun50i-h6-orangepi3-lts.patch"
 }
 
 build() {
@@ -54,10 +49,10 @@ build() {
   cd trusted-firmware-a-${_tfaver}
 
   echo -e "\nBuilding TF-A for Orange Pi 3 LTS...\n"
-  # Allwinner provides no plat_get_stack_protector_canary() hook,
-  # so explicitly disable stack protection checks in GCC; this is
-  # temporary and will be no longer needed with newer TF-A
-  make PLAT=sun50i_h6 ENABLE_STACK_PROTECTOR=none bl31
+  # Not performing regulator setup in TF-A allows Linux to boot on
+  # this board correctly, which otherwise fails because the Ethernet
+  # PHY requires a coordinated bringup of two regulators
+  make PLAT=sun50i_h6 SUNXI_SETUP_REGULATORS=0 bl31
   cp build/sun50i_h6/release/bl31.bin ../u-boot-${pkgver/rc/-rc}
 
   cd ../u-boot-${pkgver/rc/-rc}
