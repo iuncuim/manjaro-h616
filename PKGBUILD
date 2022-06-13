@@ -5,8 +5,8 @@
 
 pkgname=uboot-orangepi3-lts
 pkgver=2022.04
-pkgrel=2
-_tfaver=2.6
+pkgrel=3
+_tfaver=2.2
 pkgdesc="U-Boot for Orange Pi 3 LTS"
 arch=('aarch64')
 url='http://www.denx.de/wiki/U-Boot/WebHome'
@@ -18,15 +18,21 @@ replaces=('uboot-opi3-lts')
 install=${pkgname}.install
 source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
-        "0001-add-sun50i-h6-orangepi3-lts.patch")
+        "0001-Disable-stack-protection-explicitly.patch"
+	"0002-add-sun50i-h6-orangepi3-lts.patch")
 sha256sums=('68e065413926778e276ec3abd28bb32fa82abaa4a6898d570c1f48fbdb08bcd0'
-            '4e59f02ccb042d5d18c89c849701b96e6cf4b788709564405354b5d313d173f7'
-            '3773d2fd177a5d7b61778480755a26c476354ff882c521dde4b22c8b1e21b4f4')
+            '01d9190755f752929c82bdf6b0e16868dc7a818666b84e1dbdfa4726f6bb2731'
+            'a72f063b0656c7aa508723a7cdaf0c16a4d82496c1b6ff86ac5633eb150e9cb5'
+            'fd8196f241b50110a520223f3412606c056e50d4b03ca4bddb035739604cba60')
 
 prepare() {
-  cd u-boot-${pkgver/rc/-rc}
+  # This is temporary and will be no longer needed with newer TF-A
+  cd trusted-firmware-a-${_tfaver}
+  patch -N -p1 -i "${srcdir}/0001-Disable-stack-protection-explicitly.patch"
 
-  patch -N -p1 -i "${srcdir}/0001-add-sun50i-h6-orangepi3-lts.patch"
+  cd ../u-boot-${pkgver/rc/-rc}
+
+  patch -N -p1 -i "${srcdir}/0002-add-sun50i-h6-orangepi3-lts.patch"
 }
 
 build() {
