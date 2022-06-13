@@ -23,7 +23,7 @@ source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
 sha256sums=('68e065413926778e276ec3abd28bb32fa82abaa4a6898d570c1f48fbdb08bcd0'
             '01d9190755f752929c82bdf6b0e16868dc7a818666b84e1dbdfa4726f6bb2731'
             'a72f063b0656c7aa508723a7cdaf0c16a4d82496c1b6ff86ac5633eb150e9cb5'
-            'fd8196f241b50110a520223f3412606c056e50d4b03ca4bddb035739604cba60')
+            'c0e897741475c23a4c902d0a1fc2ed69b0e4b8c4258fe06400314a8e06cd513a')
 
 prepare() {
   # This is temporary and will be no longer needed with newer TF-A
