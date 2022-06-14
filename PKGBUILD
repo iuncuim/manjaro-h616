@@ -5,7 +5,7 @@
 
 pkgname=uboot-orangepi3-lts
 pkgver=2022.04
-pkgrel=3
+pkgrel=4
 _tfaver=2.2
 pkgdesc="U-Boot for Orange Pi 3 LTS"
 arch=('aarch64')
@@ -19,10 +19,10 @@ install=${pkgname}.install
 source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
         "0001-Disable-stack-protection-explicitly.patch"
-	"0002-add-sun50i-h6-orangepi3-lts.patch")
+        "0002-add-sun50i-h6-orangepi3-lts.patch")
 sha256sums=('68e065413926778e276ec3abd28bb32fa82abaa4a6898d570c1f48fbdb08bcd0'
             '01d9190755f752929c82bdf6b0e16868dc7a818666b84e1dbdfa4726f6bb2731'
-            'a72f063b0656c7aa508723a7cdaf0c16a4d82496c1b6ff86ac5633eb150e9cb5'
+            '3205c5270361620235a6af82e350cb312e44943bdf77662fde3365f22a191381'
             'c0e897741475c23a4c902d0a1fc2ed69b0e4b8c4258fe06400314a8e06cd513a')
 
 prepare() {
@@ -31,7 +31,6 @@ prepare() {
   patch -N -p1 -i "${srcdir}/0001-Disable-stack-protection-explicitly.patch"
 
   cd ../u-boot-${pkgver/rc/-rc}
-
   patch -N -p1 -i "${srcdir}/0002-add-sun50i-h6-orangepi3-lts.patch"
 }
 

@@ -29,4 +29,3 @@ index 94e804be9..b5aba1528 100644
    STACK_PROTECTOR_ENABLED := 1
    BL_COMMON_SOURCES	+=	lib/stack_protector/stack_protector.c	\
  				lib/stack_protector/${ARCH}/asm_stack_protector.S
-
