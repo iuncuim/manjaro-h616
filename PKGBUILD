@@ -5,7 +5,7 @@
 
 pkgname=uboot-orangepi3-lts
 pkgver=2022.04
-pkgrel=5
+pkgrel=6
 _tfaver=2.2
 pkgdesc="U-Boot for Orange Pi 3 LTS"
 arch=('aarch64')
@@ -20,7 +20,7 @@ source=("ftp://ftp.denx.de/pub/u-boot/u-boot-${pkgver/rc/-rc}.tar.bz2"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
         "0001-Disable-stack-protection-explicitly.patch"
         "0002-add-sun50i-h6-orangepi3-lts.patch"
-	"0003-fix-h6-let.patch")
+        "0003-board-sunxi-fix-h6-led.patch")
 sha256sums=('68e065413926778e276ec3abd28bb32fa82abaa4a6898d570c1f48fbdb08bcd0'
             '01d9190755f752929c82bdf6b0e16868dc7a818666b84e1dbdfa4726f6bb2731'
             '3205c5270361620235a6af82e350cb312e44943bdf77662fde3365f22a191381'
@@ -34,7 +34,7 @@ prepare() {
 
   cd ../u-boot-${pkgver/rc/-rc}
   patch -N -p1 -i "${srcdir}/0002-add-sun50i-h6-orangepi3-lts.patch"
-  patch -N -p1 -i "${srcdir}/0003-fix-h6-let.patch"
+  patch -N -p1 -i "${srcdir}/0003-board-sunxi-fix-h6-led.patch"
 }
 
 build() {
