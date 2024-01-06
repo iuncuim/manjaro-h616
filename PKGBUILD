@@ -83,12 +83,12 @@ build() {
   update_config 'CONFIG_OF_LIBFDT_OVERLAY' 'y'
 
   make EXTRAVERSION=-${pkgrel}
-  cp u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-orangepi-zero3.bin
+  cp u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-opi-zero3.bin
 }
 
 package() {
   cd u-boot-${pkgver}
 
   mkdir -p "${pkgdir}/boot/extlinux"
-  install -D -m 0644 u-boot-sunxi-with-spl-orangepi-zero3.bin -t "${pkgdir}/boot"
+  install -D -m 0644 u-boot-sunxi-with-spl-opi-zero3.bin -t "${pkgdir}/boot"
 }
