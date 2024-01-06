@@ -1,0 +1,31 @@
+pkgname=uwe5622-firmware-new
+pkgver=2024.01
+pkgrel=1
+arch=('aarch64')
+pkgdesc='Firmware files for UWE5622 WiFi/BT module'
+license=('unknown')
+url="https://github.com/orangepi-xunlong/firmware"
+depends=('git')
+conflicts=('uwe5622-firmware')
+source=('wcnmodem-38222.bin'
+        'wcnmodem.bin'  
+        'wifi_2355b001_1ant.ini'
+        'bt_configure_pskey.ini'
+        'bt_configure_rf.ini')
+md5sums=('SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP')
+
+package() {
+    install -d "${pkgdir}/usr/lib/firmware/uwe5622"
+    # Bluetooth firmware
+    install -D -m 0644 bt_configure_pskey.ini "${pkgdir}/usr/lib/firmware"
+    install -D -m 0644 bt_configure_rf.ini "${pkgdir}/usr/lib/firmware"
+    # WiFi firmware
+    install -D -m 0644 wcnmodem-38222.bin "${pkgdir}/usr/lib/firmware/uwe5622"
+    install -D -m 0644 wcnmodem.bin -t "${pkgdir}/usr/lib/firmware/uwe5622"
+    install -D -m 0644 wifi_2355b001_1ant.ini -t "${pkgdir}/usr/lib/firmware/uwe5622"
+
+}
