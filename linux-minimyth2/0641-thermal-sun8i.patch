@@ -1,0 +1,457 @@
+Subject: [PATCH v3 1/6] soc: sunxi: sram: export register 0 for THS on H616
+Date: Tue, 28 Nov 2023 00:58:44 +0000	[thread overview]
+Message-ID: <20231128005849.19044-2-andre.przywara@arm.com> (raw)
+In-Reply-To: <20231128005849.19044-1-andre.przywara@arm.com>
+
+The Allwinner H616 SoC contains a mysterious bit at register offset 0x0
+in the SRAM control block. If bit 16 is set (the reset value), the
+temperature readings of the THS are way off, leading to reports about
+200C, at normal ambient temperatures. Clearing this bits brings the
+reported values down to reasonable ranges.
+The BSP code clears this bit in firmware (U-Boot), and has an explicit
+comment about this, but offers no real explanation.
+
+Since we should not rely on firmware settings, allow other code (the THS
+driver) to access this register, by exporting it through the already
+existing syscon regmap. This mimics what we already do for the LDO
+control and the EMAC register.
+
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+---
+ drivers/soc/sunxi/sunxi_sram.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/soc/sunxi/sunxi_sram.c b/drivers/soc/sunxi/sunxi_sram.c
+index 4458b2e0562b0..24eba9ebf9f5a 100644
+--- a/drivers/soc/sunxi/sunxi_sram.c
++++ b/drivers/soc/sunxi/sunxi_sram.c
+@@ -287,6 +287,7 @@ EXPORT_SYMBOL(sunxi_sram_release);
+ struct sunxi_sramc_variant {
+ 	int num_emac_clocks;
+ 	bool has_ldo_ctrl;
++	bool has_ths_offset;
+ };
+ 
+ static const struct sunxi_sramc_variant sun4i_a10_sramc_variant = {
+@@ -308,8 +309,10 @@ static const struct sunxi_sramc_variant sun50i_a64_sramc_variant = {
+ 
+ static const struct sunxi_sramc_variant sun50i_h616_sramc_variant = {
+ 	.num_emac_clocks = 2,
++	.has_ths_offset = true,
+ };
+ 
++#define SUNXI_SRAM_THS_OFFSET_REG	0x0
+ #define SUNXI_SRAM_EMAC_CLOCK_REG	0x30
+ #define SUNXI_SYS_LDO_CTRL_REG		0x150
+ 
+@@ -318,6 +321,8 @@ static bool sunxi_sram_regmap_accessible_reg(struct device *dev,
+ {
+ 	const struct sunxi_sramc_variant *variant = dev_get_drvdata(dev);
+ 
++	if (reg == SUNXI_SRAM_THS_OFFSET_REG && variant->has_ths_offset)
++		return true;
+ 	if (reg >= SUNXI_SRAM_EMAC_CLOCK_REG &&
+ 	    reg <  SUNXI_SRAM_EMAC_CLOCK_REG + variant->num_emac_clocks * 4)
+ 		return true;
+-- 
+2.35.8
+Subject: [PATCH v3 2/6] dt-bindings: thermal: sun8i: Add H616 THS controller
+Date: Tue, 28 Nov 2023 00:58:45 +0000	[thread overview]
+Message-ID: <20231128005849.19044-3-andre.przywara@arm.com> (raw)
+In-Reply-To: <20231128005849.19044-1-andre.przywara@arm.com>
+
+From: Martin Botka <martin.botka@somainline.org>
+
+This controller is similar to the H6, but covers four sensors and uses
+slightly different calibration methods.
+Also the H616 requires to poke a bit in the SYS_CFG register range for
+correct operation, so add a "syscon" phandle property to point there.
+
+Signed-off-by: Martin Botka <martin.botka@somainline.org>
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+---
+ .../thermal/allwinner,sun8i-a83t-ths.yaml     | 30 ++++++++++++-------
+ 1 file changed, 20 insertions(+), 10 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/thermal/allwinner,sun8i-a83t-ths.yaml b/Documentation/devicetree/bindings/thermal/allwinner,sun8i-a83t-ths.yaml
+index fbd4212285e28..95a6ab9a5889b 100644
+--- a/Documentation/devicetree/bindings/thermal/allwinner,sun8i-a83t-ths.yaml
++++ b/Documentation/devicetree/bindings/thermal/allwinner,sun8i-a83t-ths.yaml
+@@ -20,6 +20,7 @@ properties:
+       - allwinner,sun50i-a100-ths
+       - allwinner,sun50i-h5-ths
+       - allwinner,sun50i-h6-ths
++      - allwinner,sun50i-h616-ths
+ 
+   clocks:
+     minItems: 1
+@@ -63,6 +64,7 @@ allOf:
+             enum:
+               - allwinner,sun50i-a100-ths
+               - allwinner,sun50i-h6-ths
++              - allwinner,sun50i-h616-ths
+ 
+     then:
+       properties:
+@@ -80,6 +82,18 @@ allOf:
+         clock-names:
+           minItems: 2
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: allwinner,sun50i-h616-ths
++
++    then:
++      properties:
++        syscon:
++          maxItems: 1
++          description: phandle to syscon device allowing access to SYS_CFG registers
++
+   - if:
+       properties:
+         compatible:
+@@ -97,16 +111,12 @@ allOf:
+           const: 1
+ 
+   - if:
+-      properties:
+-        compatible:
+-          contains:
+-            enum:
+-              - allwinner,sun8i-h3-ths
+-              - allwinner,sun8i-r40-ths
+-              - allwinner,sun50i-a64-ths
+-              - allwinner,sun50i-a100-ths
+-              - allwinner,sun50i-h5-ths
+-              - allwinner,sun50i-h6-ths
++      not:
++        properties:
++          compatible:
++            contains:
++              enum:
++                - allwinner,sun8i-a83t-ths
+ 
+     then:
+       required:
+-- 
+2.35.8
+Subject: [PATCH v3 3/6] thermal: sun8i: explain unknown H6 register value
+Date: Tue, 28 Nov 2023 00:58:46 +0000	[thread overview]
+Message-ID: <20231128005849.19044-4-andre.przywara@arm.com> (raw)
+In-Reply-To: <20231128005849.19044-1-andre.przywara@arm.com>
+
+So far we were ORing in some "unknown" value into the THS control
+register on the Allwinner H6. This part of the register is not explained
+in the H6 manual, but the H616 manual details those bits, and on closer
+inspection the THS IP blocks in both SoCs seem very close:
+- The BSP code for both SoCs writes the same values into THS_CTRL.
+- The reset values of at least the first three registers are the same.
+
+Replace the "unknown" value with its proper meaning: "acquire time",
+most probably the sample part of the sample & hold circuit of the ADC,
+according to its explanation in the H616 manual.
+
+No functional change, just a macro rename and adjustment.
+
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+---
+ drivers/thermal/sun8i_thermal.c | 29 ++++++++++++++++-------------
+ 1 file changed, 16 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/thermal/sun8i_thermal.c b/drivers/thermal/sun8i_thermal.c
+index f989b55a8aa8e..44554c3efc96c 100644
+--- a/drivers/thermal/sun8i_thermal.c
++++ b/drivers/thermal/sun8i_thermal.c
+@@ -50,7 +50,8 @@
+ #define SUN8I_THS_CTRL2_T_ACQ1(x)		((GENMASK(15, 0) & (x)) << 16)
+ #define SUN8I_THS_DATA_IRQ_STS(x)		BIT(x + 8)
+ 
+-#define SUN50I_THS_CTRL0_T_ACQ(x)		((GENMASK(15, 0) & (x)) << 16)
++#define SUN50I_THS_CTRL0_T_ACQ(x)		(GENMASK(15, 0) & ((x) - 1))
++#define SUN50I_THS_CTRL0_T_SAMPLE_PER(x)	((GENMASK(15, 0) & ((x) - 1)) << 16)
+ #define SUN50I_THS_FILTER_EN			BIT(2)
+ #define SUN50I_THS_FILTER_TYPE(x)		(GENMASK(1, 0) & (x))
+ #define SUN50I_H6_THS_PC_TEMP_PERIOD(x)		((GENMASK(19, 0) & (x)) << 12)
+@@ -410,25 +411,27 @@ static int sun8i_h3_thermal_init(struct ths_device *tmdev)
+ 	return 0;
+ }
+ 
+-/*
+- * Without this undocumented value, the returned temperatures would
+- * be higher than real ones by about 20C.
+- */
+-#define SUN50I_H6_CTRL0_UNK 0x0000002f
+-
+ static int sun50i_h6_thermal_init(struct ths_device *tmdev)
+ {
+ 	int val;
+ 
+ 	/*
+-	 * T_acq = 20us
+-	 * clkin = 24MHz
+-	 *
+-	 * x = T_acq * clkin - 1
+-	 *   = 479
++	 * The manual recommends an overall sample frequency of 50 KHz (20us,
++	 * 480 cycles at 24 MHz), which provides plenty of time for both the
++	 * acquisition time (>24 cycles) and the actual conversion time
++	 * (>14 cycles).
++	 * The lower half of the CTRL register holds the "acquire time", in
++	 * clock cycles, which the manual recommends to be 2us:
++	 * 24MHz * 2us = 48 cycles.
++	 * The high half of THS_CTRL encodes the sample frequency, in clock
++	 * cycles: 24MHz * 20us = 480 cycles.
++	 * This is explained in the H616 manual, but apparently wrongly
++	 * described in the H6 manual, although the BSP code does the same
++	 * for both SoCs.
+ 	 */
+ 	regmap_write(tmdev->regmap, SUN50I_THS_CTRL0,
+-		     SUN50I_H6_CTRL0_UNK | SUN50I_THS_CTRL0_T_ACQ(479));
++		     SUN50I_THS_CTRL0_T_ACQ(48) |
++		     SUN50I_THS_CTRL0_T_SAMPLE_PER(480));
+ 	/* average over 4 samples */
+ 	regmap_write(tmdev->regmap, SUN50I_H6_THS_MFC,
+ 		     SUN50I_THS_FILTER_EN |
+-- 
+2.35.8
+Subject: [PATCH v3 4/6] thermal: sun8i: add syscon register access code
+Date: Tue, 28 Nov 2023 00:58:47 +0000	[thread overview]
+Message-ID: <20231128005849.19044-5-andre.przywara@arm.com> (raw)
+In-Reply-To: <20231128005849.19044-1-andre.przywara@arm.com>
+
+The Allwinner H616 SoC needs to clear a bit in one register in the SRAM
+controller (exported as a syscon), to report reasonable temperature
+values. On reset, bit 16 in register 0x3000000 is set, which leads to the
+driver reporting temperatures around 200C. Clearing this bit brings the
+values down to the expected range. The BSP code does a one-time write in
+U-Boot, with a comment just mentioning the effect on the THS, but offering
+no further explanation.
+
+To not rely on firmware to set things up for us, add code that queries
+the syscon device via a DT phandle link, then clear just this single
+bit.
+
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+---
+ drivers/thermal/sun8i_thermal.c | 50 +++++++++++++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
+
+diff --git a/drivers/thermal/sun8i_thermal.c b/drivers/thermal/sun8i_thermal.c
+index 44554c3efc96c..920e419ce7343 100644
+--- a/drivers/thermal/sun8i_thermal.c
++++ b/drivers/thermal/sun8i_thermal.c
+@@ -15,6 +15,7 @@
+ #include <linux/module.h>
+ #include <linux/nvmem-consumer.h>
+ #include <linux/of.h>
++#include <linux/of_platform.h>
+ #include <linux/platform_device.h>
+ #include <linux/regmap.h>
+ #include <linux/reset.h>
+@@ -66,6 +67,7 @@ struct tsensor {
+ struct ths_thermal_chip {
+ 	bool            has_mod_clk;
+ 	bool            has_bus_clk_reset;
++	bool		needs_syscon;
+ 	int		sensor_num;
+ 	int		offset;
+ 	int		scale;
+@@ -83,6 +85,7 @@ struct ths_device {
+ 	const struct ths_thermal_chip		*chip;
+ 	struct device				*dev;
+ 	struct regmap				*regmap;
++	struct regmap_field			*syscon_regmap_field;
+ 	struct reset_control			*reset;
+ 	struct clk				*bus_clk;
+ 	struct clk                              *mod_clk;
+@@ -325,6 +328,34 @@ static void sun8i_ths_reset_control_assert(void *data)
+ 	reset_control_assert(data);
+ }
+ 
++static struct regmap *sun8i_ths_get_syscon_regmap(struct device_node *node)
++{
++	struct device_node *syscon_node;
++	struct platform_device *syscon_pdev;
++	struct regmap *regmap = NULL;
++
++	syscon_node = of_parse_phandle(node, "syscon", 0);
++	if (!syscon_node)
++		return ERR_PTR(-ENODEV);
++
++	syscon_pdev = of_find_device_by_node(syscon_node);
++	if (!syscon_pdev) {
++		/* platform device might not be probed yet */
++		regmap = ERR_PTR(-EPROBE_DEFER);
++		goto out_put_node;
++	}
++
++	/* If no regmap is found then the other device driver is at fault */
++	regmap = dev_get_regmap(&syscon_pdev->dev, NULL);
++	if (!regmap)
++		regmap = ERR_PTR(-EINVAL);
++
++	platform_device_put(syscon_pdev);
++out_put_node:
++	of_node_put(syscon_node);
++	return regmap;
++}
++
+ static int sun8i_ths_resource_init(struct ths_device *tmdev)
+ {
+ 	struct device *dev = tmdev->dev;
+@@ -369,6 +400,21 @@ static int sun8i_ths_resource_init(struct ths_device *tmdev)
+ 	if (ret)
+ 		return ret;
+ 
++	if (tmdev->chip->needs_syscon) {
++		const struct reg_field sun8i_syscon_reg_field =
++			REG_FIELD(0x0, 16, 16);
++		struct regmap *regmap;
++
++		regmap = sun8i_ths_get_syscon_regmap(dev->of_node);
++		if (IS_ERR(regmap))
++			return PTR_ERR(regmap);
++		tmdev->syscon_regmap_field = devm_regmap_field_alloc(dev,
++						      regmap,
++						      sun8i_syscon_reg_field);
++		if (IS_ERR(tmdev->syscon_regmap_field))
++			return PTR_ERR(tmdev->syscon_regmap_field);
++	}
++
+ 	ret = sun8i_ths_calibrate(tmdev);
+ 	if (ret)
+ 		return ret;
+@@ -415,6 +461,10 @@ static int sun50i_h6_thermal_init(struct ths_device *tmdev)
+ {
+ 	int val;
+ 
++	/* The H616 needs to have a bit in the SRAM control register cleared. */
++	if (tmdev->syscon_regmap_field)
++		regmap_field_write(tmdev->syscon_regmap_field, 0);
++
+ 	/*
+ 	 * The manual recommends an overall sample frequency of 50 KHz (20us,
+ 	 * 480 cycles at 24 MHz), which provides plenty of time for both the
+-- 
+2.35.8
+Subject: [PATCH v3 5/6] thermal: sun8i: add support for H616 THS controller
+Date: Tue, 28 Nov 2023 00:58:48 +0000	[thread overview]
+Message-ID: <20231128005849.19044-6-andre.przywara@arm.com> (raw)
+In-Reply-To: <20231128005849.19044-1-andre.przywara@arm.com>
+
+From: Martin Botka <martin.botka@somainline.org>
+
+Add support for the thermal sensor found in H616 SoCs, which slightly
+resembles the H6 thermal sensor controller, with a few changes like
+four sensors.
+Also the registers readings are wrong, unless a bit in the first SYS_CFG
+register cleared, so set needs_syscon to trigger that code
+
+Signed-off-by: Martin Botka <martin.botka@somainline.org>
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+---
+ drivers/thermal/sun8i_thermal.c | 73 +++++++++++++++++++++++++++++++++
+ 1 file changed, 73 insertions(+)
+
+diff --git a/drivers/thermal/sun8i_thermal.c b/drivers/thermal/sun8i_thermal.c
+index 920e419ce7343..9a404fa9d76a9 100644
+--- a/drivers/thermal/sun8i_thermal.c
++++ b/drivers/thermal/sun8i_thermal.c
+@@ -280,6 +280,64 @@ static int sun50i_h6_ths_calibrate(struct ths_device *tmdev,
+ 	return 0;
+ }
+ 
++static int sun50i_h616_ths_calibrate(struct ths_device *tmdev,
++				     u16 *caldata, int callen)
++{
++	struct device *dev = tmdev->dev;
++	int i, ft_temp;
++
++	if (!caldata[0])
++		return -EINVAL;
++
++	/*
++	 * h616 efuse THS calibration data layout:
++	 *
++	 * 0      11  16     27   32     43   48    57
++	 * +----------+-----------+-----------+-----------+
++	 * |  temp |  |sensor0|   |sensor1|   |sensor2|   |
++	 * +----------+-----------+-----------+-----------+
++	 *                      ^           ^           ^
++	 *                      |           |           |
++	 *                      |           |           sensor3[11:8]
++	 *                      |           sensor3[7:4]
++	 *                      sensor3[3:0]
++	 *
++	 * The calibration data on the H616 is the ambient temperature and
++	 * sensor values that are filled during the factory test stage.
++	 *
++	 * The unit of stored FT temperature is 0.1 degree celsius.
++	 */
++	ft_temp = caldata[0] & FT_TEMP_MASK;
++
++	for (i = 0; i < tmdev->chip->sensor_num; i++) {
++		int delta, cdata, offset, reg, temp;
++
++		if (i == 3)
++			reg = (caldata[1] >> 12)
++			      | ((caldata[2] >> 12) << 4)
++			      | ((caldata[3] >> 12) << 8);
++		else
++			reg = (int)caldata[i + 1] & TEMP_CALIB_MASK;
++
++		temp = tmdev->chip->calc_temp(tmdev, i, reg);
++		delta = ((temp - ft_temp * 100) * 10) / tmdev->chip->scale;
++		cdata = CALIBRATE_DEFAULT - delta;
++		if (cdata & ~TEMP_CALIB_MASK) {
++			dev_warn(dev, "sensor%d is not calibrated.\n", i);
++
++			continue;
++		}
++
++		offset = (i % 2) * 16;
++		regmap_update_bits(tmdev->regmap,
++				   SUN50I_H6_THS_TEMP_CALIB + (i / 2 * 4),
++				   TEMP_CALIB_MASK << offset,
++				   cdata << offset);
++	}
++
++	return 0;
++}
++
+ static int sun8i_ths_calibrate(struct ths_device *tmdev)
+ {
+ 	struct nvmem_cell *calcell;
+@@ -659,6 +717,20 @@ static const struct ths_thermal_chip sun50i_h6_ths = {
+ 	.calc_temp = sun8i_ths_calc_temp,
+ };
+ 
++static const struct ths_thermal_chip sun50i_h616_ths = {
++	.sensor_num = 4,
++	.has_bus_clk_reset = true,
++	.needs_syscon = true,
++	.ft_deviation = 8000,
++	.offset = 263655,
++	.scale = 810,
++	.temp_data_base = SUN50I_H6_THS_TEMP_DATA,
++	.calibrate = sun50i_h616_ths_calibrate,
++	.init = sun50i_h6_thermal_init,
++	.irq_ack = sun50i_h6_irq_ack,
++	.calc_temp = sun8i_ths_calc_temp,
++};
++
+ static const struct of_device_id of_ths_match[] = {
+ 	{ .compatible = "allwinner,sun8i-a83t-ths", .data = &sun8i_a83t_ths },
+ 	{ .compatible = "allwinner,sun8i-h3-ths", .data = &sun8i_h3_ths },
+@@ -667,6 +739,7 @@ static const struct of_device_id of_ths_match[] = {
+ 	{ .compatible = "allwinner,sun50i-a100-ths", .data = &sun50i_a100_ths },
+ 	{ .compatible = "allwinner,sun50i-h5-ths", .data = &sun50i_h5_ths },
+ 	{ .compatible = "allwinner,sun50i-h6-ths", .data = &sun50i_h6_ths },
++	{ .compatible = "allwinner,sun50i-h616-ths", .data = &sun50i_h616_ths },
+ 	{ /* sentinel */ },
+ };
+ MODULE_DEVICE_TABLE(of, of_ths_match);
+-- 
+2.35.8
