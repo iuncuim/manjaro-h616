@@ -1,7 +1,7 @@
 # AArch64 multi-platform
-# Maintainer: Dan Johansen <strit@manjaro.org>
-# Contributor: Kevin Mihelich <kevin@archlinuxarm.org>
-# Contributor: Dragan Simic <dsimic@buserror.io>
+# Author: @warpme piotr.oniszczuk@gmail.com
+# from https://github.com/warpme/minimyth2/tree/master/script/kernel/
+# Contributor: iuncuim@gmail.com
 
 pkgbase=linux-h616
 pkgver=6.6.2
