@@ -1,0 +1,579 @@
+# AArch64 multi-platform
+# Maintainer: Dan Johansen <strit@manjaro.org>
+# Contributor: Kevin Mihelich <kevin@archlinuxarm.org>
+# Contributor: Dragan Simic <dsimic@buserror.io>
+
+pkgbase=linux-h616
+pkgver=6.6.2
+pkgrel=1
+_newversion=false
+_stopbuild=false     # Will also stop if ${_newversion} is true
+_srcname="linux-${pkgver/%.0/}"
+_kernelname="${pkgbase#linux}"
+_desc="AArch64 multi-platform"
+arch=('aarch64')
+url="http://www.kernel.org/"
+license=('GPL2')
+makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
+options=('!strip')
+source=("http://www.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.xz"
+        'config'
+        'linux.preset'
+        '60-linux.hook'
+        '90-linux.hook'
+        '0105-drivers-led-add-openvfd-1.4.2.patch'
+        '0106-drivers-net-wireless-realtek-rtw88-upstream-wireless.patch'
+        '0109-drm-panfrost-add-support-for-custom-soft-reset-on-GXM.patch'
+        '0110-drivers-net-wireless-brcmfmac-add-ap6330-firmware.patch'
+        '0125-drm-lima-dvfs-switch-gov-to-performance.patch'
+        '0126-drm-panfrost-dvfs-switch-gov-to-performance.patch'
+        '0311-arm64-dts-meson-set-dma-pool-to-896MB.patch'
+        '0312-g12-set-cma-to-896MiB-for-4k.patch'
+        '0329-media-meson-vdec-esparser-check-parsing-.patch'
+        '0330-media-meson-vdec-implement-10bit-bitstre.patch'
+        '0331-media-meson-vdec-add-HEVC-decode-codec.patch'
+        '0332-media-meson-vdec-disable-MPEG1-MPEG2-hardware-de.patch'
+        '0341-arm64-meson-add-Amlogic-Meson-GX-PM-Suspend.patch'
+        '0342-arm64-dts-meson-add-support-for-GX-PM-and-Virtu.patch'
+        '0361-arm64-dts-meson-gxm-add-beelink-gt1.patch'
+        '0371-arm64-dts-meson-sm1-add-support-for-TX5-plus.patch'
+        '0373-arm64-dts-meson-add-more-GX-soundcards.patch'
+        '0374-arm64-dts-meson-add-more-G12-SM1-soundcards.patch'
+        '0377-drm-meson-swap-primary-overlay-zpos.patch'
+        '0500-clk-Implement-protected-clocks-for-all-OF-clock-prov.patch'
+        '0501-Revert-clk-qcom-Support-protected-clocks-property.patch'
+        '0502-arm64-dts-allwinner-h6-Protect-SCP-clock.patch'
+        '0503-rtc-sun6i-Allow-RTC-wakeup-after-shutdown.patch'
+        '0504-firmware-arm_scpi-Support-unidirectional-mailbox-cha.patch'
+        '0505-arm64-dts-allwinner-h6-Add-SCPI-protocol.patch'
+        '0506-ASoC-hdmi-codec-fix-channel-allocation.patch'
+        '0507-ASoC-sun4i-i2s-WiP-multi-channel.patch'
+        '0508-arm64-dts-sun50i-h6-dtsi-add-sound-node.patch'
+        '0524-arm64-dts-allwinner-h6-Fix-Cedrus-IOMMU-again.patch'
+        '0531-iommu-sun50i-Allow-page-sizes-multiple-of-4096.patch'
+        '0534-media-cedrus-Don-t-CPU-map-source-buffers.patch'
+        '0535-dw-hdmi-add-10bit-and-afbc-support3.patch'
+        '0536-media-cedrus-h265-Fix-configuring-bitstream-size.patch'
+        '0537-media-Add-NV12-and-P010-AFBC-compressed-formats.patch'
+        '0538-media-cedrus-add-format-filtering-based-on-depth-and.patch'
+        '0539-media-cedrus-Implement-AFBC-YUV420-formats-for-H265.patch'
+        '0542-media-cedrus-Increase-H6-clock-rate.patch'
+        '0544-clk-sunxi-ng-h6-Reparent-CPUX-during-PLL-CPUX-rate-c.patch'
+        '0547-HACK-clk-sunxi-ng-unify-parent-for-HDMI-clocks.patch'
+        '0548-wip-media-sunxi-sun8i-di-fix-race-condition.patch'
+        '0559-mfd-add-AC200.patch'
+        '0560-net-phy-Add-support-for-AC200-EPHY.patch'
+        '0561-arm64-dts-sun50i-h6.dtsi-add-ac200-nodes.patch'
+        '0562-arm64-dts-allwinner-gs1-fix-eMMC-and-incr-vcpu-limit.patch'
+        '0563-arm64-dts-allwinner-tanix-tx6-mini-enable-eth.patch'
+        '0564-arm64-dts-allwinner-add-Eeachlink-H6-Mini.patch'
+        '0565-arm64-dts-allwinner-tanix-tx6-mini-enable-wifi-cpu-dvfs.patch'
+        '0567-arm64-dts-enable-audio-gs1.patch'
+        '0568-arm64-dts-allwinner-tanix-tx6-enable-wifi-cpu-dvfs.patch'
+        '0569-drm-dw-hdmi-cec-sleep-100ms-on-error.patch'
+        '0570-arm64-dts-sun50i-h6-normalize-spdif-card-name.patch'
+        '0573-mmc-sunxi-fix-unusuable-eMMC-on-some-H6-boards-by-di.patch'
+        '0575-H6-add-sun50i-di-deinterlace-WiP.patch'
+        '0576-arm64-dts-h6-add-deinterlace-node.patch'
+        '0577-net-wireless-add-xr819-support-07072021.patch'
+        '0579-drm-bridge-dw-hdmi-fix-4k60-modes-on-some-tv.patch'
+        '0580-net-stmmac-sun8i-Use-devm_regulator_get-for-PHY-regu.patch'
+        '0581-net-stmmac-sun8i-Rename-PHY-regulator-variable-to-re.patch'
+        '0582-net-stmmac-sun8i-Add-support-for-enabling-a-regulato.patch'
+        '0583-arm64-dts-allwinner-orange-pi-3-Enable-ethernet.patch'
+        '0584-bluetooth-btrtl-add-hci-ver-rtl8822cs.patch'
+        '0585-arm64-dts-allwinner-OrangePi3-fixes.patch'
+        '0586-hantro-Add-quirk-for-NV12-NV12_4L4-capture-format.patch'
+        '0587-arm64-dts-allwinner-add-Tanix-TX6-A.patch'
+        '0588-arm64-dts-allwinner-enable-gpu-opp-multiple-boards.patch'
+        '0590-arm64-dts-allwinner-add-orangepi-3-lts.patch'
+        '0591-drm-sun4i-call-drm-atomic-helper-shutdown-at-shutdown.patch'
+        '0600-drivers-h616-wip-add-usb-emac2-support.patch'
+        '0601-drivers-thermal-allwinner-add-h616-ths-support.patch'
+        '0602-media-cedrus-add-H616-variant.patch'
+        '0603-soc-sunxi-sram-Add-SRAM-C1-H616-handling.patch'
+        '0606-dma-sun6i-dma-add-h616-support.patch'
+        '0607-drivers-drm-wip-add-h616-hdmi-jernejsk-24102023.patch'
+        '0608-sound-soc-sunxi-add-codec-driver-for-h616.patch'
+        '0609-sound-soc-add-sunxi_v2-for-h616-ahub.patch'
+        '0612-gpu-drm-panfrost-panfrost-devfreq-revert-set-opp-to-the-recommended.patch'
+        '0614-clk-sunxi-ng-ccu-sun6i-rtc-fix-32k-clk.patch'
+        '0615-drivers-iommu-sun50i-iommu-fix-iommu-on-h616.patch'
+        '0616-net-wireless-add-uwe5622-support-v20231020.patch'
+        '0617-sound-soc-sunxi-add-spdif-spdif.patch'
+        '0618-sound-soc-sunxi-hack-to-fix-oops-on-cards-caps-query.patch'
+        '0630-arm64-dts-allwinner-h616.dtsi-add-ths-audio-hdmi.patch'
+        '0631-arm64-dts-allwinner-h616-OrangePI-Zero23-enable-ths-hdmi-audio.patch'
+        '0632-arm64-dts-allwinner-h616-add-Tanix-TX6s-TVbox.patch'
+        '0633-arm64-dts-allwinner-h616-add-Tanix-TX6s-axp313-TVbox.patch'
+        '0634-arm64-dts-allwinner-h313-add-x96q-TVbox.patch'
+        '0635-arm64-dts-allwinner-h313-add-x96q-lpddr3-TVbox.patch'
+        '0637-arm64-dts-allwinner-h618-add-vontar-h618-TVbox.patch'
+        '0638-arm64-dts-allwinner-h618-add-opi-2w.patch'
+        '0639-arm64-dts-allwinner-h616.dtsi-add-spdif.patch'
+        '0640-arm64-dts-allwinner-h618-enable-spdif-opi23-tanix-tx6s.patch'
+        '0701-drm-fourcc-Add-NV20-and-NV30-YUV-formats.patch'
+        '0702-drm-rockchip-vop-Add-NV15-NV20-and-NV30-support.patch'
+        '0703-media-v4l2-common-Add-helpers-to-calculate-bytesperl.patch'
+        '0704-media-v4l2-Add-NV15-and-NV20-pixel-formats.patch'
+        '0705-media-rkvdec-h264-Use-bytesperline-and-buffer-height.patch'
+        '0706-media-rkvdec-h264-Don-t-hardcode-SPS-PPS-parameters.patch'
+        '0707-media-rkvdec-Extract-rkvdec_fill_decoded_pixfmt-into.patch'
+        '0708-media-rkvdec-Move-rkvdec_reset_decoded_fmt-helper.patch'
+        '0709-media-rkvdec-Extract-decoded-format-enumeration-into.patch'
+        '0710-media-rkvdec-Add-image-format-concept.patch'
+        '0711-media-rkvdec-Add-get_image_fmt-ops.patch'
+        '0712-media-rkvdec-h264-Support-High-10-and-4-2-2-profiles.patch'
+        '0714-media-rkvdec-Add-HEVC-backend.patch'
+        '0715-media-rkvdec-Add-variants-support.patch'
+        '0716-media-rkvdec-Implement-capability-filtering.patch'
+        '0717-media-rkvdec-Add-RK3288-variant.patch'
+        '0718-media-rkvdec-Disable-QoS-for-HEVC-and-VP9-on-RK3328.patch'
+        '0722-v4l2-wip-iep-driver.patch'
+        '0723-devfreq-rockchip-add-devfreq-driver-for-rk3328-dmc.patch'
+        '0724-media-rkvdec-add-soft-reset-on-errors.patch'
+        '0725-drm-rockchip-vop-add-immutable-zpos-property-fix-z-order.patch'
+        '0726-drm-rockchip-vop-move-least-capable-wins-to-end-to-fix-osd-in-drm_planes.patch'
+        '0739-arm64-dtsi-rockchip-rk3328-rk3399-add-soft-reset.patch'
+        '0740-arm64-dts-rockchip-var-fixes-from-libreelec.patch'
+        '0741-arm64-dts-rockchip-Include-cache-performance-registe.patch'
+        '0742-arm64-dts-rockchip-Include-cache-performance-registe.patch'
+        '0743-arm64-dts-rockchip-beelink-a1-enable-openvfd.patch'
+        '0745-arm64-dts-rockchip-beelink-a1-enable-androind-dram-timmings.patch'
+        '0746-arm64-dts-rockchip-beelink-a1-bump-cpu-gpu-freqs.patch'
+        '0747-arm64-dts-rockchip-add-enable-dmc-on-roc-cc.patch'
+        '0749-phy-rockchip-phy-add-rockchip-inno-usb3.patch'
+        '0750-arm64-dts-rockchip-enable-inno-usb3-beelinkA1-roc-cc.patch'
+        '0752-arm64-dts-rockchip-rk3399-add-radxa-rockpi-4se.patch'
+        '0753-arm64-dts-rockchip-rk3399-radxa-rockpi-bc-remove-wifi-compatible.patch'
+        '0754-arm64-dts-rockchip-rk33xx-set-userled-to-mmc.patch'
+        '0755-arm64-dts-rockchip-rk3399-add-orangepi-4-and-4-lts.patch'
+        '0800-Enable-rk356x-PCIe-controller.patch'
+        '0831-arm64-dts-rockchip-enable-usb2-usb3-sata-audio-in-rk35xx.dtsi.patch'
+        '0833-arm64-dts-rockchip-enable-Quartz64-A-usb2-usb3-pcie-audio.patch'
+        '0836-arm64-dts-rockchip-add-dts-for-x96-x6.patch'
+        '0840-arm64-dts-rockchip-add-dts-for-rock3b.patch'
+        '0841-arm64-dts-rockchip-increas-alarm-cpu-temp-to-85.patch'
+        '0842-arm64-dts-rockchip-Quartz64-B-fix-Eth-enable-hdmi-audio.patch'
+        '0843-arm64-dts-rockchip-rock3a-fix-mdio-reset-disable-uart-bt.patch'
+        '0845-arm64-dts-rockchip-add-dts-for-rock3c.patch'
+        '0846-arm64-dts-rockchip-rk35xx-set-userled-to-mmc.patch'
+        '0847-arm64-dts-rockchip-add-dts-for-urve-pi.patch'
+        '0848-arm64-dts-rockchip-add-dts-for-opi-3b.patch'
+        '0900-rpi-vc04_services-add_h~l2-m2m_decode-04092022.patch'
+        '0901-rpi-vc04_services-bcm2835-codec-remove-isp-formats.patch'
+        '0904-media-add-rpivid-driver.patch'
+        '0905-arm64-dts-brcm-set-userled-to-mmc.patch'
+        '1010-fix-clk-divisions.patch'
+        '1011-irqchip-fix-its-timeout-issue.patch'
+        '1023-add-rk3588-cpufreq-support.patch'
+        '1024-add-rk3588-usb3-support.patch'
+        '1050-arm64-dtsi-rockchip-rk3588s-add-sfc-node.patch'
+        '1061-arm64-dts-rockchip-rk3588-add-orangepi-5-plus.patch'
+        '1062-arm64-dts-rockchip-rk3588s-add-orangepi-5.dts.patch'
+        '1063-arm64-dts-rockchip-rk3588s-rock-5a-enable-dvfs-usb-pci.dts.patch'
+        '1064-arm64-dts-rockchip-rk3588-rock-5b-enable-dvfs-usb-pci.dts.patch'
+        '1100-dt-bindings-clock-add-rk3528-clock-definitions.patch'
+        '1101-clk-rockchip-add-clock-controller-for-the-RK3528.patch'
+        '1102-pinctrl-rockchip-add-rk3528-support.patch'
+        '1103-dt-bindings-power-add-RK3528-SoCs-header-for-idle.patch'
+        '1104-ethernet-stmmac-dwmac-rk3528-add-GMAC-support.patch'
+        '1105-soc-rockchip-power-domain-add-rk3528-support.patch'
+        '1106-phy-rockchip-inno-usb2-add-phy-support-for-rk3528.patch'
+        #'1107-hack-hack-soc-rockchip-power-domain-workaround-for-oops-on-rk3528.patch'
+        '1108-thermal-rockchip-add-support-for-rk3528.patch'
+        '1109-phy-rockchip-naneng-combphy-add-support-for-rk3528.patch'
+        '1110-phy-rockchip-inno-hdmi-add-support-for-rk3528.patch'
+        '1111-drm-rockchip-dw_hdmi-add-support-for-rk3528.patch'
+        '1113-nvmem-rockchip-otp-add-support-for-rk3528.patch'
+        '1114-sound-soc-codecs-add-rk3528-support.patch'
+        '1115-hack-hack-gpu-drm-rockchip-rockchip_vop2_reg-add-rk3528.patch'
+        '1150-arm64-dtsi-rockchip-add-3528.dtsi.patch'
+        '1151-arm64-dts-rockchip-add-dts-for-vontar_r3.patch'
+)
+md5sums=('ed7af4ee62c054680315181a428a3e5a'
+        'SKIP'
+        '86d4a35722b5410e3b29fc92dae15d4b'
+        'ce6c81ad1ad1f8b333fd6077d47abdaf'
+        '3dc88030a8f2f5a5f97266d99b149f77'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        #'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+        'SKIP'
+)
+
+prepare() {
+  apply_patches() {
+      local PATCH
+      for PATCH in "${source[@]}"; do
+          PATCH="${PATCH%%::*}"
+          PATCH="${PATCH##*/}"
+          [[ ${PATCH} = *.patch ]] || continue
+          msg2 "Applying patch: ${PATCH}..."
+          patch -N -p1 < "../${PATCH}"
+      done
+  }
+
+  cd ${_srcname}
+
+  apply_patches
+  
+  # Apply our kernel configuration
+  cat "${srcdir}/config" > ./.config
+
+  # Add pkgrel to extraversion
+  sed -ri "s|^(EXTRAVERSION =)(.*)|\1 \2-${pkgrel}|" Makefile
+
+  # Don't run depmod on "make install", we'll do that ourselves in packaging
+  sed -i '2iexit 0' scripts/depmod.sh
+ 
+  #make menuconfig
+  #cp ./.config "${srcdir}/config"
+
+}
+
+build() {
+  cd ${_srcname}
+
+  # Get the kernel version
+  if [[ "${_newversion}" = false ]]; then
+    make prepare
+  fi
+
+  # Configure the kernel; adjust the line below to your choice
+  # or simply manually edit the ".config" file
+  if [[ "${_newversion}" = true ]]; then
+    make menuconfig   # CLI menu for configuration
+  fi
+  #make nconfig       # New CLI menu for configuration
+  #make xconfig       # X-based configuration
+  #make oldconfig     # Using old config from previous kernel version
+
+  # Stash the configuration (use with new major kernel version)
+  if [[ "${_newversion}" = true ]]; then
+    cp ./.config /var/tmp/${pkgbase}.config
+  fi
+
+  # Stop here, which is useful to configure the kernel
+  if [[ "${_newversion}" = true || "${_stopbuild}" = true ]]; then
+    msg "Stopping build"
+    return 1
+  fi
+
+  # Enable to create an all-inclusive build
+  #yes "" | make config
+
+  # Build the kernel and the modules
+  unset LDFLAGS
+  make ${MAKEFLAGS} Image modules
+
+  # Generate device tree blobs with symbols to support
+  # applying device tree overlays in U-Boot
+  make ${MAKEFLAGS} DTC_FLAGS="-@" dtbs
+}
+
+_package() {
+  pkgdesc="The Linux Kernel and modules - ${_desc}"
+  depends=('coreutils' 'linux-firmware' 'kmod' 'initramfs')
+  optdepends=('crda: to set the correct wireless channels of your country')
+  provides=('kernel26' "linux=${pkgver}")
+  conflicts=('kernel26' 'linux')
+  replaces=('linux-armv8' 'linux-aarch64')
+  backup=("etc/mkinitcpio.d/${pkgbase}.preset")
+  install=${pkgname}.install
+
+  cd ${_srcname}
+
+  KARCH=arm64
+
+  # get kernel version
+  _kernver="$(make kernelrelease)"
+  _basekernel=${_kernver%%-*}
+  _basekernel=${_basekernel%.*}
+
+  mkdir -p "${pkgdir}"/{boot,usr/lib/modules}
+  make INSTALL_MOD_PATH="${pkgdir}/usr" modules_install
+  make INSTALL_DTBS_PATH="${pkgdir}/boot/dtbs" dtbs_install
+  cp arch/$KARCH/boot/Image "${pkgdir}/boot"
+
+  # make room for external modules
+  local _extramodules="extramodules-${_basekernel}${_kernelname}"
+  ln -s "../${_extramodules}" "${pkgdir}/usr/lib/modules/${_kernver}/extramodules"
+
+  # add real version for building modules and running depmod from hook
+  echo "${_kernver}" |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
+
+  # remove build and source links
+  # rm "${pkgdir}"/usr/lib/modules/${_kernver}/{source,build}
+  rm "${pkgdir}"/usr/lib/modules/${_kernver}/build
+
+  # now we call depmod...
+  depmod -b "${pkgdir}/usr" -F System.map "${_kernver}"
+
+  # sed expression for following substitutions
+  local _subst="
+    s|%PKGBASE%|${pkgbase}|g
+    s|%KERNVER%|${_kernver}|g
+    s|%EXTRAMODULES%|${_extramodules}|g
+  "
+
+  # install mkinitcpio preset file
+  sed "${_subst}" ../linux.preset |
+    install -Dm644 /dev/stdin "${pkgdir}/etc/mkinitcpio.d/${pkgbase}.preset"
+
+  # install pacman hooks
+  sed "${_subst}" ../60-linux.hook |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/libalpm/hooks/60-${pkgbase}.hook"
+  sed "${_subst}" ../90-linux.hook |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/libalpm/hooks/90-${pkgbase}.hook"
+}
+
+_package-headers() {
+  pkgdesc="Header files and scripts for building modules for linux kernel - ${_desc}"
+  provides=("linux-headers=${pkgver}")
+  conflicts=('linux-headers')
+  replaces=('linux-aarch64-headers')
+
+  cd ${_srcname}
+  local _builddir="${pkgdir}/usr/lib/modules/${_kernver}/build"
+
+  install -Dt "${_builddir}" -m644 Makefile .config Module.symvers
+  install -Dt "${_builddir}/kernel" -m644 kernel/Makefile
+
+  mkdir "${_builddir}/.tmp_versions"
+
+  cp -t "${_builddir}" -a include scripts
+
+  install -Dt "${_builddir}/arch/${KARCH}" -m644 arch/${KARCH}/Makefile
+  install -Dt "${_builddir}/arch/${KARCH}/kernel" -m644 arch/${KARCH}/kernel/asm-offsets.s
+  install -Dt "${_builddir}" -m644 vmlinux 
+
+  cp -t "${_builddir}/arch/${KARCH}" -a arch/${KARCH}/include
+  mkdir -p "${_builddir}/arch/arm"
+  cp -t "${_builddir}/arch/arm" -a arch/arm/include
+
+  install -Dt "${_builddir}/drivers/md" -m644 drivers/md/*.h
+  install -Dt "${_builddir}/net/mac80211" -m644 net/mac80211/*.h
+
+  # http://bugs.archlinux.org/task/13146
+  install -Dt "${_builddir}/drivers/media/i2c" -m644 drivers/media/i2c/msp3400-driver.h
+
+  # http://bugs.archlinux.org/task/20402
+  install -Dt "${_builddir}/drivers/media/usb/dvb-usb" -m644 drivers/media/usb/dvb-usb/*.h
+  install -Dt "${_builddir}/drivers/media/dvb-frontends" -m644 drivers/media/dvb-frontends/*.h
+  install -Dt "${_builddir}/drivers/media/tuners" -m644 drivers/media/tuners/*.h
+
+  # add xfs and shmem for aufs building
+  mkdir -p "${_builddir}"/{fs/xfs,mm}
+
+  # copy in Kconfig files
+  find . -name Kconfig\* -exec install -Dm644 {} "${_builddir}/{}" \;
+
+  # remove unneeded architectures
+  local _arch
+  for _arch in "${_builddir}"/arch/*/; do
+    [[ ${_arch} == */${KARCH}/ || ${_arch} == */arm/ ]] && continue
+    rm -r "${_arch}"
+  done
+
+  # remove documentation files
+  rm -r "${_builddir}/Documentation"
+
+  # remove now broken symlinks
+  find -L "${_builddir}" -type l -printf 'Removing %P\n' -delete
+
+  # strip scripts directory
+  local file
+  while read -rd '' file; do
+    case "$(file -bi "$file")" in
+      application/x-sharedlib\;*)      # Libraries (.so)
+        strip $STRIP_SHARED "$file" ;;
+      application/x-archive\;*)        # Libraries (.a)
+        strip $STRIP_STATIC "$file" ;;
+      application/x-executable\;*)     # Binaries
+        strip $STRIP_BINARIES "$file" ;;
+      application/x-pie-executable\;*) # Relocatable binaries
+        strip $STRIP_SHARED "$file" ;;
+    esac
+  done < <(find "${_builddir}" -type f -perm -u+x ! -name vmlinux -print0 2>/dev/null)
+  strip $STRIP_STATIC "${_builddir}/vmlinux"
+  
+  # remove unwanted files
+  find ${_builddir} -name '*.orig' -delete
+}
+
+# pkgname=("${pkgbase}" "${pkgbase}-headers")
+pkgname=("${pkgbase}")
+for _p in ${pkgname[@]}; do
+  eval "package_${_p}() {
+    _package${_p#${pkgbase}}
+  }"
+done
+
+
