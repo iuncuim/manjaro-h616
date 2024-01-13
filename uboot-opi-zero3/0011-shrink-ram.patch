@@ -1,0 +1,82 @@
+From 4a542204ebd3ce90393c24a102679c9a3c7c13bc Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Sat, 16 Dec 2023 19:00:16 +0300
+Subject: [PATCH] Update dram_sun50i_h616.h and dram_sun50i_h616.c
+
+---
+ .../include/asm/arch-sunxi/dram_sun50i_h616.h  |  1 +
+ arch/arm/mach-sunxi/dram_sun50i_h616.c         | 18 ++++++++++++++++--
+ 2 files changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h b/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h
+index a8fdda124a..0d81077ce5 100644
+--- a/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h
++++ b/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h
+@@ -166,6 +166,7 @@ struct dram_config {
+ 	u8 rows;
+ 	u8 ranks;
+ 	u8 bus_full_width;
++	bool dram_shrink;
+ };
+ 
+ static inline int ns_to_t(int nanoseconds)
+diff --git a/arch/arm/mach-sunxi/dram_sun50i_h616.c b/arch/arm/mach-sunxi/dram_sun50i_h616.c
+index c5c1331a4c..3d8171e9ae 100644
+--- a/arch/arm/mach-sunxi/dram_sun50i_h616.c
++++ b/arch/arm/mach-sunxi/dram_sun50i_h616.c
+@@ -154,7 +154,10 @@ static void mctl_set_addrmap(const struct dram_config *config)
+ 
+ 	/* Ranks */
+ 	if (ranks == 2)
+-		mctl_ctl->addrmap[0] = rows + cols - 3;
++		if (config->dram_shrink)
++			mctl_ctl->addrmap[0] = rows + cols - 5;
++		else
++			mctl_ctl->addrmap[0] = rows + cols - 3;
+ 	else
+ 		mctl_ctl->addrmap[0] = 0x1F;
+ 
+@@ -204,7 +207,10 @@ static void mctl_set_addrmap(const struct dram_config *config)
+ 		mctl_ctl->addrmap[7] = 0x0F0F;
+ 		break;
+ 	case 15:
+-		mctl_ctl->addrmap[6] = (cols - 3) | ((cols - 3) << 8) | ((cols - 3) << 16) | 0x0F000000;
++		if (config->dram_shrink)
++			mctl_ctl->addrmap[6] = (cols - 3) | ((cols - 2) << 8) | ((cols - 2) << 16) | 0x0F000000;
++		else
++			mctl_ctl->addrmap[6] = (cols - 3) | ((cols - 3) << 8) | ((cols - 3) << 16) | 0x0F000000;
+ 		mctl_ctl->addrmap[7] = 0x0F0F;
+ 		break;
+ 	case 16:
+@@ -1324,6 +1330,7 @@ static void mctl_auto_detect_dram_size(const struct dram_para *para,
+ 				       struct dram_config *config)
+ {
+ 	/* detect row address bits */
++	config->dram_shrink = false;
+ 	config->cols = 8;
+ 	config->rows = 18;
+ 	mctl_core_init(para, config);
+@@ -1345,6 +1352,11 @@ static void mctl_auto_detect_dram_size(const struct dram_para *para,
+ 					   config->bus_full_width)))
+ 			break;
+ 	}
++	u32 dram_size = (1ULL << (config->cols + config->rows + 3)) * (config->bus_full_width + 1) * 2 * config->ranks;
++	if (mctl_mem_matches(dram_size - 0x10)) {
++		config->dram_shrink = true;
++		mctl_core_init(para, config);
++	}
+ }
+ 
+ static unsigned long mctl_calc_size(const struct dram_config *config)
+@@ -1352,6 +1364,8 @@ static unsigned long mctl_calc_size(const struct dram_config *config)
+ 	u8 width = config->bus_full_width ? 4 : 2;
+ 
+ 	/* 8 banks */
++	if (1)
++		return (1ULL << (config->cols + config->rows + 3)) * width * config->ranks / 4 * 3;
+ 	return (1ULL << (config->cols + config->rows + 3)) * width * config->ranks;
+ }
+ 
+-- 
+2.43.0
+

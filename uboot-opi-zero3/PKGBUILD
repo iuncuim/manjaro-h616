@@ -4,7 +4,7 @@
 
 pkgname=uboot-h616
 pkgver=v2023.10
-pkgrel=1
+pkgrel=2
 _tfaver=v2.9.0
 pkgdesc="U-Boot for h616 devices"
 arch=('aarch64')
@@ -17,18 +17,30 @@ replaces=('uboot-h616')
 install=${pkgname}.install
 source=("https://source.denx.de/u-boot/u-boot/-/archive/${pkgver}/u-boot-${pkgver}.tar.gz"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
-        "0001-mctl_phy_configure_odt.patch"
-        "0002-sunxi-H616-add-LPDDR4-DRAM-support.patch"
-        "0003-Update-pmic_bus.c-board.c-and-6-more-files.patch"
-        "0004-sunxi-H616-GPU-enable-hack.patch"
-        "0005-sunxi-add-barrier-in-memory-check.patch"
+        "0001-update-devicetree.patch"
+        "0002-simplify-PMIC-setup.patch"
+        "0003-power-pmic-add-AXP313.patch"
+        "0004-power-regulator-add-AXP313.patch"
+        "0005-h616-DRAM-refactor-configure-odt.patch"
+        "0006-h616-add-LPDDR4-DRAM-support.patch"
+        "0007-mtd-spi-nor-add-zbit-zb25vq128.patch"
+        "0008-h616-rm-default-axp305-selection.patch"
+        "0009-h616-add-opi-zero3.patch"
+        "0010-sunxi-add-barrier-in-memory-check.patch"
+        "0011-sunxi-H616-GPU-enable-hack.patch"
         )
 sha256sums=('61a2f1b304e014e5caf1f61f0701eac2911ffb3fd20084528b2dfc8f0b8a706a'
             '510207a4ecc263bace34213ccd5dc1b8ce22945cd55d2452fef4af6d76e0d41e'
-            '25dc057592768fb2d63f4010c4c08a36a226b7deb9639c517c42cd37d824f7d9'
-            '7eff10927f91f1d07601aeb4e198255ddaca4bb7fc76309d8d0835791cf90662'
-            '4178ac743e84c296465c8cd9a45a4b4c3ce7dcf691a4e09606baeae1fcf94199'
-            '10aac0b0125ae73de7af36716aa55e28c35a1c1cc100bbd59e8fa695c5fc21a7'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
             'SKIP'
             )
 

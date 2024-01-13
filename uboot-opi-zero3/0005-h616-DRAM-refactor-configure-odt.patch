@@ -1,14 +1,31 @@
-From dc94db414ed3585cd56d6559b6249f29aacae4c9 Mon Sep 17 00:00:00 2001
-From: iuncuim <iuncuim@gmail.com>
-Date: Sun, 15 Oct 2023 14:06:53 +0300
-Subject: [PATCH 1/5] mctl_phy_configure_odt
+From b71129ca3b469ccb22182c34d8cc05a742795582 Mon Sep 17 00:00:00 2001
+From: Andre Przywara <andre.przywara@arm.com>
+Date: Thu, 7 Sep 2023 20:38:46 +0100
+Subject: [PATCH] sunxi: H616: DRAM: refactor mctl_phy_configure_odt()
 
+The original H616 DDR3 ODT configuration code wrote board specific values
+into a sequence of paired registers.
+For LPDDR3 support we needed to special-case one group of registers,
+because for that DRAM type we need to write 0 into the lower register of
+each pair. That already made the code less readable.
+
+LPDDR4 support will make things even messier, so let's refactor that
+code now: We allow to write different values into the lower and upper
+half of each pair. The masking is moved into a macro, and use in each
+write statement.
+
+The effect is not as obvious yet, as we don't need the full flexibility at
+the moment, but the motivation will become clearer with LPDDR4 support.
+
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+Reviewed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+Reviewed-by: Mikhail Kalashnikov <iuncuim@gmail.com>
 ---
  arch/arm/mach-sunxi/dram_sun50i_h616.c | 84 ++++++++++----------------
  1 file changed, 31 insertions(+), 53 deletions(-)
 
 diff --git a/arch/arm/mach-sunxi/dram_sun50i_h616.c b/arch/arm/mach-sunxi/dram_sun50i_h616.c
-index 7e580b62dc..ba5659d409 100644
+index 7e580b62dca..ba5659d4094 100644
 --- a/arch/arm/mach-sunxi/dram_sun50i_h616.c
 +++ b/arch/arm/mach-sunxi/dram_sun50i_h616.c
 @@ -241,61 +241,39 @@ static const u8 phy_init[] = {
@@ -105,5 +122,5 @@ index 7e580b62dc..ba5659d409 100644
  	dmb();
  }
 -- 
-2.42.0
+GitLab
 

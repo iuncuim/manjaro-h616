@@ -1,19 +1,34 @@
-From 016d7de2b413e9b66d10361ed233df785c574e58 Mon Sep 17 00:00:00 2001
-From: iuncuim <iuncuim@gmail.com>
-Date: Sat, 4 Nov 2023 09:18:08 +0300
-Subject: [PATCH 1/2] sunxi: H616: add LPDDR4 DRAM support
+From 4b02f0120a4bb2a5d7081aef8cef6a4ca57e9db2 Mon Sep 17 00:00:00 2001
+From: Mikhail Kalashnikov <iuncuim@gmail.com>
+Date: Sat, 11 Nov 2023 12:10:00 +0300
+Subject: [PATCH] sunxi: H616: add LPDDR4 DRAM support
 
+The H616 SoC family has support for several types of DRAM: DDR3,
+LPDDR3, DDR4 and LPDDR4.
+At the moment, the driver only supports DDR3 and LPDDR3 memory.
+Let's extend the driver to support the LPDDR4 memory. This type
+of memory widely used in device with T507(-H) SoC and new orangepi
+zero3 with H618.
+The compatibility with T507 is not yet complete, because there
+is difference in the phy_init array.
+The LPDDR4-2133 timings correspond to DRAM Rayson RS1G32LO4D2BDS-53BT
+found on the NOR SPI from the Orangepi Zero 3 4GB.
+
+Signed-off-by: Mikhail Kalashnikov <iuncuim@gmail.com>
+Tested-by: Piotr Oniszczuk <piotr.oniszczuk@gmail.com>
+Reviewed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+Acked-by: Andre Przywara <andre.przywara@arm.com>
 ---
  .../include/asm/arch-sunxi/dram_sun50i_h616.h |   2 +
  arch/arm/mach-sunxi/Kconfig                   |  17 ++
- arch/arm/mach-sunxi/dram_sun50i_h616.c        | 197 ++++++++++++++----
+ arch/arm/mach-sunxi/dram_sun50i_h616.c        | 218 ++++++++++++++----
  arch/arm/mach-sunxi/dram_timings/Makefile     |   1 +
- .../dram_timings/h616_lpddr4_2133.c           |  95 +++++++++
- 5 files changed, 277 insertions(+), 35 deletions(-)
+ .../dram_timings/h616_lpddr4_2133.c           |  95 ++++++++
+ 5 files changed, 294 insertions(+), 39 deletions(-)
  create mode 100644 arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
 
 diff --git a/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h b/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h
-index 11774deded..a8fdda124a 100644
+index 11774deded0..a8fdda124a0 100644
 --- a/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h
 +++ b/arch/arm/include/asm/arch-sunxi/dram_sun50i_h616.h
 @@ -130,6 +130,7 @@ check_member(sunxi_mctl_ctl_reg, unk_0x4240, 0x4240);
@@ -33,7 +48,7 @@ index 11774deded..a8fdda124a 100644
  	u32 tpr11;
  	u32 tpr12;
 diff --git a/arch/arm/mach-sunxi/Kconfig b/arch/arm/mach-sunxi/Kconfig
-index 9d5df2c102..e65bcb36a2 100644
+index a10e4c06b6a..a4a8d8e9445 100644
 --- a/arch/arm/mach-sunxi/Kconfig
 +++ b/arch/arm/mach-sunxi/Kconfig
 @@ -85,6 +85,12 @@ config DRAM_SUN50I_H616_TPR2
@@ -49,7 +64,7 @@ index 9d5df2c102..e65bcb36a2 100644
  config DRAM_SUN50I_H616_TPR10
  	hex "H616 DRAM TPR10 parameter"
  	help
-@@ -441,6 +447,9 @@ config SUNXI_DRAM_DDR2
+@@ -462,6 +468,9 @@ config SUNXI_DRAM_DDR2
  config SUNXI_DRAM_LPDDR3
  	bool
  
@@ -59,7 +74,7 @@ index 9d5df2c102..e65bcb36a2 100644
  choice
  	prompt "DRAM Type and Timing"
  	default SUNXI_DRAM_DDR3_1333 if !MACH_SUN8I_V3S
-@@ -484,6 +493,14 @@ config SUNXI_DRAM_H616_LPDDR3
+@@ -505,6 +514,14 @@ config SUNXI_DRAM_H616_LPDDR3
  	  This option is the LPDDR3 timing used by the stock boot0 by
  	  Allwinner.
  
@@ -75,9 +90,20 @@ index 9d5df2c102..e65bcb36a2 100644
  	bool "DDR3-1333 boot0 timings on the H616 DRAM controller"
  	select SUNXI_DRAM_DDR3
 diff --git a/arch/arm/mach-sunxi/dram_sun50i_h616.c b/arch/arm/mach-sunxi/dram_sun50i_h616.c
-index ba5659d409..185f35850a 100644
+index ba5659d4094..c5c1331a4c3 100644
 --- a/arch/arm/mach-sunxi/dram_sun50i_h616.c
 +++ b/arch/arm/mach-sunxi/dram_sun50i_h616.c
+@@ -6,8 +6,8 @@
+  * unknown. That's why this driver has plenty of magic numbers. Some
+  * meaning was nevertheless deduced from strings found in boot0 and
+  * known meaning of some dram parameters.
+- * This driver only supports DDR3 memory and omits logic for all
+- * other supported types supported by hardware.
++ * This driver supports DDR3, LPDDR3 and LPDDR4 memory. There is no
++ * DDR4 support yet.
+  *
+  * (C) Copyright 2020 Jernej Skrabec <jernej.skrabec@siol.net>
+  *
 @@ -238,6 +238,11 @@ static const u8 phy_init[] = {
  	0x08, 0x01, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
  	0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x07,
@@ -90,14 +116,21 @@ index ba5659d409..185f35850a 100644
  #endif
  };
  
-@@ -246,8 +251,13 @@ static void mctl_phy_configure_odt(const struct dram_para *para)
+@@ -246,8 +251,20 @@ static void mctl_phy_configure_odt(const struct dram_para *para)
  {
  	uint32_t val_lo, val_hi;
  
-+	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x390, BIT(5), BIT(4));
-+	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x3d0, BIT(5), BIT(4));
-+	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x410, BIT(5), BIT(4));
-+	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x450, BIT(5), BIT(4));
++	/*
++	 * This part should be applicable to all memory types, but is
++	 * usually found in LPDDR4 bootloaders. Therefore, we will leave
++	 * only for this type of memory.
++	 */
++	if (para->type == SUNXI_DRAM_TYPE_LPDDR4) {
++		clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x390, BIT(5), BIT(4));
++		clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x3d0, BIT(5), BIT(4));
++		clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x410, BIT(5), BIT(4));
++		clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x450, BIT(5), BIT(4));
++	}
 +
  	val_lo = para->dx_dri;
 -	val_hi = para->dx_dri;
@@ -105,7 +138,7 @@ index ba5659d409..185f35850a 100644
  	writel_relaxed(MASK_BYTE(val_lo, 0), SUNXI_DRAM_PHY0_BASE + 0x388);
  	writel_relaxed(MASK_BYTE(val_hi, 0), SUNXI_DRAM_PHY0_BASE + 0x38c);
  	writel_relaxed(MASK_BYTE(val_lo, 1), SUNXI_DRAM_PHY0_BASE + 0x3c8);
-@@ -265,7 +275,7 @@ static void mctl_phy_configure_odt(const struct dram_para *para)
+@@ -265,7 +282,7 @@ static void mctl_phy_configure_odt(const struct dram_para *para)
  	writel_relaxed(MASK_BYTE(val_hi, 1), SUNXI_DRAM_PHY0_BASE + 0x34c);
  
  	val_lo = (para->type == SUNXI_DRAM_TYPE_LPDDR3) ? 0 : para->dx_odt;
@@ -114,7 +147,27 @@ index ba5659d409..185f35850a 100644
  	writel_relaxed(MASK_BYTE(val_lo, 0), SUNXI_DRAM_PHY0_BASE + 0x380);
  	writel_relaxed(MASK_BYTE(val_hi, 0), SUNXI_DRAM_PHY0_BASE + 0x384);
  	writel_relaxed(MASK_BYTE(val_lo, 1), SUNXI_DRAM_PHY0_BASE + 0x3c0);
-@@ -578,6 +588,8 @@ static void mctl_phy_bit_delay_compensation(const struct dram_para *para)
+@@ -392,12 +409,18 @@ static bool mctl_phy_read_calibration(const struct dram_config *config)
+ 	return result;
+ }
+ 
+-static bool mctl_phy_read_training(const struct dram_config *config)
++static bool mctl_phy_read_training(const struct dram_para *para,
++			   const struct dram_config *config)
+ {
+ 	u32 val1, val2, *ptr1, *ptr2;
+ 	bool result = true;
+ 	int i;
+ 
++	if (para->type == SUNXI_DRAM_TYPE_LPDDR4) {
++		writel(0, SUNXI_DRAM_PHY0_BASE + 0x800);
++		writel(0, SUNXI_DRAM_PHY0_BASE + 0x81c);
++	}
++
+ 	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x198, 3, 2);
+ 	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x804, 0x3f, 0xf);
+ 	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 0x808, 0x3f, 0xf);
+@@ -578,6 +601,8 @@ static void mctl_phy_bit_delay_compensation(const struct dram_para *para)
  		clrbits_le32(SUNXI_DRAM_PHY0_BASE + 0x60, 1);
  		setbits_le32(SUNXI_DRAM_PHY0_BASE + 8, 8);
  		clrbits_le32(SUNXI_DRAM_PHY0_BASE + 0x190, 0x10);
@@ -123,7 +176,7 @@ index ba5659d409..185f35850a 100644
  
  		if (para->tpr10 & BIT(30))
  			val = para->tpr11 & 0x3f;
-@@ -791,8 +803,9 @@ static void mctl_phy_ca_bit_delay_compensation(const struct dram_para *para,
+@@ -791,8 +816,9 @@ static void mctl_phy_ca_bit_delay_compensation(const struct dram_para *para,
  	writel(val, SUNXI_DRAM_PHY0_BASE + 0x7e0);
  	writel(val, SUNXI_DRAM_PHY0_BASE + 0x7f4);
  
@@ -135,7 +188,7 @@ index ba5659d409..185f35850a 100644
  		if (para->tpr2 & 1) {
  			writel(val, SUNXI_DRAM_PHY0_BASE + 0x794);
  			if (config->ranks == 2) {
-@@ -818,8 +831,8 @@ static void mctl_phy_ca_bit_delay_compensation(const struct dram_para *para,
+@@ -818,8 +844,8 @@ static void mctl_phy_ca_bit_delay_compensation(const struct dram_para *para,
  				writel(val, SUNXI_DRAM_PHY0_BASE + 0x7b8);
  			}
  		}
@@ -146,7 +199,7 @@ index ba5659d409..185f35850a 100644
  		if (para->tpr2 & 1) {
  			writel(val, SUNXI_DRAM_PHY0_BASE + 0x7a0);
  			if (config->ranks == 2) {
-@@ -833,7 +846,18 @@ static void mctl_phy_ca_bit_delay_compensation(const struct dram_para *para,
+@@ -833,7 +859,18 @@ static void mctl_phy_ca_bit_delay_compensation(const struct dram_para *para,
  				writel(val, SUNXI_DRAM_PHY0_BASE + 0x7f8);
  			}
  		}
@@ -166,7 +219,7 @@ index ba5659d409..185f35850a 100644
  }
  
  static bool mctl_phy_init(const struct dram_para *para,
-@@ -846,30 +870,42 @@ static bool mctl_phy_init(const struct dram_para *para,
+@@ -846,30 +883,42 @@ static bool mctl_phy_init(const struct dram_para *para,
  	u32 val, val2, *ptr, mr0, mr2;
  	int i;
  
@@ -220,7 +273,7 @@ index ba5659d409..185f35850a 100644
  
  	writel(val, SUNXI_DRAM_PHY0_BASE + 0x14);
  	writel(val, SUNXI_DRAM_PHY0_BASE + 0x35c);
-@@ -893,19 +929,40 @@ static bool mctl_phy_init(const struct dram_para *para,
+@@ -893,19 +942,40 @@ static bool mctl_phy_init(const struct dram_para *para,
  	if (para->tpr10 & TPR10_CA_BIT_DELAY)
  		mctl_phy_ca_bit_delay_compensation(para, config);
  
@@ -267,7 +320,7 @@ index ba5659d409..185f35850a 100644
  	clrsetbits_le32(SUNXI_DRAM_PHY0_BASE + 4, 0x7, val);
  
  	if (para->clk <= 672)
-@@ -955,8 +1012,8 @@ static bool mctl_phy_init(const struct dram_para *para,
+@@ -955,8 +1025,8 @@ static bool mctl_phy_init(const struct dram_para *para,
  		mr0 = 0x1f14;
  		mr2 = 0x20;
  	}
@@ -278,7 +331,7 @@ index ba5659d409..185f35850a 100644
  		writel(mr0, &mctl_ctl->mrctrl1);
  		writel(0x80000030, &mctl_ctl->mrctrl0);
  		mctl_await_completion(&mctl_ctl->mrctrl0, BIT(31), 0);
-@@ -972,7 +1029,8 @@ static bool mctl_phy_init(const struct dram_para *para,
+@@ -972,7 +1042,8 @@ static bool mctl_phy_init(const struct dram_para *para,
  		writel(0, &mctl_ctl->mrctrl1);
  		writel(0x80003030, &mctl_ctl->mrctrl0);
  		mctl_await_completion(&mctl_ctl->mrctrl0, BIT(31), 0);
@@ -288,7 +341,7 @@ index ba5659d409..185f35850a 100644
  		writel(mr0, &mctl_ctl->mrctrl1);
  		writel(0x800000f0, &mctl_ctl->mrctrl0);
  		mctl_await_completion(&mctl_ctl->mrctrl0, BIT(31), 0);
-@@ -988,7 +1046,48 @@ static bool mctl_phy_init(const struct dram_para *para,
+@@ -988,7 +1059,48 @@ static bool mctl_phy_init(const struct dram_para *para,
  		writel(0x301, &mctl_ctl->mrctrl1);
  		writel(0x800000f0, &mctl_ctl->mrctrl0);
  		mctl_await_completion(&mctl_ctl->mrctrl0, BIT(31), 0);
@@ -338,7 +391,16 @@ index ba5659d409..185f35850a 100644
  
  	writel(0, SUNXI_DRAM_PHY0_BASE + 0x54);
  
-@@ -1057,17 +1156,29 @@ static bool mctl_ctrl_init(const struct dram_para *para,
+@@ -1018,7 +1130,7 @@ static bool mctl_phy_init(const struct dram_para *para,
+ 
+ 	if (para->tpr10 & TPR10_READ_TRAINING) {
+ 		for (i = 0; i < 5; i++)
+-			if (mctl_phy_read_training(config))
++			if (mctl_phy_read_training(para, config))
+ 				break;
+ 		if (i == 5) {
+ 			debug("read training failed!\n");
+@@ -1057,17 +1169,29 @@ static bool mctl_ctrl_init(const struct dram_para *para,
  
  	setbits_le32(&mctl_com->unk_0x008, 0xff00);
  
@@ -373,7 +435,7 @@ index ba5659d409..185f35850a 100644
  	if (config->bus_full_width)
  		reg_val |= MSTR_BUSWIDTH_FULL;
  	else
-@@ -1079,10 +1190,20 @@ static bool mctl_ctrl_init(const struct dram_para *para,
+@@ -1079,10 +1203,20 @@ static bool mctl_ctrl_init(const struct dram_para *para,
  	else
  		writel(0x0201, &mctl_ctl->odtmap);
  
@@ -396,7 +458,7 @@ index ba5659d409..185f35850a 100644
  	writel(reg_val, &mctl_ctl->odtcfg);
  	writel(reg_val, &mctl_ctl->unk_0x2240);
  	writel(reg_val, &mctl_ctl->unk_0x3240);
-@@ -1102,6 +1223,9 @@ static bool mctl_ctrl_init(const struct dram_para *para,
+@@ -1102,6 +1236,9 @@ static bool mctl_ctrl_init(const struct dram_para *para,
  	setbits_le32(&mctl_ctl->unk_0x3180, BIT(31) | BIT(30));
  	setbits_le32(&mctl_ctl->unk_0x4180, BIT(31) | BIT(30));
  
@@ -406,7 +468,7 @@ index ba5659d409..185f35850a 100644
  	setbits_le32(&mctl_ctl->rfshctl3, BIT(0));
  	clrbits_le32(&mctl_ctl->dfimisc, BIT(0));
  
-@@ -1224,6 +1348,8 @@ static const struct dram_para para = {
+@@ -1224,6 +1361,8 @@ static const struct dram_para para = {
  	.type = SUNXI_DRAM_TYPE_DDR3,
  #elif defined(CONFIG_SUNXI_DRAM_H616_LPDDR3)
  	.type = SUNXI_DRAM_TYPE_LPDDR3,
@@ -415,7 +477,7 @@ index ba5659d409..185f35850a 100644
  #endif
  	.dx_odt = CONFIG_DRAM_SUN50I_H616_DX_ODT,
  	.dx_dri = CONFIG_DRAM_SUN50I_H616_DX_DRI,
-@@ -1231,6 +1357,7 @@ static const struct dram_para para = {
+@@ -1231,6 +1370,7 @@ static const struct dram_para para = {
  	.odt_en = CONFIG_DRAM_SUN50I_H616_ODT_EN,
  	.tpr0 = CONFIG_DRAM_SUN50I_H616_TPR0,
  	.tpr2 = CONFIG_DRAM_SUN50I_H616_TPR2,
@@ -424,7 +486,7 @@ index ba5659d409..185f35850a 100644
  	.tpr11 = CONFIG_DRAM_SUN50I_H616_TPR11,
  	.tpr12 = CONFIG_DRAM_SUN50I_H616_TPR12,
 diff --git a/arch/arm/mach-sunxi/dram_timings/Makefile b/arch/arm/mach-sunxi/dram_timings/Makefile
-index 8bfd99448a..5f20341924 100644
+index 8bfd99448a8..5f203419240 100644
 --- a/arch/arm/mach-sunxi/dram_timings/Makefile
 +++ b/arch/arm/mach-sunxi/dram_timings/Makefile
 @@ -5,3 +5,4 @@ obj-$(CONFIG_SUNXI_DRAM_H6_LPDDR3)	+= h6_lpddr3.o
@@ -434,7 +496,7 @@ index 8bfd99448a..5f20341924 100644
 +obj-$(CONFIG_SUNXI_DRAM_H616_LPDDR4)	+= h616_lpddr4_2133.o
 diff --git a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
 new file mode 100644
-index 0000000000..c11cb8678f
+index 00000000000..c11cb8678f6
 --- /dev/null
 +++ b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
 @@ -0,0 +1,95 @@
@@ -534,5 +596,5 @@ index 0000000000..c11cb8678f
 +	writel((trefi << 16) | trfc, &mctl_ctl->rfshtmg);
 +}
 -- 
-2.42.0
+GitLab
 
