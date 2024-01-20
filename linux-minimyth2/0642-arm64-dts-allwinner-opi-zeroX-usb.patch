@@ -1,0 +1,32 @@
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi	2024-01-13 17:22:43.822240397 +0300
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi	2024-01-20 08:45:05.106114328 +0300
+@@ -126,7 +126,13 @@
+ 	status = "okay";
+ };
+ 
+-/* USB 2 & 3 are on headers only. */
++&ehci2 {
++	status = "okay";
++};
++
++&ehci3 {
++	status = "okay";
++};
+ 
+ &emac0 {
+ 	pinctrl-names = "default";
+@@ -169,6 +175,14 @@
+ 	status = "okay";
+ };
+ 
++&ohci2 {
++	status = "okay";
++};
++
++&ohci3 {
++	status = "okay";
++};
++
+ &spi0  {
+ 	status = "okay";
+ 	pinctrl-names = "default";
