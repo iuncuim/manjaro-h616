@@ -4,7 +4,7 @@ notice_uboot() {
   # parameters may be used instead.
   echo "New version of U-Boot firmware can be flashed to your microSD card (mmcblk1)"
   echo "or eMMC module (mmcblk2).  You can do that by running:"
-  echo "# dd if=/boot/u-boot-sunxi-with-spl-orangepi3-lts.bin of=/dev/mmcblkX bs=128k seek=1 conv=notrunc,fsync"
+  echo "# dd if=/boot/u-boot-sunxi-with-spl-opi-zero3.bin of=/dev/mmcblkX bs=8k seek=1 conv=notrunc,fsync"
 }
 
 create_config() {
