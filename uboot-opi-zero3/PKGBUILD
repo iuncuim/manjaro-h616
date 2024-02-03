@@ -2,26 +2,28 @@
 # Maintainer: Furkan Kardame  <f.kardame@manjaro.org>
 # Contributor: Mikhail Kalashnikov <iuncuim@gmail.com>
 
-pkgname=uboot-h616
+pkgname=uboot-opi-zero3
 pkgver=v2024.01
-pkgrel=1
+pkgrel=2
 _tfaver=v2.9.0
-pkgdesc="U-Boot for h616 devices"
+pkgdesc="U-Boot for orangepi zero3"
 arch=('aarch64')
 url='http://www.denx.de/wiki/U-Boot/WebHome'
 license=('GPL')
 makedepends=('bc' 'python' 'python-setuptools' 'swig' 'dtc' 'arm-none-eabi-gcc' 'bison' 'flex')
 provides=('uboot')
 conflicts=('uboot')
-replaces=('uboot-h616')
+replaces=('uboot-opi-zero3')
 install=${pkgname}.install
 source=("https://source.denx.de/u-boot/u-boot/-/archive/${pkgver}/u-boot-${pkgver}.tar.gz"
         "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
+        "0001-arm64-dts-allwinner-opi-zeroX-usb.patch"
         "0010-sunxi-add-barrier-in-memory-check.patch"
         "0011-sunxi-H616-GPU-enable-hack.patch"
         )
 sha256sums=('20bcde63e9c5c635d75c74fd98809ad3a1026c6e36f0523f2c8fee8c56bc5a53'
             '510207a4ecc263bace34213ccd5dc1b8ce22945cd55d2452fef4af6d76e0d41e'
+            'SKIP'
             'SKIP'
             'SKIP'
             )
