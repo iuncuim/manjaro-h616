@@ -5,7 +5,7 @@
 
 pkgbase=linux-h616
 pkgver=6.6.2
-pkgrel=2
+pkgrel=3
 _newversion=false
 _stopbuild=false     # Will also stop if ${_newversion} is true
 _srcname="linux-${pkgver/%.0/}"
@@ -114,6 +114,7 @@ source=("http://www.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.xz"
         '0640-arm64-dts-allwinner-h618-enable-spdif-opi23-tanix-tx6s.patch'
         '0641-thermal-sun8i.patch'
         '0642-arm64-dts-allwinner-opi-zeroX-usb.patch'
+        '0643-arm64-dts-allwinner-h616-update-emac-for-Orange-Pi-Zero-3.patch'
         '0701-drm-fourcc-Add-NV20-and-NV30-YUV-formats.patch'
         '0702-drm-rockchip-vop-Add-NV15-NV20-and-NV30-support.patch'
         '0703-media-v4l2-common-Add-helpers-to-calculate-bytesperl.patch'
@@ -198,6 +199,7 @@ md5sums=('ed7af4ee62c054680315181a428a3e5a'
         '86d4a35722b5410e3b29fc92dae15d4b'
         'ce6c81ad1ad1f8b333fd6077d47abdaf'
         '3dc88030a8f2f5a5f97266d99b149f77'
+        'SKIP'
         'SKIP'
         'SKIP'
         'SKIP'
