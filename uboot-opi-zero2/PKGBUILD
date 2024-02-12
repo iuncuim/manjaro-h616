@@ -1,0 +1,87 @@
+# U-Boot: Orange Pi Zero 2
+# Maintainer: Furkan Kardame  <f.kardame@manjaro.org>
+# Contributor: Mikhail Kalashnikov <iuncuim@gmail.com>
+
+pkgname=uboot-opi-zero2
+pkgver=v2024.01
+pkgrel=1
+_tfaver=v2.9.0
+pkgdesc="U-Boot for orangepi zero2"
+arch=('aarch64')
+url='http://www.denx.de/wiki/U-Boot/WebHome'
+license=('GPL')
+makedepends=('bc' 'python' 'python-setuptools' 'swig' 'dtc' 'arm-none-eabi-gcc' 'bison' 'flex')
+provides=('uboot')
+conflicts=('uboot')
+replaces=('uboot-opi-zero2')
+install=${pkgname}.install
+source=("https://source.denx.de/u-boot/u-boot/-/archive/${pkgver}/u-boot-${pkgver}.tar.gz"
+        "https://git.trustedfirmware.org/TF-A/trusted-firmware-a.git/snapshot/trusted-firmware-a-${_tfaver}.tar.gz"
+        "0001-arm64-dts-allwinner-opi-zeroX-usb.patch"
+        "0010-sunxi-add-barrier-in-memory-check.patch"
+        "0011-sunxi-H616-GPU-enable-hack.patch"
+        )
+sha256sums=('20bcde63e9c5c635d75c74fd98809ad3a1026c6e36f0523f2c8fee8c56bc5a53'
+            '510207a4ecc263bace34213ccd5dc1b8ce22945cd55d2452fef4af6d76e0d41e'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            )
+
+prepare() {
+  apply_patches() {
+      local PATCH
+      for PATCH in "${source[@]}"; do
+          PATCH="${PATCH%%::*}"
+          PATCH="${PATCH##*/}"
+          [[ ${PATCH} = *.patch ]] || continue
+          msg2 "Applying patch: ${PATCH}..."
+          patch -N -p1 < "../${PATCH}"
+      done
+  }
+
+  cd u-boot-${pkgver}
+  apply_patches
+}
+
+build() {
+  # Avoid build warnings by editing a .config option in place instead of
+  # appending an option to .config, if an option is already present
+  update_config() {
+    if ! grep -q "^$1=$2$" .config; then
+      if grep -q "^# $1 is not set$" .config; then
+        sed -i -e "s/^# $1 is not set$/$1=$2/g" .config
+      elif grep -q "^$1=" .config; then
+        sed -i -e "s/^$1=.*/$1=$2/g" .config
+      else
+        echo "$1=$2" >> .config
+      fi
+    fi
+  }
+
+  unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+
+  cd trusted-firmware-a-${_tfaver}
+
+  echo -e "\nBuilding TF-A for H616 devices...\n"
+  make PLAT=sun50i_h616 bl31
+  cp build/sun50i_h616/release/bl31.bin ../u-boot-${pkgver}
+
+  cd ../u-boot-${pkgver}
+
+  echo -e "\nBuilding U-Boot for OrangePi Zero 2...\n"
+  make orangepi_zero2_defconfig
+
+  update_config 'CONFIG_IDENT_STRING' '" Manjaro Linux ARM"'
+  update_config 'CONFIG_OF_LIBFDT_OVERLAY' 'y'
+
+  make EXTRAVERSION=-${pkgrel}
+  cp u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-opi-zero2.bin
+}
+
+package() {
+  cd u-boot-${pkgver}
+
+  mkdir -p "${pkgdir}/boot/extlinux"
+  install -D -m 0644 u-boot-sunxi-with-spl-opi-zero2.bin -t "${pkgdir}/boot"
+}
