@@ -1,0 +1,319 @@
+# AArch64 multi-platform
+# Maintainer: Dan Johansen <strit@manjaro.org>
+# Contributor: Kevin Mihelich <kevin@archlinuxarm.org>
+# Contributor: Dragan Simic <dsimic@buserror.io>
+
+pkgbase=linux-rc
+pkgver=6.8.rc3
+pkgrel=1
+_newversion=false
+_stopbuild=false     # Will also stop if ${_newversion} is true
+_srcname="linux-${pkgver/.rc/-rc}"
+_kernelname="${pkgbase#linux}"
+_desc="AArch64 multi-platform (release candidate)"
+arch=('aarch64')
+url="http://www.kernel.org/"
+license=('GPL2')
+makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
+options=('!strip')
+source=("https://git.kernel.org/torvalds/t/${_srcname}.tar.gz"                     # Kernel source
+        '1001-arm64-dts-allwinner-add-ohci-ehci-to-h5-nanopi.patch'                # Nanopi Neo Plus 2 (by Furkan?)
+        #'1002-gpu-drm-add-new-display-resolution-2560x1440.patch'                  # Odroid;  Not upstreamable Failed to apply
+        '1003-panfrost-Silence-Panfrost-gem-shrinker-loggin.patch'                 # Panfrost (preference patch, might not be upstreamable)
+        '1004-arm64-dts-rockchip-Add-Firefly-Station-p1-support.patch'             # Firefly Station P1 (by Furkan)
+        '1005-rk3399-rp64-pcie-Reimplement-rockchip-PCIe-bus-scan-delay.patch'     # RockPro64 (by @nuumio, perhaps upstreamable?)
+        #'1006-arm64-dts-amlogic-add-meson-g12b-ugoos-am6-plus.patch'               # Meson Ugoos (by Furkan)
+        '1007-arm64-dts-rockchip-Add-PCIe-bus-scan-delay-to-RockPr.patch'          # RockPro64 (relies on patch 1005)
+        #'1008-arm64-dts-rockchip-switch-to-hs200-on-rockpi4.patch'                 # Radxa Rock Pi 4;  Temporary hotfix, not for upstreaming (by Dragan) Applied
+        '1009-arm64-dts-rockchip-Add-PCIe-bus-scan-delay-to-Rock-P.patch'          # Radxa Rock Pi 4 (relies on patch 1005)
+        #'1010-arm64-dts-rockchip-add-rk3568-station-p2.patch'                      # Firefly Station P2 (by Furkan) Applied
+        '1011-arm64-dts-meson-radxa-zero-add-support-for-the-usb-t.patch'          # Radxa Zero (by Furkan)
+	#'1012-pwm-meson-Explicitly-set-.polarity-in-.get_state.patch'              # Meson; Temp fix for boot issues Already Applied
+        #'1013-arm64-dts-allwinner-add-OrangePi-3-LTS.patch'                        # Orange Pi 3 LTS Support (Furkan)
+        #'2001-staging-add-rtl8723cs-driver.patch'                                  # Realtek WiFi;  Not upstreamable
+	#'2001-2-staging-add-rtl8723cs-driver.patch'
+	#'2001-3-staging-add-rtl8723cs-driver.patch'
+	#'2002-arm64-dts-rockchip-Work-around-daughterboard-issues.patch'           # Pinebook Pro microSD;  (submitted by Dan) (applied in linux-next)
+        '2003-arm64-dts-allwinner-add-hdmi-sound-to-pine-devices.patch'            # Allwinner HDMI Sound; (by Dan)
+        #'3001-irqchip-gic-v3-add-hackaround-for-rk3568-its.patch'                  # RK256X; ITS hack for GIC (might not be upstreamable) - Failed to apply and did not get accepted.
+        #'3002-arm64-dts-rockchip-Lower-sd-speed-on-soquartz.patch'                 # SoQuartz; from list:  (submitted by Dan) (applied in linux-next)
+        '3003-arm64-dts-rockchip-Add-hdmi-cec-assigned-clocks-to-r.patch'          # RK356X; (maybe applied in linux-next)
+        #'3004-arm64-dts-rockchip-rk356x-update-pcie-io-ranges.patch'               # From https://github.com/neggles/linux-quartz64/commit/2c1e3811e6d7430f7d46dbb01d3773192c51cdcf (by Neggles) Applied in 6.5-rc1
+        '3005-board-rock3a-gmac1.patch'                                            # Rock 3A; Ethernet. Based on Armbian patch
+        #'3006-drm-rockchip-dw_hdmi-Add-4k-30-support.patch'                        # Rockchip; (applied in linux-next)
+        '3007-iio-accel-fix-DT-probe-not-respecting-orientation-property.patch'    # PineTab 2; From Segfault: https://github.com/TuxThePenguin0/linux/commits/device/pine64-pinetab2
+        '3008-drm-panel-add-BOE-TH101MB31IG002-28A-driver.patch'                   # PineTab 2
+        "3009-arch-arm64-add-device-tree-for-Pine64-PineTab2.patch::https://github.com/TuxThePenguin0/linux/commit/872b829a3511cfa853bd3af3bd4f30be1cb3d1ab.patch"                # PineTab 2
+	"3010-arm64-dts-rockchip-add-opi3b.patch"				#Add OPI3B 
+        #'4001-arm64-dts-rk3399-pinebook-pro-Fix-USB-PD-charging.patch'             # Pinebook Pro; From Megi: https://github.com/torvalds/linux/compare/master...megous:linux:pbp-6.2
+        #'4002-arm64-dts-rk3399-pinebook-pro-Improve-Type-C-support-on-Pinebook-Pro.patch'
+        #'4003-arm64-dts-rk3399-pinebook-pro-Remove-redundant-pinctrl-properties-from-edp.patch'
+        #'4004-arm64-dts-rk3399-pinebook-pro-Remove-unused-features.patch'
+        #'4005-arm64-dts-rk3399-pinebook-pro-Dont-allow-usb2-phy-driver-to-update-USB-role.patch'
+        #'4006-arm64-dts-rockchip-rk3399-pinebook-pro-Support-both-Type-C-plug-orientations.patch'
+        '4007-ASoC-codec-es8316-DAC-Soft-Ramp-Rate-is-just-a-2-bit-control.patch'
+        #'4008-arm64-dts-rk3399-pinebook-pro-Fix-codec-frequency-after-boot.patch'
+        #'4009-arm64-dts-rockchip-rk3399-pinebook-pro-Fix-VDO-display-output.patch'
+        #'2001-v3-01-14-drm-panthor-Add-uAPI.patch'
+	#'2002-v3-02-14-drm-panthor-Add-GPU-register-definitions.patch'
+	#'2003-v3-03-14-drm-panthor-Add-the-device-logical-block.patch'
+	#'2004-v3-04-14-drm-panthor-Add-the-GPU-logical-block.patch'
+	#'2005-v3-05-14-drm-panthor-Add-GEM-logical-block.patch'
+	#'2006-v3-06-14-drm-panthor-Add-the-devfreq-logical-block.patch'
+	#'2007-v3-07-14-drm-panthor-Add-the-MMU-VM-logical-block.patch'
+	#'2008-v3-08-14-drm-panthor-Add-the-FW-logical-block.patch'
+	#'2009-v3-09-14-drm-panthor-Add-the-heap-logical-block.patch'
+	#'2010-v3-10-14-drm-panthor-Add-the-scheduler-logical-block.patch'
+	#'2011-v3-11-14-drm-panthor-Add-the-driver-frontend-block.patch'
+	#'2012-v3-12-14-drm-panthor-Allow-driver-compilation.patch'
+	#'2013-v3-13-14-dt-bindings-gpu-mali-valhall-csf-Add-support-for-Arm-Mali-CSF-GPUs.patch'
+	#'2014-v3-14-14-drm-panthor-Add-an-entry-to-MAINTAINERS.patch'
+	#'2015-v3-1-2-iommu-Allow-passing-custom-allocators-to-pgtable-drivers.patch'
+	#'2016-v3-2-2-iommu-Extend-LPAE-page-table-format-to-support-custom-allocators.patch'
+	#'2018-drm-misc-next-v2-1-7-drm-gpuva_mgr-allow-building-as-module.patch'
+	#'2019-drm-misc-next-v2-2-7-drm-gpuvm-rename-struct-drm_gpuva_manager-to-struct-drm_gpuvm.patch'
+	#'2020-drm-misc-next-v2-3-7-drm-nouveau-uvmm-rename-umgr-to-base.patch'
+	#'2021-drm-misc-next-v2-4-7-drm-gpuvm-common-dma-resv-per-struct-drm_gpuvm.patch'
+	#'2022-drm-misc-next-v2-5-7-drm-gpuvm-add-an-abstraction-for-a-VM-BO-combination.patch'
+	#'2023-drm-misc-next-v2-6-7-drm-gpuvm-generalize-dma_resv-extobj-handling-and-GEM-validation.patch'
+	#'2024-drm-misc-next-v2-7-7-drm-nouveau-GPUVM-dma-resv-extobj-handling-GEM-validation.patch'
+	#'2025-drm-gpuvm-Let-drm_gpuvm_bo_put-report-when-the-vm_bo-object-is-destroyed.patch'
+	'config'
+        'linux.preset'
+        '60-linux.hook'
+        '90-linux.hook')
+md5sums=('5a092d071b3d609b688e66213d3e7fc0'
+         'e6fe272dc95a1c0a8f871924699fea16'
+         'f8f0b124c741be61d86bea8d44e875f9'
+         '564136ab1c75b6dc67be02b54e695ae5'
+         '902b49528c733701e639ed6b7f5fb067'
+         '28982d87c45ed8f5aab966d82f8455d8'
+         'a0cf3209d3f856522ef14c4618837ae7'
+         'e9377e7295ebd76cc68b9dd42891c0c8'
+         '9aa0591c2d601a104d664a802a44728c'
+         '467b3ff965db6867f4289f5d256ca93e'
+         '8fb62d56ea03359cf3999564e3dab15f'
+         '3c96dd46f2473612400421f270d8f696'
+         '3e2c8f55c0dc3445e2d7c4fcc8b84c6e'
+         'e0e4aec740dbfaaaf6f0079193123df3'
+         '149e9f9540fafb258e979d2d318bd392'
+         'ac3ff9a57ac6fc002383453ce06bec04'
+         '097531c25d4163024c22ad3317564b8e'
+         '86d4a35722b5410e3b29fc92dae15d4b'
+         'ce6c81ad1ad1f8b333fd6077d47abdaf'
+         '3dc88030a8f2f5a5f97266d99b149f77')
+
+prepare() {
+  apply_patches() {
+      local PATCH
+      for PATCH in "${source[@]}"; do
+          PATCH="${PATCH%%::*}"
+          PATCH="${PATCH##*/}"
+          [[ ${PATCH} = $1*.patch ]] || continue
+          msg2 "Applying patch: ${PATCH}..."
+          patch -N -p1 < "../${PATCH}"
+      done
+  }
+
+  cd ${_srcname}
+
+  # Assorted Manjaro ARM patches
+  apply_patches 1
+
+  # Assorted Pinebook, PinePhone and PineTab patches
+  apply_patches 2
+
+  # Assorted RK35XX patches not yet upstreamed
+  apply_patches 3
+
+  # Pinebook Pro patches by Megi
+  apply_patches 4
+
+  # Apply our kernel configuration
+  cat "${srcdir}/config" > .config
+
+  # Add pkgrel to extraversion
+  sed -ri "s|^(EXTRAVERSION =)(.*)|\1 \2-${pkgrel}|" Makefile
+
+  # Don't run depmod on "make install", we'll do that ourselves in packaging
+  sed -i '2iexit 0' scripts/depmod.sh
+}
+
+build() {
+  cd ${_srcname}
+
+  # Get the kernel version
+  if [[ "${_newversion}" = false ]]; then
+    make prepare
+  fi
+
+  # Configure the kernel; adjust the line below to your choice
+  # or simply manually edit the ".config" file
+  if [[ "${_newversion}" = true ]]; then
+    make menuconfig   # CLI menu for configuration
+  fi
+  #make nconfig       # New CLI menu for configuration
+  #make xconfig       # X-based configuration
+  #make oldconfig     # Using old config from previous kernel version
+
+  # Stash the configuration (use with new major kernel version)
+  if [[ "${_newversion}" = true ]]; then
+    cp ./.config /var/tmp/${pkgbase}.config
+    cp ./.config "${srcdir}/config"
+  fi
+
+  # Stop here, which is useful to configure the kernel
+  if [[ "${_newversion}" = true || "${_stopbuild}" = true ]]; then
+    msg "Stopping build"
+    return 1
+  fi
+
+  # Enable to create an all-inclusive build
+  #yes "" | make config
+
+  # Build the kernel and the modules
+  unset LDFLAGS
+  make ${MAKEFLAGS} Image modules
+
+  # Generate device tree blobs with symbols to support
+  # applying device tree overlays in U-Boot
+  make ${MAKEFLAGS} DTC_FLAGS="-@" dtbs
+}
+
+_package() {
+  pkgdesc="The Linux Kernel and modules - ${_desc}"
+  depends=('coreutils' 'kmod' 'initramfs')
+  optdepends=('crda: to set the correct wireless channels of your country'
+              'linux-firmware: addition firmware')
+  provides=("linux=${pkgver}")
+  replaces=('linux-armv8-rc' 'linux-aarch64-rc')
+  conflicts=('linux' 'rpi-overlays')
+  backup=("etc/mkinitcpio.d/${pkgbase}.preset")
+  install=${pkgname}.install
+
+  cd ${_srcname}
+
+  KARCH=arm64
+
+  # get kernel version
+  _kernver="$(make kernelrelease)"
+  _basekernel=${_kernver%%-*}
+  _basekernel=${_basekernel%.*}
+
+  mkdir -p "${pkgdir}"/{boot,usr/lib/modules}
+  make INSTALL_MOD_PATH="${pkgdir}/usr" modules_install
+  make INSTALL_DTBS_PATH="${pkgdir}/boot/dtbs" dtbs_install
+  cp arch/$KARCH/boot/Image "${pkgdir}/boot"
+
+  # make room for external modules
+  local _extramodules="extramodules-${_basekernel}${_kernelname}"
+  ln -s "../${_extramodules}" "${pkgdir}/usr/lib/modules/${_kernver}/extramodules"
+
+  # add real version for building modules and running depmod from hook
+  echo "${_kernver}" |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/lib/modules/${_extramodules}/version"
+
+  # remove build and source links
+  rm "${pkgdir}"/usr/lib/modules/${_kernver}/build
+
+  # now we call depmod...
+  depmod -b "${pkgdir}/usr" -F System.map "${_kernver}"
+
+  # sed expression for following substitutions
+  local _subst="
+    s|%PKGBASE%|${pkgbase}|g
+    s|%KERNVER%|${_kernver}|g
+    s|%EXTRAMODULES%|${_extramodules}|g
+  "
+
+  # install mkinitcpio preset file
+  sed "${_subst}" ../linux.preset |
+    install -Dm644 /dev/stdin "${pkgdir}/etc/mkinitcpio.d/${pkgbase}.preset"
+
+  # install pacman hooks
+  sed "${_subst}" ../60-linux.hook |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/libalpm/hooks/60-${pkgbase}.hook"
+  sed "${_subst}" ../90-linux.hook |
+    install -Dm644 /dev/stdin "${pkgdir}/usr/share/libalpm/hooks/90-${pkgbase}.hook"
+}
+
+_package-headers() {
+  pkgdesc="Header files and scripts for building modules for linux kernel - ${_desc}"
+  provides=("linux-headers=${pkgver}")
+  replaces=('linux-armv8-rc-headers' 'linux-aarch64-rc-headers')
+  conflicts=('linux-headers')
+
+  cd ${_srcname}
+  local _builddir="${pkgdir}/usr/lib/modules/${_kernver}/build"
+
+  install -Dt "${_builddir}" -m644 Makefile .config Module.symvers
+  install -Dt "${_builddir}/kernel" -m644 kernel/Makefile
+
+  mkdir "${_builddir}/.tmp_versions"
+
+  cp -t "${_builddir}" -a include scripts
+
+  install -Dt "${_builddir}/arch/${KARCH}" -m644 arch/${KARCH}/Makefile
+  install -Dt "${_builddir}/arch/${KARCH}/kernel" -m644 arch/${KARCH}/kernel/asm-offsets.s
+  install -Dt "${_builddir}" -m644 vmlinux
+
+  cp -t "${_builddir}/arch/${KARCH}" -a arch/${KARCH}/include
+  mkdir -p "${_builddir}/arch/arm"
+  cp -t "${_builddir}/arch/arm" -a arch/arm/include
+
+  install -Dt "${_builddir}/drivers/md" -m644 drivers/md/*.h
+  install -Dt "${_builddir}/net/mac80211" -m644 net/mac80211/*.h
+
+  # http://bugs.archlinux.org/task/13146
+  install -Dt "${_builddir}/drivers/media/i2c" -m644 drivers/media/i2c/msp3400-driver.h
+
+  # http://bugs.archlinux.org/task/20402
+  install -Dt "${_builddir}/drivers/media/usb/dvb-usb" -m644 drivers/media/usb/dvb-usb/*.h
+  install -Dt "${_builddir}/drivers/media/dvb-frontends" -m644 drivers/media/dvb-frontends/*.h
+  install -Dt "${_builddir}/drivers/media/tuners" -m644 drivers/media/tuners/*.h
+
+  # add xfs and shmem for aufs building
+  mkdir -p "${_builddir}"/{fs/xfs,mm}
+
+  # copy in Kconfig files
+  find . -name Kconfig\* -exec install -Dm644 {} "${_builddir}/{}" \;
+
+  # remove unneeded architectures
+  local _arch
+  for _arch in "${_builddir}"/arch/*/; do
+    [[ ${_arch} == */${KARCH}/ || ${_arch} == */arm/ ]] && continue
+    rm -r "${_arch}"
+  done
+
+  # remove documentation files
+  rm -r "${_builddir}/Documentation"
+
+  # remove now broken symlinks
+  find -L "${_builddir}" -type l -printf 'Removing %P\n' -delete
+
+  # strip scripts directory
+  local file
+  while read -rd '' file; do
+    case "$(file -bi "$file")" in
+      application/x-sharedlib\;*)      # Libraries (.so)
+        strip $STRIP_SHARED "$file" ;;
+      application/x-archive\;*)        # Libraries (.a)
+        strip $STRIP_STATIC "$file" ;;
+      application/x-executable\;*)     # Binaries
+        strip $STRIP_BINARIES "$file" ;;
+      application/x-pie-executable\;*) # Relocatable binaries
+        strip $STRIP_SHARED "$file" ;;
+    esac
+  done < <(find "${_builddir}" -type f -perm -u+x ! -name vmlinux -print0 2>/dev/null)
+  strip $STRIP_STATIC "${_builddir}/vmlinux"
+  
+  # remove unwanted files
+  find ${_builddir} -name '*.orig' -delete
+}
+
+pkgname=("${pkgbase}" "${pkgbase}-headers")
+for _p in ${pkgname[@]}; do
+  eval "package_${_p}() {
+    _package${_p#${pkgbase}}
+  }"
+done

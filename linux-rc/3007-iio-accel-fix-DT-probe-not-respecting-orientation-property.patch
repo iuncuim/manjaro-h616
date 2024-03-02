@@ -1,0 +1,28 @@
+From aff129ac7657e34696bc00a72ca2c024925888cc Mon Sep 17 00:00:00 2001
+From: Segfault <awarnecke002@hotmail.com>
+Date: Fri, 20 Jan 2023 14:18:20 +1100
+Subject: [PATCH] iio/accel: fix DT probe not respecting orientation property
+
+---
+ drivers/iio/accel/st_accel_core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/iio/accel/st_accel_core.c b/drivers/iio/accel/st_accel_core.c
+index c8c8eb15c34e63..27dc03d463bce0 100644
+--- a/drivers/iio/accel/st_accel_core.c
++++ b/drivers/iio/accel/st_accel_core.c
+@@ -1289,12 +1289,12 @@ static int apply_acpi_orientation(struct iio_dev *indio_dev)
+ 
+ 	adev = ACPI_COMPANION(indio_dev->dev.parent);
+ 	if (!adev)
+-		return -ENXIO;
++		return ret;
+ 
+ 	/* Read _ONT data, which should be a package of 6 integers. */
+ 	status = acpi_evaluate_object(adev->handle, "_ONT", NULL, &buffer);
+ 	if (status == AE_NOT_FOUND) {
+-		return -ENXIO;
++		return ret;
+ 	} else if (ACPI_FAILURE(status)) {
+ 		dev_warn(&indio_dev->dev, "failed to execute _ONT: %d\n",
+ 			 status);
