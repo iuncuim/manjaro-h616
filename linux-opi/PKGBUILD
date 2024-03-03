@@ -51,11 +51,13 @@ source=("https://cdn.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.xz"
 	'4015-staging-Add-fusb30x-driver.patch'
 	'4020-arm64-dts-rockchip-Add-Orange-Pi-800-dts.patch'
 	'4022-arm64-dts-rockchip-enable-i2c2-i2c4-uart4.patch'
+	'5001-drivers-drm-wip-add-h616-hdmi-jernejsk-24102023.patch'
+	'5002-h616-dts-add-hdmi-nodes.patch'
 	'linux.preset'
         '60-linux.hook'
         '90-linux.hook')
 md5sums=('ebd444b2d4d33676cd6a4bb6f38ab0a9'
-         '2b0b357bde670ad78ec480764bdbe242'
+         'SKIP'
          '9aa0591c2d601a104d664a802a44728c'
          'e6fe272dc95a1c0a8f871924699fea16'
          '9f27b2a05eaeb1995fc0fcf6a8b923c4'
@@ -80,7 +82,7 @@ md5sums=('ebd444b2d4d33676cd6a4bb6f38ab0a9'
          '5a833ab6a3c232752b8bf21b897863dd'
          '2092853c3dfde2d10e854fa60beb8c91'
          '2db3185c1f6b59158d3851aa5ffa790a'
-         '2914916986cddad32f0898a93999b124'
+         'SKIP'
          '4418ae71b6b8c28bee8d9b5927b1e74b'
          '1b3bbb0b221decd2a4f0c1e4eb76d2fb'
          'f98520ef96a470286c8662a4ac95e32a'
@@ -89,6 +91,8 @@ md5sums=('ebd444b2d4d33676cd6a4bb6f38ab0a9'
          '47a9e7dd3c9bcbf9814410e922b39c1d'
          '27c70d7f94f579b155c56a9c220063e1'
          'ab1ea0beb244b84ea87eb12945180810'
+         'SKIP'
+         'SKIP'
          '86d4a35722b5410e3b29fc92dae15d4b'
          'ce6c81ad1ad1f8b333fd6077d47abdaf'
          '3dc88030a8f2f5a5f97266d99b149f77')
@@ -119,8 +123,8 @@ prepare() {
   # Apply OPI Patches
   apply_patches 4
 
-  # Apply LE VPU Patches
- # apply_patches 5
+  # Apply H616/H618 Patches
+  apply_patches 5
   
   # Apply our kernel configuration
   cat "${srcdir}/config" > ./.config
