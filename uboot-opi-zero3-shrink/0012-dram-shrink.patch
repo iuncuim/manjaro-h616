@@ -1,0 +1,71 @@
+diff --git a/arch/arm/mach-sunxi/Kconfig b/arch/arm/mach-sunxi/Kconfig
+index a4a8d8e..18c2f64 100644
+--- a/arch/arm/mach-sunxi/Kconfig
++++ b/arch/arm/mach-sunxi/Kconfig
+@@ -110,6 +110,11 @@ config DRAM_SUN50I_H616_TPR12
+ 	  TPR12 value from vendor DRAM settings.
+ endif
+ 
++config DRAM_SUN50I_H616_SHRINK
++	bool
++	help
++	  Support for the 12Gbit DRAM memory 
++
+ config SUN6I_PRCM
+ 	bool
+ 	help
+diff --git a/arch/arm/mach-sunxi/dram_sun50i_h616.c b/arch/arm/mach-sunxi/dram_sun50i_h616.c
+index c5c1331..ba893ba 100644
+--- a/arch/arm/mach-sunxi/dram_sun50i_h616.c
++++ b/arch/arm/mach-sunxi/dram_sun50i_h616.c
+@@ -1352,7 +1352,11 @@ static unsigned long mctl_calc_size(const struct dram_config *config)
+ 	u8 width = config->bus_full_width ? 4 : 2;
+ 
+ 	/* 8 banks */
++#ifdef DRAM_SUN50I_H616_SHRINK
++	return (1ULL << (config->cols + config->rows + 3)) * width * config->ranks * 3 / 4;
++#else
+ 	return (1ULL << (config->cols + config->rows + 3)) * width * config->ranks;
++#endif
+ }
+ 
+ static const struct dram_para para = {
+diff --git a/configs/orangepi_zero3_shrink_defconfig b/configs/orangepi_zero3_shrink_defconfig
+new file mode 100644
+index 0000000..8644497
+--- /dev/null
++++ b/configs/orangepi_zero3_shrink_defconfig
+@@ -0,0 +1,33 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SUNXI=y
++CONFIG_DEFAULT_DEVICE_TREE="sun50i-h618-orangepi-zero3"
++CONFIG_SPL=y
++CONFIG_DRAM_SUN50I_H616_DX_ODT=0x07070707
++CONFIG_DRAM_SUN50I_H616_DX_DRI=0x0e0e0e0e
++CONFIG_DRAM_SUN50I_H616_CA_DRI=0x0e0e
++CONFIG_DRAM_SUN50I_H616_ODT_EN=0xaaaaeeee
++CONFIG_DRAM_SUN50I_H616_TPR6=0x44000000
++CONFIG_DRAM_SUN50I_H616_TPR10=0x402f6663
++CONFIG_DRAM_SUN50I_H616_TPR11=0x24242624
++CONFIG_DRAM_SUN50I_H616_TPR12=0x0f0f100f
++CONFIG_DRAM_SUN50I_H616_SHRINK=y
++CONFIG_MACH_SUN50I_H616=y
++CONFIG_SUNXI_DRAM_H616_LPDDR4=y
++CONFIG_DRAM_CLK=792
++CONFIG_USB1_VBUS_PIN="PC16"
++CONFIG_R_I2C_ENABLE=y
++CONFIG_SPL_SPI_SUNXI=y
++# CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++CONFIG_SPL_I2C=y
++CONFIG_SPL_SYS_I2C_LEGACY=y
++CONFIG_SYS_I2C_MVTWSI=y
++CONFIG_SYS_I2C_SLAVE=0x7f
++CONFIG_SYS_I2C_SPEED=400000
++CONFIG_SPI_FLASH_ZBIT=y
++CONFIG_PHY_MOTORCOMM=y
++CONFIG_SUN8I_EMAC=y
++CONFIG_AXP313_POWER=y
++CONFIG_SPI=y
++CONFIG_USB_EHCI_HCD=y
++CONFIG_USB_OHCI_HCD=y
++CONFIG_USB_MUSB_GADGET=y

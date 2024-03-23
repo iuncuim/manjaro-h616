@@ -1,0 +1,41 @@
+notice_uboot() {
+  # The instructions below apply to installations that use GPT.
+  # For installations that use MBR partitioning, "bs=1024 seek=8"
+  # parameters may be used instead.
+  echo "New version of U-Boot firmware can be flashed to your microSD card (mmcblk1)"
+  echo "or eMMC module (mmcblk2).  You can do that by running:"
+  echo "# dd if=/boot/u-boot-sunxi-with-spl-opi-zero3-shrink.bin of=/dev/mmcblkX bs=8k seek=1 conv=notrunc,fsync"
+}
+
+create_config() {
+  mkdir -p /boot/extlinux
+  echo "LABEL Manjaro ARM
+KERNEL /Image
+FDT /dtbs/allwinner/sun50i-h618-orangepi-zero3.dtb
+APPEND initrd=/initramfs-linux.img console=ttyS0,115200 root=LABEL=ROOT_MNJRO rw rootwait audit=0 splash plymouth.ignore-serial-consoles" \
+    > /boot/extlinux/extlinux.conf
+}
+
+post_install() {
+  notice_uboot
+  if [ -f /boot/extlinux/extlinux.conf.pacsave ]; then
+    mv /boot/extlinux/extlinux.conf.pacsave /boot/extlinux/extlinux.conf
+  fi
+  if [ -f /boot/extlinux/extlinux.conf ]; then
+    echo "Keeping old extlinux.conf file..."
+  else
+    create_config
+  fi
+}
+
+post_upgrade() {
+  notice_uboot
+  if [ -f /boot/extlinux/extlinux.conf.pacsave ]; then
+    mv /boot/extlinux/extlinux.conf.pacsave /boot/extlinux/extlinux.conf
+  fi
+  if [ -f /boot/extlinux/extlinux.conf ]; then
+    echo "Keeping old extlinux.conf file..."
+  else
+    create_config
+  fi
+}
