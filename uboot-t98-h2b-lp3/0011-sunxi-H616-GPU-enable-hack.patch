@@ -1,0 +1,10 @@
+--- a/arch/arm/mach-sunxi/clock_sun50i_h6.c	2023-10-02 17:39:59.000000000 +0300
++++ b/arch/arm/mach-sunxi/clock_sun50i_h6.c	2023-11-05 10:01:39.244655001 +0300
+@@ -16,6 +16,7 @@
+ 		/* this seems to enable PLLs on H616 */
+ 		setbits_le32(&prcm->sys_pwroff_gating, 0x10);
+ 		setbits_le32(&prcm->res_cal_ctrl, 2);
++		writel(0, 0x7010254);
+ 	}
+ 
+ 	clrbits_le32(&prcm->res_cal_ctrl, 1);
