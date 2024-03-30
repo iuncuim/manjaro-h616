@@ -1,0 +1,68 @@
+From c75d96571b2ca129ac62e2311b772c88fe3e675a Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Sat, 9 Mar 2024 18:55:53 +0300
+Subject: [PATCH] Update sun50i-h616.dtsi and sun50i-h618-orangepi-zero3.dts
+
+---
+ .../arm64/boot/dts/allwinner/sun50i-h616.dtsi | 26 +++++++++++++++++++
+ .../allwinner/sun50i-h618-orangepi-zero3.dts  |  2 +-
+ 2 files changed, 27 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+index c3223b23d..d17e7d79a 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+@@ -133,6 +133,8 @@ gpu: gpu@1800000 {
+ 			clocks = <&ccu CLK_GPU0>, <&ccu CLK_BUS_GPU>;
+ 			clock-names = "core", "bus";
+ 			resets = <&ccu RST_BUS_GPU>;
++			operating-points-v2 = <&gpu_opp_table>;
++			#cooling-cells = <2>;
+ 			status = "disabled";
+ 		};
+ 
+@@ -1111,4 +1113,28 @@ ddr_temp_critical: ddr-trip-0 {
+ 			};
+ 		};
+ 	};
++
++	gpu_opp_table: gpu-opp-table {
++		compatible = "operating-points-v2";
++		opp-125000000 {
++			opp-hz = /bits/ 64 <125000000>;
++			opp-microvolt = <810000>;
++		};
++		opp-250000000 {
++			opp-hz = /bits/ 64 <250000000>;
++			opp-microvolt = <810000>;
++		};
++		opp-432000000 {
++			opp-hz = /bits/ 64 <432000000>;
++			opp-microvolt = <810000>;
++		};
++		opp-600000000 {
++			opp-hz = /bits/ 64 <600000000>;
++			opp-microvolt = <960000>;
++		};
++		opp-800000000 {
++			opp-hz = /bits/ 64 <800000000>;
++			opp-microvolt = <1080000>;
++		};
++ 	};
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
+index ae59907f5..7b08277b7 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
+@@ -81,7 +81,7 @@ reg_dldo1: dldo1 {
+ 			reg_dcdc1: dcdc1 {
+ 				regulator-always-on;
+ 				regulator-min-microvolt = <810000>;
+-				regulator-max-microvolt = <990000>;
++				regulator-max-microvolt = <1000000>;
+ 				regulator-name = "vdd-gpu-sys";
+ 			};
+ 
+-- 
+2.44.0
+

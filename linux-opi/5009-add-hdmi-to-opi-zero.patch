@@ -1,8 +1,20 @@
+From 6bf174895b048fd08a94795a9c6c45af02c200e4 Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Sat, 9 Mar 2024 17:25:28 +0300
+Subject: [PATCH] Update sun50i-h616-orangepi-zero.dtsi, sun50i-h616.dtsi, and
+ sun50i-h618-orangepi-zero3.dts
+
+---
+ .../allwinner/sun50i-h616-orangepi-zero.dtsi  |  21 ++
+ .../arm64/boot/dts/allwinner/sun50i-h616.dtsi | 205 ++++++++++++++++++
+ .../allwinner/sun50i-h618-orangepi-zero3.dts  |  15 ++
+ 3 files changed, 241 insertions(+)
+
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
-index fc7315b..1825da9 100644
+index fc7315b94..1825da99e 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
-@@ -22,6 +22,17 @@
+@@ -22,6 +22,17 @@ chosen {
  		stdout-path = "serial0:115200n8";
  	};
  
@@ -20,7 +32,7 @@ index fc7315b..1825da9 100644
  	leds {
  		compatible = "gpio-leds";
  
-@@ -59,6 +70,10 @@
+@@ -59,6 +70,10 @@ reg_usb1_vbus: regulator-usb1-vbus {
  	};
  };
  
@@ -31,7 +43,7 @@ index fc7315b..1825da9 100644
  &ehci1 {
  	status = "okay";
  };
-@@ -72,6 +87,12 @@
+@@ -72,6 +87,12 @@ &emac0 {
  	status = "okay";
  };
  
@@ -45,7 +57,7 @@ index fc7315b..1825da9 100644
  	ext_rgmii_phy: ethernet-phy@1 {
  		compatible = "ethernet-phy-ieee802.3-c22";
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
-index 74aed0d..106b719 100644
+index 608145830..c3223b23d 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
 @@ -7,8 +7,11 @@
@@ -57,10 +69,10 @@ index 74aed0d..106b719 100644
  #include <dt-bindings/reset/sun50i-h616-ccu.h>
  #include <dt-bindings/reset/sun50i-h6-r-ccu.h>
 +#include <dt-bindings/reset/sun8i-de2.h>
+ #include <dt-bindings/thermal/thermal.h>
  
  / {
- 	interrupt-parent = <&gic>;
-@@ -52,6 +55,12 @@
+@@ -57,6 +60,12 @@ cpu3: cpu@3 {
  		};
  	};
  
@@ -73,24 +85,10 @@ index 74aed0d..106b719 100644
  	reserved-memory {
  		#address-cells = <2>;
  		#size-cells = <2>;
-@@ -108,6 +117,64 @@
- 		#size-cells = <1>;
- 		ranges = <0x0 0x0 0x0 0x40000000>;
+@@ -127,6 +136,50 @@ gpu: gpu@1800000 {
+ 			status = "disabled";
+ 		};
  
-+		gpu: gpu@1800000 {
-+			compatible = "allwinner,sun50i-h616-mali",
-+				     "arm,mali-bifrost";
-+			reg = <0x1800000 0x40000>;
-+			interrupts = <GIC_SPI 95 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 96 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 97 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "job", "mmu", "gpu";
-+			clocks = <&ccu CLK_GPU0>, <&ccu CLK_BUS_GPU>;
-+			clock-names = "core", "bus";
-+			resets = <&ccu RST_BUS_GPU>;
-+			status = "disabled";
-+		};
-+
 +		bus@1000000 {
 +			compatible = "allwinner,sun50i-h616-de33",
 +				     "allwinner,sun50i-a64-de2";
@@ -138,7 +136,7 @@ index 74aed0d..106b719 100644
  		syscon: syscon@3000000 {
  			compatible = "allwinner,sun50i-h616-system-control";
  			reg = <0x03000000 0x1000>;
-@@ -121,6 +188,12 @@
+@@ -140,6 +193,12 @@ sram_c: sram@28000 {
  				#address-cells = <1>;
  				#size-cells = <1>;
  				ranges = <0 0x00028000 0x30000>;
@@ -151,7 +149,7 @@ index 74aed0d..106b719 100644
  			};
  		};
  
-@@ -249,6 +322,12 @@
+@@ -296,6 +355,12 @@ uart1_rts_cts_pins: uart1-rts-cts-pins {
  				pins = "PG8", "PG9";
  				function = "uart1";
  			};
@@ -164,7 +162,7 @@ index 74aed0d..106b719 100644
  		};
  
  		gic: interrupt-controller@3021000 {
-@@ -664,6 +743,146 @@
+@@ -750,6 +815,146 @@ ohci3: usb@5311400 {
  			status = "disabled";
  		};
  
@@ -312,10 +310,10 @@ index 74aed0d..106b719 100644
  			compatible = "allwinner,sun50i-h616-rtc";
  			reg = <0x07000000 0x400>;
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
-index b3b1b86..ae59907 100644
+index b3b1b8692..ae59907f5 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
-@@ -12,6 +12,11 @@
+@@ -12,6 +12,11 @@ / {
  	compatible = "xunlong,orangepi-zero3", "allwinner,sun50i-h618";
  };
  
@@ -327,7 +325,7 @@ index b3b1b86..ae59907 100644
  &emac0 {
  	allwinner,tx-delay-ps = <700>;
  	phy-mode = "rgmii-rxid";
-@@ -22,6 +27,16 @@
+@@ -22,6 +27,16 @@ &ext_rgmii_phy {
  	motorcomm,clk-out-frequency-hz = <125000000>;
  };
  
@@ -344,3 +342,6 @@ index b3b1b86..ae59907 100644
  &mmc0 {
  	/*
  	 * The schematic shows the card detect pin wired up to PF6, via an
+-- 
+2.44.0
+
