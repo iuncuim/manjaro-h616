@@ -1,5 +1,4 @@
-# Maintainer: Tobias Huttinger <kontakt@tobiashuttinger.de>
-# Contributor: Maxime Gauduin <alucryd@archlinux.org>
+# Maintainer: Maxime Gauduin <alucryd@archlinux.org>
 # Contributor: Bartłomiej Piotrowski <bpiotrowski@archlinux.org>
 # Contributor: Ionut Biru <ibiru@archlinux.org>
 # Contributor: Tom Newsom <Jeepster@gmx.co.uk>
@@ -15,11 +14,10 @@
 #  - remove depends on svt-av1, remove --enable-libsvtav1
 #  - remove --enable-lto
 
-# add adopted v4l2request from https://github.com/Kwiboo/FFmpeg
-
 pkgname=ffmpeg
-pkgver=7.1.2
+pkgver=8.0.1
 pkgrel=2
+epoch=3
 pkgdesc='Complete solution to record, convert and stream audio and video'
 arch=(aarch64)
 url=https://ffmpeg.org
@@ -114,49 +112,69 @@ provides=(
   libavfilter.so
   libavformat.so
   libavutil.so
-  libpostproc.so
   libswresample.so
   libswscale.so
 )
-
+_tag=d22ecc4f6f3fca77b3e71b18641ceddb25973e97
 source=(
-  git+https://git.ffmpeg.org/ffmpeg.git#tag=n${pkgver}
-  fix_build_with_v4l2_1.30.patch
+  git+https://git.ffmpeg.org/ffmpeg.git#tag=${_tag}
   0001-Add-av_stream_get_first_dts-for-Chromium.patch
-  0002-avcodec-libsvtav1-unbreak-build-with-latest-svtav1.patch
-  '0003-ffmpeg-glslang16-fix.patch'::'https://git.ffmpeg.org/gitweb/ffmpeg.git/patch/f1e9032a2000b8b885cffd6fed8eacd47b37673f'
-  0004-Add-v4l2request.patch
+  0001-unbreak-glslang-build.patch
+  0003-avutil-hwcontext-Add-hwdevice-type-for-V4L2-Request-.patch
+  0004-avutil-hwcontext_v4l2request-Probe-for-a-capable-med.patch
+  0005-avcodec-Add-common-V4L2-Request-API-code.patch
+  0006-avcodec-v4l2request-Add-common-decode-support-for-hw.patch
+  0007-avcodec-Add-V4L2-Request-API-mpeg2-hwaccel.patch
+  0008-avcodec-h264dec-add-ref_pic_marking-and-pic_order_cn.patch
+  0009-avcodec-Add-V4L2-Request-API-h264-hwaccel.patch
+  0010-avcodec-Add-V4L2-Request-API-hevc-hwaccel.patch
+  0011-avcodec-Add-V4L2-Request-API-vp8-hwaccel.patch
+  0012-avcodec-Add-V4L2-Request-API-vp9-hwaccel.patch
+  0013-avcodec-Add-V4L2-Request-API-av1-hwaccel.patch
+  0014-avutil-hwcontext_v4l2request-Add-support-for-AFBC_16.patch
+  0015-avutil-hwcontext_v4l2request-Add-support-for-BROADCO.patch
 )
-b2sums=('966f06bac6b3c703c58da8eaeeba70a1c93ee3e9773de2d1911ac10518cdea0af171333f0c1fd59f0e6eddc28a11d19d69ae136d386a57cb1ddf61e08fe76a04'
-        'a713b3a4243cc5de3867f7c210172c094f50bd614c0c8be2c99d6161b06d43d9183ae9c442ac3056bfe06c28419e276d129b1235471466eedd340bf0c4780acb'
+
+b2sums=('0796d77c58d5db487ccda15454dadf129a6e0ae2a5a9cec562c86f2050b1e9314164c7f2dbf0a6c8cdae37dfd5e28f494d5ac248e970bc7f01b097100971fe8a'
         'e5f7b79f7731be9ee5a7280a9221fb531ac5a2d9820fc5870b68b0eabea667dfbe8f39f41c1e1763a4c84982896afaa54c81ff57847d203b70afafd726689e5d'
-        'a32aeff68032a78d661011654bbdba138002833f7d17d23bba6f95479ca22bef5697eb9e7e4cb9e0b5140fc23eab3aab16fc60962d62809c3c02f890599a8332'
-        '3e247ecf7c692d28fc226315d5807c8605c2b1926289b08182f1703eb888b7ca3f68e9cfe42a5897413eed05200206feed04aa37776efcc04aa39cd920cbff68'
-        'SKIP')
+        '650631d4f06dffec55bd6419f680d95617a9093d8e548b3dac0b379496477dcbd4121883128438343c568e992cb5b455efc0b7c4e34a5e7200518f9b5beaa231'
+        '2a71f4e12f3a50b07c83b228566e3b25105f7b3afb6b0ae6d0c7f350afbab28393ffa2090f4b96dd6810e5bcd4b3f56648069d301a5aed54ba30dbc41110f42a'
+        '9557f8bedefaadabb624d62b70edd708e5d08252ee458b650cb3f7a56439d1f867d82acfde0cf2279dfac78b558ab490374587161cc61d3c2f42ddd1b190c558'
+        'a7f2ca4d65144ed4c46bd01f4b6e53621ca09f87a8d40f38a9f5965036f332a73f19ca037116c78ed18333dfa9d1f50c688702c5980a78244731c047fc8ce1d1'
+        '07aa9ae123fa2252ada5cd1e32621a2005213c48ea143f635c35ec9feb799c7eee2307e7d14d7765e684fed30ad88838f3c86e0f4e6ef5107d1224836300f2ba'
+        'c677f3e96769ed1a480817e4a45b94bf3eb1143458fbd55cb9a344d9c3b485faa22b2eb650294c206327a56f24c5cb81b216f2c3e9acc0688635510514df1f37'
+        'd3300b503104c101b6bd36d6a7001c378a0dd08d05783374334ada5c2ac56ef6aca2f55bd6100e29f2d501a6561074b9a2d2128687c665a7123228e53688b1aa'
+        '749fc9823f97934cc56c27809dcd429aa497c597f5df344a63d1d69c1fe483636193e8958c0f15e58774b9c6f100353c1ef68d8dfc8a4514e665ddab9e2d10f2'
+        '80e64434296d57a6489294bbee64ef53406a32f926921d4ec7014e04fa4836f44ec4e5f1ccc7c45b795368f0b8864d8dc95f30ec6dc9d09854acf64f1c25abbb'
+        'ef064a375dc3a63d3903052ca7582291630bb212d7d7387feaba12a0e81eeacff17b6ebec04af0eba746bc7370b02c4ba5d40d1adfcf4201785a162b3c9807b0'
+        '4ace61ab5d95c7676e909186f459b25679c1956c0e830f371d7e0a8d5e30e9cf790f96919ca43cc9bfaf48e265f5f375aaae8e57aa6ecc4a1300fe4ca453b7c9'
+        'e80bb5de680f7097c32a8b610dbd3e7b48c9e9e6da958266d587f6761d709dba5d4cd2f0b6ac9281250ff0af55dc472da7a64b9968acf589641861269977431c'
+        'f1256cc5534326f9a734a3937db680a4534f1be48405c7e4eec3bcde7ac3f50856394237bdf94cddd193ac999932f0840c786e588e133fca7510830589af2b6b'
+        'da3a7fd5f071a0ef15375149f54d890a1932bd819809e3965134b87f95cf0b44fd203fac23f46a432251595f6e5d749cb515c1baed53a78166daa98351aa1d1b')
 
 prepare() {
   cd ffmpeg
 
-  # Fix build with v4l2 >= 1.30
-  # https://trac.ffmpeg.org/ticket/11570
-  patch -Np1 -i "${srcdir}/fix_build_with_v4l2_1.30.patch"
-
   # https://crbug.com/1251779
   git apply -3 ../0001-Add-av_stream_get_first_dts-for-Chromium.patch
 
-  # Fix for svt-av1
-  # Taken from https://github.com/FFmpeg/FFmpeg/commit/d1ed5c06e3edc5f2b5f3664c80121fa55b0baa95.patch
-  git apply -3 ../0002-avcodec-libsvtav1-unbreak-build-with-latest-svtav1.patch
+  # https://github.com/FFmpeg/FFmpeg/commit/f1e9032a2000b8b885cffd6fed8eacd47b37673f
+  git apply -3 ../0001-unbreak-glslang-build.patch
 
-  # Fix build fail when compiling with glslang >= 16.0
-  patch -Np1 -i "${srcdir}/0003-ffmpeg-glslang16-fix.patch"
-
-  # Add v4l2request patches
-  patch -Np1 -i "${srcdir}/0004-Add-v4l2request.patch"
-
-  # VAAPI HEVC encode alignment fix
-  git cherry-pick -n bcfbf2bac8f9eeeedc407b40596f5c7aaa0d5b47
-  git cherry-pick -n d0facac679faf45d3356dff2e2cb382580d7a521
+  # Add v4l2request patches from https://github.com/Kwiboo/FFmpeg/tree/v4l2-request-n8.0.1
+  git apply -3 ../0003-avutil-hwcontext-Add-hwdevice-type-for-V4L2-Request-.patch
+  git apply -3 ../0004-avutil-hwcontext_v4l2request-Probe-for-a-capable-med.patch
+  git apply -3 ../0005-avcodec-Add-common-V4L2-Request-API-code.patch
+  git apply -3 ../0006-avcodec-v4l2request-Add-common-decode-support-for-hw.patch
+  git apply -3 ../0007-avcodec-Add-V4L2-Request-API-mpeg2-hwaccel.patch
+  git apply -3 ../0008-avcodec-h264dec-add-ref_pic_marking-and-pic_order_cn.patch
+  git apply -3 ../0009-avcodec-Add-V4L2-Request-API-h264-hwaccel.patch
+  git apply -3 ../0010-avcodec-Add-V4L2-Request-API-hevc-hwaccel.patch
+  git apply -3 ../0011-avcodec-Add-V4L2-Request-API-vp8-hwaccel.patch
+  git apply -3 ../0012-avcodec-Add-V4L2-Request-API-vp9-hwaccel.patch
+  git apply -3 ../0013-avcodec-Add-V4L2-Request-API-av1-hwaccel.patch
+  git apply -3 ../0014-avutil-hwcontext_v4l2request-Add-support-for-AFBC_16.patch
+  git apply -3 ../0015-avutil-hwcontext_v4l2request-Add-support-for-BROADCO.patch
 }
 
 pkgver() {
