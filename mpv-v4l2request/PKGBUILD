@@ -1,8 +1,8 @@
 # Maintainer: Daniel Bermond <dbermond@archlinux.org>
 
-pkgname=mpv-full-git
+pkgname=mpv
 pkgver=0.40.0
-pkgrel=5
+pkgrel=15
 pkgdesc='A free, open source, and cross-platform media player (git version with all possible libs)'
 arch=('x86_64' 'aarch64')
 license=('GPL-2.0-or-later')
@@ -26,16 +26,6 @@ conflicts=('mpv')
 options=('!emptydirs')
 source=('git+https://github.com/philipl/mpv.git#branch=v4l2request')
 sha256sums=('SKIP')
-
-pkgver() {
-    local _version
-    local _revision
-    local _shorthash
-    _version="$(git -C mpv tag | sort -Vr | head -n1 | sed 's/^v//')"
-    _revision="$(git -C mpv rev-list v"${_version}"..HEAD --count)"
-    _shorthash="$(git -C mpv rev-parse --short HEAD)"
-    printf '%s.r%s.g%s' "$_version" "$_revision" "$_shorthash"
-}
 
 build() {
     arch-meson mpv build \
