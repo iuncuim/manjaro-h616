@@ -1,0 +1,62 @@
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
+@@ -119,6 +119,13 @@
+ };
+ 
+ /* USB 2 & 3 are on headers only. */
++&ehci2 {
++	status = "okay";
++};
++
++&ehci3 {
++	status = "okay";
++};
+ 
+ &emac0 {
+ 	pinctrl-names = "default";
+@@ -172,6 +179,14 @@
+ 	status = "okay";
+ };
+ 
++&ohci2 {
++	status = "okay";
++};
++
++&ohci3 {
++	status = "okay";
++};
++
+ &pio {
+ 	compatible = "allwinner,sun50i-h616-pinctrl", "syscon";
+ };
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
+@@ -110,6 +110,13 @@
+ };
+ 
+ /* USB 2 & 3 are on the FPC connector (or the exansion board) */
++&ehci2 {
++	status = "okay";
++};
++
++&ehci3 {
++	status = "okay";
++};
+ 
+ &gpu {
+ 	mali-supply = <&reg_dcdc1>;
+@@ -152,6 +159,14 @@
+ 	status = "okay";
+ };
+ 
++&ohci2 {
++	status = "okay";
++};
++
++&ohci3 {
++	status = "okay";
++};
++
+ &pio {
+ 	vcc-pc-supply = <&reg_dldo1>;
+ 	vcc-pf-supply = <&reg_dldo1>;	/* internally via VCC-IO */
