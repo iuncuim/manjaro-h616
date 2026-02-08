@@ -1,0 +1,190 @@
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
+index 573f2163f..39c1940f5 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
+@@ -31,7 +31,14 @@ chosen {
+ 		stdout-path = "serial0:115200n8";
+ 	};
+ 
+- 	connector {
++	backlight: backlight {
++		compatible = "pwm-backlight";
++		pwms = <&pwm 0 50000 0>;
++		pinctrl-0 = <&lcd_backlight_pin>;
++		pinctrl-names = "default";
++	};
++
++	connector {
+ 		compatible = "hdmi-connector";
+ 		type = "c";
+ 
+@@ -176,7 +189,7 @@ led-0 {
+ 			function = LED_FUNCTION_POWER;
+ 			color = <LED_COLOR_ID_GREEN>;
+ 			gpios = <&pio 8 12 GPIO_ACTIVE_HIGH>; /* PI12 */
+-			default-state = "on";
++			default-state = "off";
+ 		};
+ 
+ 		led-1 {
+@@ -186,12 +199,63 @@ led-1 {
+ 		};
+ 	};
+ 
++	reg_lcd: regulator-gpio-lcd-vdd {
++		compatible = "regulator-fixed";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-name = "vdd-lcd";
++		gpio = <&pio 8 15 GPIO_ACTIVE_HIGH>; // PI15
++		enable-active-high;
++	};
++
++	reg_mmc2: regulator-mmc2 {
++		compatible = "regulator-fixed";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-name = "vdd-mmc2";
++		gpio = <&pio 4 4 GPIO_ACTIVE_HIGH>; // PE4
++		enable-active-high;
++	};
++
+ 	reg_vcc5v: regulator-vcc5v { /* USB-C power input */
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc-5v";
+ 		regulator-min-microvolt = <5000000>;
+ 		regulator-max-microvolt = <5000000>;
+ 	};
++
++	spi_lcd: spi {
++		compatible = "spi-gpio";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		sck-gpios = <&pio 8 9 GPIO_ACTIVE_HIGH>; // PI9
++		mosi-gpios = <&pio 8 10 GPIO_ACTIVE_HIGH>; // PI10
++		cs-gpios = <&pio 8 8 GPIO_ACTIVE_HIGH>; // PI8
++		num-chipselects = <1>;
++
++		panel: panel@0 {
++			compatible = "anbernic,rg35xx-plus-panel";
++
++			reg = <0>;
++
++			spi-max-frequency = <3125000>;
++			spi-3wire;
++
++			reset-gpios = <&pio 8 14 GPIO_ACTIVE_LOW>; // PI14
++
++			backlight = <&backlight>;
++			power-supply = <&reg_lcd>;
++			pinctrl-0 = <&lcd0_rgb888_pins>;
++			pinctrl-names = "default";
++
++			port {
++				panel_in_rgb: endpoint {
++					remote-endpoint = <&tcon_lcd0_out_lcd>;
++				};
++			};
++		};
++	};
+ };
+ 
+ &codec {
+@@ -239,18 +303,38 @@ &mmc0 {
+ 	status = "okay";
+ };
+ 
++&mmc2 {
++	vmmc-supply = <&reg_mmc2>;
++	disable-wp;
++	cd-gpios = <&pio 4 22 GPIO_ACTIVE_LOW>;  /* PE22 */
++	bus-width = <4>;
++	status = "okay";
++};
++
+ &ohci0 {
+ 	status = "okay";
+ };
+ 
+ &pio {
+ 	vcc-pa-supply = <&reg_cldo3>;
+-	vcc-pc-supply = <&reg_cldo3>;
++	vcc-pc-supply = <&reg_aldo1>;
++	vcc-pd-supply = <&reg_cldo3>;
+ 	vcc-pe-supply = <&reg_cldo3>;
+ 	vcc-pf-supply = <&reg_cldo3>;
+ 	vcc-pg-supply = <&reg_aldo4>;
+ 	vcc-ph-supply = <&reg_cldo3>;
+ 	vcc-pi-supply = <&reg_cldo3>;
++
++	lcd_backlight_pin: pwm0-pin {
++		pins = "PD28";
++		function = "pwm0";
++	};
++};
++
++&pwm {
++	allwinner,pwm-paired-channel-clock-sources = "hosc", "hosc", "hosc";
++	allwinner,pwm-paired-channel-clock-prescales = <0>, <0>, <0>;
++	status = "okay";
+ };
+ 
+ &r_i2c {
+@@ -303,7 +387,10 @@ reg_dcdc3: dcdc3 {
+ 			};
+ 
+ 			reg_aldo1: aldo1 {
+-				/* 1.8v - unused */
++				regulator-always-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-name = "vcc-mmc2";
+ 			};
+ 
+ 			reg_aldo2: aldo2 {
+@@ -393,6 +480,16 @@ usb_power: usb-power {
+ 	};
+ };
+ 
++&tcon_lcd0 {
++	status = "okay";
++};
++
++&tcon_lcd0_out {
++	tcon_lcd0_out_lcd: endpoint@1 {
++		remote-endpoint = <&panel_in_rgb>;
++	};
++};
++
+ &uart0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart0_ph_pins>;
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus.dts
+index 60a8e4922..8804fc8db 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus.dts
+@@ -26,6 +26,7 @@ &mmc1 {
+ 	vqmmc-supply = <&reg_aldo4>;
+ 	mmc-pwrseq = <&wifi_pwrseq>;
+ 	bus-width = <4>;
++	keep-power-in-suspend;
+ 	non-removable;
+ 	status = "okay";
+ 
+diff --git a/drivers/clk/sunxi-ng/ccu-sun8i-de2.c b/drivers/clk/sunxi-ng/ccu-sun8i-de2.c
+index a6cd0f988..fe17db276 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun8i-de2.c
++++ b/drivers/clk/sunxi-ng/ccu-sun8i-de2.c
+@@ -308,7 +308,7 @@ static int sunxi_de2_clk_probe(struct platform_device *pdev)
+ 	 */
+ 	if (of_device_is_compatible(pdev->dev.of_node,
+ 				    "allwinner,sun50i-h616-de33-clk")) {
+-		writel(0, reg + 0x24);
++		//writel(0, reg + 0x24);
+ 		writel(0x0000a980, reg + 0x28);
+ 	}
+ 
+-- 
+2.50.1
+

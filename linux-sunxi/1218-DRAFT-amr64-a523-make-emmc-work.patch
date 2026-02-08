@@ -1,0 +1,122 @@
+From b418acefec3c673c087afb511f0fe6f156a8928c Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Wed, 27 Aug 2025 16:41:46 +0800
+Subject: [PATCH] DRAFT: amr64: a523: make emmc work
+
+Signed-off-by: Mikhail Kalashnikov <iuncuim@gmail.com>
+---
+ arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi        |  6 +++---
+ .../arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts | 11 ++++++-----
+ drivers/clk/sunxi-ng/ccu-sun55i-a523.c                |  7 ++++---
+ 3 files changed, 13 insertions(+), 11 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+index e777525f8..6ca6929b3 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+@@ -197,7 +197,7 @@ mmc0_pins: mmc0-pins {
+ 				pins = "PF0" ,"PF1", "PF2", "PF3", "PF4", "PF5";
+ 				allwinner,pinmux = <2>;
+ 				function = "mmc0";
+-				drive-strength = <30>;
++				drive-strength = <40>;
+ 				bias-pull-up;
+ 			};
+ 
+@@ -206,7 +206,7 @@ mmc1_pins: mmc1-pins {
+ 				pins = "PG0" ,"PG1", "PG2", "PG3", "PG4", "PG5";
+ 				allwinner,pinmux = <2>;
+ 				function = "mmc1";
+-				drive-strength = <30>;
++				drive-strength = <40>;
+ 				bias-pull-up;
+ 			};
+ 
+@@ -216,7 +216,7 @@ mmc2_pins: mmc2-pins {
+ 				       "PC15", "PC16";
+ 				allwinner,pinmux = <3>;
+ 				function = "mmc2";
+-				drive-strength = <30>;
++				drive-strength = <40>;
+ 				bias-pull-up;
+ 			};
+ 
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts b/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
+index 16d586d8d..a37d7a1dc 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
+@@ -131,12 +131,13 @@ sdio_wifi: wifi@1 {
+ &mmc2 {
+ 	vmmc-supply = <&reg_cldo3>;
+ 	vqmmc-supply = <&reg_cldo1>;
+-	max-frequency = <25000000>;
++	max-frequency = <150000000>;
+ 	bus-width = <8>;
+ 	non-removable;
+ 	cap-mmc-hw-reset;
+ 	mmc-ddr-1_8v;
+ 	mmc-hs200-1_8v;
++	post-power-on-delay-ms = <500>;
+ 	status = "okay";
+ };
+ 
+@@ -256,8 +257,8 @@ reg_bldo4: bldo4 {
+ 
+ 			reg_cldo1: cldo1 {
+ 				regulator-always-on;
+-				regulator-min-microvolt = <1800000>;
+-				regulator-max-microvolt = <1800000>;
++				regulator-min-microvolt = <1900000>;
++				regulator-max-microvolt = <1900000>;
+ 				regulator-name = "vcc-codec-sd";
+ 			};
+ 
+@@ -265,8 +266,8 @@ reg_cldo2: cldo2 {
+ 			};
+ 
+ 			reg_cldo3: cldo3 {
+-				regulator-min-microvolt = <3300000>;
+-				regulator-max-microvolt = <3300000>;
++				regulator-min-microvolt = <3400000>;
++				regulator-max-microvolt = <3400000>;
+ 				regulator-name = "vcc-codec-eth-sd";
+ 			};
+ 
+diff --git a/drivers/clk/sunxi-ng/ccu-sun55i-a523.c b/drivers/clk/sunxi-ng/ccu-sun55i-a523.c
+index 7bf41e628..216472f85 100644
+--- a/drivers/clk/sunxi-ng/ccu-sun55i-a523.c
++++ b/drivers/clk/sunxi-ng/ccu-sun55i-a523.c
+@@ -119,7 +119,7 @@ static const struct clk_hw *pll_periph0_150M_hws[] = {
+ 
+ #define SUN55I_A523_PLL_PERIPH1_REG	0x028
+ static struct ccu_nm pll_periph1_4x_clk = {
+-	.enable		= BIT(27),
++	.enable		= BIT(27) | BIT(30) | BIT(31),
+ 	.lock		= BIT(28),
+ 	.n		= _SUNXI_CCU_MULT_MIN(8, 8, 11),
+ 	.m		= _SUNXI_CCU_DIV(1, 1), /* input divider */
+@@ -127,7 +127,8 @@ static struct ccu_nm pll_periph1_4x_clk = {
+ 		.reg		= 0x028,
+ 		.hw.init	= CLK_HW_INIT_PARENTS_DATA("pll-periph1-4x",
+ 							   osc24M, &ccu_nm_ops,
+-							   CLK_SET_RATE_GATE),
++							   CLK_SET_RATE_UNGATE |
++							   CLK_IS_CRITICAL),
+ 	},
+ };
+ 
+@@ -664,10 +665,10 @@ static SUNXI_CCU_MP_MUX_GATE_POSTDIV_DUALDIV(mmc1_clk, "mmc1", nand_mmc_parents,
+ 
+ static const struct clk_parent_data mmc2_parents[] = {
+ 	{ .fw_name = "hosc" },
++	{ .hw = &pll_periph1_600M_clk.hw },
+ 	{ .hw = &pll_periph0_800M_clk.common.hw },
+ 	{ .hw = &pll_periph0_600M_clk.hw },
+ 	{ .hw = &pll_periph1_800M_clk.common.hw },
+-	{ .hw = &pll_periph1_600M_clk.hw },
+ };
+ 
+ static SUNXI_CCU_MP_MUX_GATE_POSTDIV_DUALDIV(mmc2_clk, "mmc2", mmc2_parents,
+-- 
+2.50.1
+

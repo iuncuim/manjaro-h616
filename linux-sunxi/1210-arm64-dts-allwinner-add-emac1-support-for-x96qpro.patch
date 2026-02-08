@@ -1,0 +1,184 @@
+From 0e2883f1d1e6813a475768d1e7427e97089b31ca Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Sat, 5 Jul 2025 10:39:58 +0300
+Subject: arm64: dts: allwinner: add emac1 support for x96qpro+
+
+Signed-off-by: Mikhail Kalashnikov <iuncuim@gmail.com>
+---
+ .../arm64/boot/dts/allwinner/sun55i-a523.dtsi | 25 ++++++++++++++++---
+ .../dts/allwinner/sun55i-h728-x96qpro+.dts    | 24 +++++++++++++++++++
+ .../ethernet/stmicro/stmmac/dwmac-sun55i.c    |  8 ++++++
+ .../net/ethernet/stmicro/stmmac/dwmac-sun8i.c | 11 ++++++++
+ 4 files changed, 65 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+index 1f4ece8dd..fb6069cd9 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+@@ -174,6 +174,14 @@ rgmii0_pins: rgmii0-pins {
+ 				bias-disable;
+ 			};
+ 
++			rgmii0_25m_pin: rgmii0-25m-pin {
++				pins = "PH13";
++				allwinner,pinmux = <5>;
++				function = "gmac0";
++				drive-strength = <40>;
++				bias-disable;
++			};
++
+ 			rgmii1_pins: rgmii1-pins {
+ 				pins = "PJ0", "PJ1", "PJ2", "PJ3", "PJ4",
+ 				       "PJ5", "PJ6", "PJ7", "PJ8", "PJ9",
+@@ -184,6 +192,14 @@ rgmii1_pins: rgmii1-pins {
+ 				bias-disable;
+ 			};
+ 
++			rgmii1_25m_pin: rgmii1-25m-pin {
++				pins = "PJ10";
++				allwinner,pinmux = <5>;
++				function = "gmac1";
++				drive-strength = <40>;
++				bias-disable;
++			};
++
+ 			uart0_pb_pins: uart0-pb-pins {
+ 				pins = "PB9", "PB10";
+ 				allwinner,pinmux = <2>;
+@@ -621,8 +637,8 @@ gmac0: ethernet@4500000 {
+ 			compatible = "allwinner,sun55i-a523-gmac0",
+ 				     "allwinner,sun50i-a64-emac";
+ 			reg = <0x04500000 0x10000>;
+-			clocks = <&ccu CLK_BUS_EMAC0>;
+-			clock-names = "stmmaceth";
++			clocks = <&ccu CLK_BUS_EMAC0>, <&ccu CLK_EMAC0_25M>;
++			clock-names = "stmmaceth", "emac25m";
+ 			resets = <&ccu RST_BUS_EMAC0>;
+ 			reset-names = "stmmaceth";
+ 			interrupts = <GIC_SPI 46 IRQ_TYPE_LEVEL_HIGH>;
+@@ -643,8 +659,9 @@ gmac1: ethernet@4510000 {
+ 			compatible = "allwinner,sun55i-a523-gmac200",
+ 				     "snps,dwmac-4.20a";
+ 			reg = <0x04510000 0x10000>;
+-			clocks = <&ccu CLK_BUS_EMAC1>, <&ccu CLK_MBUS_EMAC1>;
+-			clock-names = "stmmaceth", "mbus";
++			clocks = <&ccu CLK_BUS_EMAC1>, <&ccu CLK_MBUS_EMAC1>,
++				 <&ccu CLK_EMAC1_25M>;
++			clock-names = "stmmaceth", "mbus", "emac25m";
+ 			resets = <&ccu RST_BUS_EMAC1>;
+ 			reset-names = "stmmaceth";
+ 			interrupts = <GIC_SPI 47 IRQ_TYPE_LEVEL_HIGH>;
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts b/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
+index 305cd35a5..b9b5d495f 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
+@@ -13,6 +13,7 @@ / {
+ 	compatible = "amediatech,x96q-pro-plus", "allwinner,sun55i-h728";
+ 
+ 	aliases {
++		ethernet0 = &gmac1;
+ 		serial0 = &uart0;
+ 	};
+ 
+@@ -60,6 +60,30 @@ &ehci1 {
+ 	status = "okay";
+ };
+ 
++&gmac1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&rgmii1_pins>, <&rgmii1_25m_pin>;
++	phy-mode = "rgmii-id";
++	phy-handle = <&ext_rgmii_phy>;
++	phy-supply = <&reg_cldo3>;
++
++	tx-internal-delay-ps = <200>;
++	rx-internal-delay-ps = <500>;
++	allwinner,use-25m-clk;
++
++	status = "okay";
++};
++
++&mdio1 {
++	ext_rgmii_phy: ethernet-phy@1 {
++		compatible = "ethernet-phy-ieee802.3-c22";
++		reg = <1>;
++		reset-gpios = <&pio 9 16 GPIO_ACTIVE_LOW>;
++		reset-assert-us = <10000>;
++		reset-deassert-us = <150000>;
++	};
++};
++
+ &mmc0 {
+ 	vmmc-supply = <&reg_vcc3v3>;
+ 	cd-gpios = <&pio 5 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; /* PF6 */
+diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac-sun55i.c b/drivers/net/ethernet/stmicro/stmmac/dwmac-sun55i.c
+index 7fadb90e3..8a3272d7f 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/dwmac-sun55i.c
++++ b/drivers/net/ethernet/stmicro/stmmac/dwmac-sun55i.c
+@@ -110,6 +110,7 @@ static int sun55i_gmac200_probe(struct platform_device *pdev)
+ 	struct stmmac_resources stmmac_res;
+ 	struct device *dev = &pdev->dev;
+ 	struct clk *clk;
++	struct clk *emac_25m_clk;
+ 	int ret;
+ 
+ 	ret = stmmac_get_platform_resources(pdev, &stmmac_res);
+@@ -133,6 +134,13 @@ static int sun55i_gmac200_probe(struct platform_device *pdev)
+ 		return dev_err_probe(dev, PTR_ERR(clk),
+ 				     "Failed to get or enable MBUS clock\n");
+ 
++	if (of_property_read_bool(dev->of_node,"allwinner,use-25m-clk")) {
++		emac_25m_clk = devm_clk_get_enabled(dev, "emac25m");
++		if (IS_ERR(emac_25m_clk))
++			return dev_err_probe(dev, PTR_ERR(emac_25m_clk),
++						"Failed to get or enable 25M PHY clock\n");
++	}
++
+ 	ret = devm_regulator_get_enable_optional(dev, "phy");
+ 	if (ret)
+ 		return dev_err_probe(dev, ret, "Failed to get or enable PHY supply\n");
+diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c b/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
+index 2796dc426..da242435c 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
++++ b/drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.c
+@@ -70,12 +70,14 @@ struct emac_variant {
+  */
+ struct sunxi_priv_data {
+ 	struct clk *ephy_clk;
++	struct clk *emac_25m_clk;
+ 	struct regulator *regulator;
+ 	struct reset_control *rst_ephy;
+ 	const struct emac_variant *variant;
+ 	struct regmap_field *regmap_field;
+ 	bool internal_phy_powered;
+ 	bool use_internal_phy;
++	bool use_25m_clk;
+ 	void *mux_handle;
+ };
+ 
+@@ -588,6 +590,12 @@ static int sun8i_dwmac_init(struct platform_device *pdev, void *priv)
+ 	struct sunxi_priv_data *gmac = priv;
+ 	int ret;
+ 
++	if (gmac->use_25m_clk) {
++		gmac->emac_25m_clk = devm_clk_get_enabled(dev, "emac25m");
++		if (IS_ERR(gmac->emac_25m_clk))
++			return PTR_ERR(gmac->emac_25m_clk);
++	}
++
+ 	if (gmac->regulator) {
+ 		ret = regulator_enable(gmac->regulator);
+ 		if (ret) {
+@@ -1174,6 +1182,9 @@ static int sun8i_dwmac_probe(struct platform_device *pdev)
+ 		return -EINVAL;
+ 	}
+ 
++	if (of_property_read_bool(dev->of_node,"allwinner,use-25m-clk"))
++			gmac->use_25m_clk = true;
++
+ 	/* Optional regulator for PHY */
+ 	gmac->regulator = devm_regulator_get_optional(dev, "phy");
+ 	if (IS_ERR(gmac->regulator)) {
+-- 
+2.50.0
+

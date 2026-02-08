@@ -1,0 +1,73 @@
+From 2dc0c87886753e3d5a45ec1f787f419d7903d7c5 Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Sat, 25 Oct 2025 13:07:42 +0800
+Subject: npu: enable on specific boards
+
+Signed-off-by: Mikhail Kalashnikov <iuncuim@gmail.com>
+---
+ arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi            | 1 +
+ arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts   | 4 ++++
+ arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts | 4 ++++
+ arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts | 4 ++++
+ 4 files changed, 13 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+index edf262960..9bc2d9b44 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+@@ -922,6 +922,7 @@ npu: npu@7122000 {
+ 			clock-names = "bus", "core", "reg";
+ 			resets = <&mcu_ccu RST_BUS_MCU_NPU>;
+ 			power-domains = <&ppu PD_NPU>;
++			status = "disabled";
+ 		};
+ 
+ 		ccu_cpu: clock@8817000 {
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
+index 11515ba4e..b4c7dc9a3 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
+@@ -154,6 +154,10 @@ &mmc2 {
+ 	status = "okay";
+ };
+ 
++&npu {
++	status = "okay";
++};
++
+ &ohci0 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts
+index e174ae78e..30bd4a327 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts
+@@ -166,6 +166,10 @@ &mmc2 {
+ 	status = "okay";
+ };
+ 
++&npu {
++	status = "okay";
++};
++
+ &ohci0 {
+ 	status = "okay";
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts
+index 3a77f89ef..585e3a112 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts
+@@ -160,6 +160,10 @@ &mmc2 {
+ 	status = "okay";
+ };
+ 
++&npu {
++	status = "okay";
++};
++
+ &ohci0 {
+ 	status = "okay";
+ };
+-- 
+2.51.0
+

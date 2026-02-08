@@ -1,0 +1,90 @@
+From 6db43af6a538045d8883b18de2f387039a5ea1af Mon Sep 17 00:00:00 2001
+From: Mikhail Kalashnikov <iuncuim@gmail.com>
+Date: Sun, 6 Jul 2025 05:13:14 +0300
+Subject: [PATCH 2/2] arm64: dts: allwinner: a523: enable Mali GPU for all
+ boards
+
+All devices based on the A523/A527/H728/T527 processors contain a G57 MC1 GPU.
+
+Enable the DT nodes for this GPU and specify a regulator that supplies power
+to the SoC's VDD_GPU pins. The other parameters are set in the SoC dtsi,
+so are board independent.
+
+Signed-off-by: Mikhail Kalashnikov <iuncuim@gmail.com>
+---
+ .../arm64/boot/dts/allwinner/sun55i-a523.dtsi | 37 +++++++++++++++++++
+ .../dts/allwinner/sun55i-t527-walnutpi-2b.dts |  5 +++
+ 2 files changed, 42 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+index 849d75b6f..134cca0a1 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
+@@ -169,6 +169,7 @@ gpu: gpu@1800000 {
+ 			clock-names = "core", "bus";
+ 			power-domains = <&pck600 PD_GPU>;
+ 			resets = <&ccu RST_BUS_GPU>;
++			operating-points-v2 = <&gpu_opp_table>;
+ 			status = "disabled";
+ 		};
+ 
+@@ -964,4 +965,40 @@ ddr_temp_critical: ddr-trip-0 {
+ 			};
+ 		};
+ 	};
++
++	gpu_opp_table: opp-table-gpu {
++		compatible = "operating-points-v2";
++		opp-150000000 {
++			opp-hz = /bits/ 64 <150000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-200000000 {
++			opp-hz = /bits/ 64 <200000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-300000000 {
++			opp-hz = /bits/ 64 <300000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-400000000 {
++			opp-hz = /bits/ 64 <400000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-600000000 {
++			opp-hz = /bits/ 64 <600000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-648000000 {
++			opp-hz = /bits/ 64 <648000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-696000000 {
++			opp-hz = /bits/ 64 <696000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-744000000 {
++			opp-hz = /bits/ 64 <744000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++	};
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts
+index 9abd643a7..20d0afafd 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-walnutpi-2b.dts
+@@ -103,6 +103,11 @@ &gmac1 {
+ 	status = "okay";
+ };
+ 
++&gpu {
++	mali-supply = <&reg_dcdc2>;
++	status = "okay";
++};
++
+ &mdio1 {
+ 	ext_rgmii_phy: ethernet-phy@1 {
+ 		compatible = "ethernet-phy-ieee802.3-c22";
+-- 
+2.50.1
+
