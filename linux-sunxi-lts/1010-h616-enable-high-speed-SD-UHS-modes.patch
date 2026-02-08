@@ -6,17 +6,8 @@ Subject: [PATCH] Implemented a driver for MicroSD that utilizes the built-in
 
 https://github.com/wirenboard/linux/commit/1a4a22f7bc5275741c91273a6b4e398cf93904fe
 
----
- .../allwinner/sun50i-h616-orangepi-zero.dtsi  |  20 +++
- .../sun50i-h700-anbernic-rg35xx-2024.dts      |  16 +++
- drivers/regulator/Kconfig                     |  12 ++
- drivers/regulator/Makefile                    |   1 +
- drivers/regulator/h616-mmc-regulator.c        | 122 ++++++++++++++++++
- 5 files changed, 171 insertions(+)
- create mode 100644 drivers/regulator/h616-mmc-regulator.c
-
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
-index 12d4d9a15..e674b35fe 100644
+index 1028d096c..309ab1fcd 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
 @@ -33,6 +33,14 @@ hdmi_con_in: endpoint {
@@ -34,14 +25,14 @@ index 12d4d9a15..e674b35fe 100644
  	leds {
  		compatible = "gpio-leds";
  
-@@ -133,7 +141,15 @@ ext_rgmii_phy: ethernet-phy@1 {
+@@ -133,8 +141,15 @@ ext_rgmii_phy: ethernet-phy@1 {
  };
  
  &mmc0 {
 +	vqmmc-supply = <&h616_vqmmc_regulator>;
 +	max-frequency = <100000000>;
  	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;	/* PF6 */
-+	disable-wp;
+ 	disable-wp;
 +	sd-uhs-sdr104;
 +	sd-uhs-sdr50;
 +	sd-uhs-sdr25;
@@ -50,7 +41,7 @@ index 12d4d9a15..e674b35fe 100644
  	bus-width = <4>;
  	status = "okay";
  };
-@@ -156,6 +172,10 @@ &ohci1 {
+@@ -157,6 +172,10 @@ &ohci1 {
  	status = "okay";
  };
  
@@ -62,10 +53,10 @@ index 12d4d9a15..e674b35fe 100644
  	status = "okay";
  	pinctrl-names = "default";
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-index b6159e2fc..d93e4edba 100644
+index c75240c66..59535600a 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-@@ -169,6 +169,14 @@ button-vol-down {
+@@ -182,6 +182,14 @@ button-vol-down {
  		};
  	};
  
@@ -80,7 +71,7 @@ index b6159e2fc..d93e4edba 100644
  	leds {
  		compatible = "gpio-leds";
  
-@@ -224,7 +232,14 @@ hdmi_out_con: endpoint {
+@@ -294,7 +302,14 @@ hdmi_out_con: endpoint {
  
  &mmc0 {
  	vmmc-supply = <&reg_cldo3>;
@@ -95,16 +86,16 @@ index b6159e2fc..d93e4edba 100644
  	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;  /* PF6 */
  	bus-width = <4>;
  	status = "okay";
-@@ -235,6 +250,7 @@ &ohci0 {
+@@ -313,6 +328,7 @@ &ohci0 {
  };
  
  &pio {
 +	compatible = "allwinner,sun50i-h616-pinctrl", "syscon";
  	vcc-pa-supply = <&reg_cldo3>;
- 	vcc-pc-supply = <&reg_cldo3>;
- 	vcc-pe-supply = <&reg_cldo3>;
+ 	vcc-pc-supply = <&reg_aldo1>;
+ 	vcc-pd-supply = <&reg_cldo3>;
 diff --git a/drivers/regulator/Kconfig b/drivers/regulator/Kconfig
-index 39297f7d8..a11a63972 100644
+index 05e32d764..707164304 100644
 --- a/drivers/regulator/Kconfig
 +++ b/drivers/regulator/Kconfig
 @@ -1720,4 +1720,16 @@ config REGULATOR_QCOM_LABIBB
@@ -125,7 +116,7 @@ index 39297f7d8..a11a63972 100644
 +
  endif
 diff --git a/drivers/regulator/Makefile b/drivers/regulator/Makefile
-index 3d5a803dc..3309c160d 100644
+index 524e026c0..266358309 100644
 --- a/drivers/regulator/Makefile
 +++ b/drivers/regulator/Makefile
 @@ -201,5 +201,6 @@ obj-$(CONFIG_REGULATOR_WM831X) += wm831x-ldo.o

@@ -1,5 +1,5 @@
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
-index fc7315b94..cb9551306 100644
+index 908fa3b84..4bae53f19 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
 @@ -57,6 +57,33 @@ reg_usb1_vbus: regulator-usb1-vbus {
@@ -35,8 +35,8 @@ index fc7315b94..cb9551306 100644
 +	};
  };
  
- &ehci1 {
-@@ -85,6 +112,20 @@ &mmc0 {
+ &codec {
+@@ -91,6 +118,20 @@ &mmc0 {
  	status = "okay";
  };
  
@@ -57,7 +57,7 @@ index fc7315b94..cb9551306 100644
  &ohci1 {
  	status = "okay";
  };
-@@ -109,6 +150,24 @@ &uart0 {
+@@ -115,6 +156,24 @@ &uart0 {
  	status = "okay";
  };
  
@@ -83,7 +83,7 @@ index fc7315b94..cb9551306 100644
  	/*
  	 * PHY0 pins are connected to a USB-C socket, but a role switch
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
-index 6a4f0da97..cd3642ba7 100644
+index a0fe7a9af..0af222854 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
 @@ -52,6 +52,33 @@ reg_vcc3v3: vcc3v3 {
@@ -119,8 +119,8 @@ index 6a4f0da97..cd3642ba7 100644
 +	};
  };
  
- &cpu0 {
-@@ -71,6 +98,20 @@ &mmc0 {
+ &codec {
+@@ -76,6 +103,20 @@ &mmc0 {
  	status = "okay";
  };
  
@@ -141,7 +141,7 @@ index 6a4f0da97..cd3642ba7 100644
  &ohci1 {
  	status = "okay";
  };
-@@ -159,6 +200,24 @@ &uart0 {
+@@ -164,6 +205,24 @@ &uart0 {
  	status = "okay";
  };
  
@@ -167,5 +167,5 @@ index 6a4f0da97..cd3642ba7 100644
  	/*
  	 * PHY0 pins are connected to a USB-C socket, but a role switch
 -- 
-2.46.1
+2.49.0
 

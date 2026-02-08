@@ -1,0 +1,118 @@
+From 0985f122ae919a44cd10ad82b80a5b403cfb6432 Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Sun, 6 Jul 2025 06:21:13 +0300
+Subject: [PATCH] Update sun55i-a527-cubie-a5e.dts, sun55i-h728-x96qpro+.dts,
+ and 3 more files...
+
+Signed-off-by: Mikhail Kalashnikov <iuncuim@gmail.com>
+---
+ .../dts/allwinner/sun55i-a527-cubie-a5e.dts   |  3 +++
+ .../dts/allwinner/sun55i-h728-x96qpro+.dts    |  3 +++
+ .../dts/allwinner/sun55i-t527-avaota-a1.dts   |  3 +++
+ .../dts/allwinner/sun55i-t527-orangepi-4a.dts |  3 +++
+ drivers/regulator/axp20x-regulator.c          | 26 +++++++++++++++++++
+ 5 files changed, 38 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-a527-cubie-a5e.dts b/arch/arm64/boot/dts/allwinner/sun55i-a527-cubie-a5e.dts
+index 8bc0f2c72..32772c619 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-a527-cubie-a5e.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-a527-cubie-a5e.dts
+@@ -258,6 +258,9 @@ reg_dcdc1_323: dcdc1 {
+ 			};
+ 
+ 			/* DCDC2 is polyphased with DCDC1 */
++			reg_dcdc2_323: dcdc2 {
++				x-powers,force-polyfase-mode;
++			};
+ 
+ 			/* RISC-V management core supply */
+ 			reg_dcdc3_323: dcdc3 {
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts b/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
+index 59db10354..0cb78dfa1 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-h728-x96qpro+.dts
+@@ -250,6 +250,9 @@ reg_dcdc1_323: dcdc1 {
+ 			};
+ 
+ 			/* DCDC2 is polyphased with DCDC1 */
++			reg_dcdc2_323: dcdc2 {
++				x-powers,force-polyfase-mode;
++			};
+ 
+ 			reg_dcdc3_323: dcdc3 {
+ 				regulator-always-on;
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
+index 142177c1f..02130fbae 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
+@@ -280,6 +280,9 @@ reg_dcdc1_323: dcdc1 {
+ 			};
+ 
+ 			/* DCDC2 is polyphased with DCDC1 */
++			reg_dcdc2_323: dcdc2 {
++				x-powers,force-polyfase-mode;
++			};
+ 
+ 			/* Some RISC-V management core related voltage */
+ 			reg_dcdc3_323: dcdc3 {
+diff --git a/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts b/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts
+index 5f97505ec..fa0f54add 100644
+--- a/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts
++++ b/arch/arm64/boot/dts/allwinner/sun55i-t527-orangepi-4a.dts
+@@ -320,6 +320,9 @@ reg_dcdc1_323: dcdc1 {
+ 			};
+ 
+ 			/* DCDC2 is polyphased with DCDC1 */
++			reg_dcdc2_323: dcdc2 {
++				x-powers,force-polyfase-mode;
++			};
+ 
+ 			/* Some RISC-V management core related voltage */
+ 			reg_dcdc3_323: dcdc3 {
+diff --git a/drivers/regulator/axp20x-regulator.c b/drivers/regulator/axp20x-regulator.c
+index da891415e..a71b787a9 100644
+--- a/drivers/regulator/axp20x-regulator.c
++++ b/drivers/regulator/axp20x-regulator.c
+@@ -1481,6 +1481,23 @@ static int axp20x_set_dcdc_workmode(struct regulator_dev *rdev, int id, u32 work
+ 	return regmap_update_bits(rdev->regmap, reg, mask, workmode);
+ }
+ 
++static int axp20x_force_polyphase_setup(struct axp20x_dev *axp20x, int id)
++{
++	switch (axp20x->variant) {
++	case AXP323_ID:
++		switch (id) {
++		case AXP313A_DCDC2:
++			regmap_write(axp20x->regmap, AXP323_DCDC_MODE_CTRL2, BIT(1));
++		}
++		break;
++	default:
++		/* should not happen */
++		WARN_ON(1);
++		return -EINVAL;
++	}
++	return 0;
++}
++
+ /*
+  * This function checks whether a regulator is part of a poly-phase
+  * output setup based on the registers settings. Returns true if it is.
+@@ -1704,6 +1721,15 @@ static int axp20x_regulator_probe(struct platform_device *pdev)
+ 					rdev->desc->name);
+ 		}
+ 
++		/*
++		 * Currently only the AXP323 needs to force dual phase setup.
++		 */
++		if (of_property_read_bool(rdev->dev.of_node,
++					   "x-powers,force-polyfase-mode"))
++			if (axp20x_force_polyphase_setup(axp20x, i))
++				dev_err(&pdev->dev, "Failed to set polifase mode on %s\n",
++					rdev->desc->name);
++
+ 		/*
+ 		 * Save AXP22X DCDC1 / DCDC5 / AXP15060 ALDO1 regulator names for later.
+ 		 */
+-- 
+2.50.0
+

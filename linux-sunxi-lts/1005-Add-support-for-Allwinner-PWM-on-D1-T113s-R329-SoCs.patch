@@ -143,10 +143,10 @@ index e4175adb0..2c26cb8b2 100644
  			compatible = "allwinner,sun20i-d1-ccu";
  			reg = <0x2001000 0x1000>;
 diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index 0915c1e7d..778151aa3 100644
+index 4731d5b90..230a55613 100644
 --- a/drivers/pwm/Kconfig
 +++ b/drivers/pwm/Kconfig
-@@ -652,6 +652,16 @@ config PWM_SUN4I
+@@ -662,6 +662,16 @@ config PWM_SUN4I
  	  To compile this driver as a module, choose M here: the module
  	  will be called pwm-sun4i.
  
@@ -164,10 +164,10 @@ index 0915c1e7d..778151aa3 100644
  	tristate "Sunplus PWM support"
  	depends on ARCH_SUNPLUS || COMPILE_TEST
 diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index 9081e0c0e..85ad1fe0d 100644
+index 539e0def3..ef7515d2f 100644
 --- a/drivers/pwm/Makefile
 +++ b/drivers/pwm/Makefile
-@@ -60,6 +60,7 @@ obj-$(CONFIG_PWM_STM32)		+= pwm-stm32.o
+@@ -61,6 +61,7 @@ obj-$(CONFIG_PWM_STM32)		+= pwm-stm32.o
  obj-$(CONFIG_PWM_STM32_LP)	+= pwm-stm32-lp.o
  obj-$(CONFIG_PWM_STMPE)		+= pwm-stmpe.o
  obj-$(CONFIG_PWM_SUN4I)		+= pwm-sun4i.o
@@ -605,5 +605,5 @@ index 000000000..f68ecb663
 +MODULE_DESCRIPTION("Allwinner sun20i PWM driver");
 +MODULE_LICENSE("GPL");
 -- 
-2.46.1
+2.49.0
 

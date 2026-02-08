@@ -1,0 +1,83 @@
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+index d98c731b1..3664ab079 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
+@@ -215,6 +215,7 @@ gpu: gpu@1800000 {
+ 			clocks = <&ccu CLK_GPU0>, <&ccu CLK_BUS_GPU>;
+ 			clock-names = "core", "bus";
+ 			resets = <&ccu RST_BUS_GPU>;
++			operating-points-v2 = <&gpu_opp_table>;
+ 			status = "disabled";
+ 		};
+ 
+@@ -1310,4 +1311,32 @@ ddr_temp_critical: ddr-trip-0 {
+ 			};
+ 		};
+ 	};
++
++	gpu_opp_table: opp-table-gpu {
++		compatible = "operating-points-v2";
++		opp-420000000 {
++			opp-hz = /bits/ 64 <420000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-456000000 {
++			opp-hz = /bits/ 64 <456000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-504000000 {
++			opp-hz = /bits/ 64 <504000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-552000000 {
++			opp-hz = /bits/ 64 <552000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-600000000 {
++			opp-hz = /bits/ 64 <600000000>;
++			opp-microvolt = <900000 900000 990000>;
++		};
++		opp-648000000 {
++			opp-hz = /bits/ 64 <648000000>;
++			opp-microvolt = <960000 960000 990000>;
++		};
++	};
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
+index 24d8b8d54..dbef7f41a 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
+@@ -88,7 +88,7 @@ reg_dcdc1: dcdc1 {
+ 			reg_dcdc2: dcdc2 {
+ 				regulator-always-on;
+ 				regulator-min-microvolt = <810000>;
+-				regulator-max-microvolt = <1100000>;
++				regulator-max-microvolt = <1200000>;
+ 				regulator-name = "vdd-cpu";
+ 			};
+ 
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
+index 67f0b6e0b..c75240c66 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
+@@ -365,14 +365,14 @@ regulators {
+ 			reg_dcdc1: dcdc1 {
+ 				regulator-always-on;
+ 				regulator-min-microvolt = <900000>;
+-				regulator-max-microvolt = <1160000>;
++				regulator-max-microvolt = <1200000>;
+ 				regulator-name = "vdd-cpu";
+ 			};
+ 
+ 			reg_dcdc2: dcdc2 {
+ 				regulator-always-on;
+-				regulator-min-microvolt = <940000>;
+-				regulator-max-microvolt = <940000>;
++				regulator-min-microvolt = <900000>;
++				regulator-max-microvolt = <990000>;
+ 				regulator-name = "vdd-gpu-sys";
+ 			};
+ 
+-- 
+2.49.0
+

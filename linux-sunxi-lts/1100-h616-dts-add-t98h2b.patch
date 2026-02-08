@@ -12,7 +12,7 @@ index 00bed412e..ba9924da1 100644
  dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-orangepi-zero2w.dtb
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-t98-h2b-lp3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h616-t98-h2b-lp3.dts
 new file mode 100644
-index 000000000..fce435d93
+index 000000000..1b1f53bd4
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-t98-h2b-lp3.dts
 @@ -0,0 +1,216 @@
@@ -59,7 +59,7 @@ index 000000000..fce435d93
 +		regulator-always-on;
 +	};
 +
-+	wifi_pwrseq: wifi_pwrseq {
++	wifi_pwrseq: pwrseq {
 +		compatible = "mmc-pwrseq-simple";
 +		clocks = <&rtc CLK_OSC32K_FANOUT>;
 +		clock-names = "ext_clock";
@@ -232,6 +232,38 @@ index 000000000..fce435d93
 +&usbphy {
 +	status = "okay";
 +};
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+index 93727b9a5..9384a7225 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+@@ -609,6 +609,7 @@ BRCMF_FW_DEF(4329, "brcmfmac4329-sdio");
+ BRCMF_FW_DEF(4330, "brcmfmac4330-sdio");
+ BRCMF_FW_DEF(4334, "brcmfmac4334-sdio");
+ BRCMF_FW_DEF(43340, "brcmfmac43340-sdio");
++BRCMF_FW_DEF(43342, "brcmfmac43342-sdio");
+ BRCMF_FW_DEF(4335, "brcmfmac4335-sdio");
+ BRCMF_FW_DEF(43362, "brcmfmac43362-sdio");
+ BRCMF_FW_DEF(4339, "brcmfmac4339-sdio");
+@@ -642,6 +643,7 @@ static const struct brcmf_firmware_mapping brcmf_sdio_fwnames[] = {
+ 	BRCMF_FW_ENTRY(BRCM_CC_4334_CHIP_ID, 0xFFFFFFFF, 4334),
+ 	BRCMF_FW_ENTRY(BRCM_CC_43340_CHIP_ID, 0xFFFFFFFF, 43340),
+ 	BRCMF_FW_ENTRY(BRCM_CC_43341_CHIP_ID, 0xFFFFFFFF, 43340),
++	BRCMF_FW_ENTRY(BRCM_CC_43342_CHIP_ID, 0xFFFFFFFF, 43342),
+ 	BRCMF_FW_ENTRY(BRCM_CC_4335_CHIP_ID, 0xFFFFFFFF, 4335),
+ 	BRCMF_FW_ENTRY(BRCM_CC_43362_CHIP_ID, 0xFFFFFFFE, 43362),
+ 	BRCMF_FW_ENTRY(BRCM_CC_4339_CHIP_ID, 0xFFFFFFFF, 4339),
+diff --git a/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h b/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
+index c1e22c589..fbcbb6321 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
++++ b/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
+@@ -27,6 +27,7 @@
+ #define BRCM_CC_4334_CHIP_ID		0x4334
+ #define BRCM_CC_43340_CHIP_ID		43340
+ #define BRCM_CC_43341_CHIP_ID		43341
++#define BRCM_CC_43342_CHIP_ID 		43342
+ #define BRCM_CC_43362_CHIP_ID		43362
+ #define BRCM_CC_4335_CHIP_ID		0x4335
+ #define BRCM_CC_4339_CHIP_ID		0x4339
 -- 
-2.47.1
+2.49.0
 
