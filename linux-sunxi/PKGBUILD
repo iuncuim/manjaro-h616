@@ -5,8 +5,8 @@
 
 pkgbase=linux-sunxi
 pkgver=6.19
-_pkgver=6.19-rc7
-pkgrel=7
+_pkgver=6.19
+pkgrel=8
 _newversion=false
 _stopbuild=false    # Will also stop if ${_newversion} is true
 _srcname="linux-${_pkgver/%.0/}"
@@ -48,8 +48,8 @@ source=("https://git.kernel.org/torvalds/t/${_srcname}.tar.gz"
         'linux.preset'
         '60-linux.hook'
         '90-linux.hook')
-md5sums=('SKIP'
-         'SKIP'
+md5sums=('20f9ccc4fad63d9378194fa75f1faf69'
+         'c2c762d356a437ea98d33fc63d246923'
          '192e6899fbe940c01671f0346e69aaf4'
          'c65c5729302e715faa9b2262a30418fd'
          '388b92618bd691894df800b4e49205e3'

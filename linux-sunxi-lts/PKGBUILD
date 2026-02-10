@@ -4,8 +4,8 @@
 # Contributor: Dragan Simic <dsimic@buserror.io>
 
 pkgbase=linux-sunxi-lts
-pkgver=6.18.8
-_pkgver=6.18.8
+pkgver=6.18.9
+_pkgver=6.18.9
 pkgrel=1
 _newversion=false
 _stopbuild=false    # Will also stop if ${_newversion} is true
@@ -50,8 +50,8 @@ source=("https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/${_srcname}.tar.x
         'linux.preset'
         '60-linux.hook'
         '90-linux.hook')
-md5sums=('3c20df47c3c2660ccdc53017a27b1431'
-         '7507aee75922b0b825cf54012dd2357e'
+md5sums=('SKIP'
+         'SKIP'
          '192e6899fbe940c01671f0346e69aaf4'
          'c65c5729302e715faa9b2262a30418fd'
          '388b92618bd691894df800b4e49205e3'
