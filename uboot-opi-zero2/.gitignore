@@ -1,5 +1,0 @@
-src/
-pkg/
-*.gz
-*.zst
-makepkg-arm*

@@ -1,0 +1,124 @@
+# U-Boot: H616/H618/H700 Allwinner Boards
+# Contributor: Mikhail Kalashnikov <iuncuim@gmail.com>
+
+pkgbase=uboot-sunxi
+pkgname=('uboot-opi-zero2'
+         'uboot-opi-zero2w'
+         'uboot-opi-zero3'
+         'uboot-walnutpi-1b')
+pkgver=v2025.07
+pkgrel=1
+_tfaver=2.9.0
+pkgdesc="U-Boot for orangepi zero3"
+arch=('aarch64')
+url='http://www.denx.de/wiki/U-Boot/WebHome'
+license=('GPL')
+makedepends=('bc' 'python' 'python-setuptools' 'swig' 'dtc' 'bison' 'flex')
+install=${pkgname}.install
+source=("https://source.denx.de/u-boot/u-boot/-/archive/${pkgver}/u-boot-${pkgver}.tar.gz"
+        "https://github.com/ARM-software/arm-trusted-firmware/archive/refs/tags/v${_tfaver}.tar.gz"
+        '0002-h616-add-ac300-phy.patch'
+        "0011-sunxi-H616-GPU-enable-hack.patch"
+        '7006-device-add-walnutpi-1b.patch'
+        )
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            )
+
+h616_boards=('orangepi_zero2'
+             'orangepi_zero2w'
+             'orangepi_zero3'
+             'walnutpi_1b')
+
+prepare() {
+  apply_patches() {
+      local PATCH
+      for PATCH in "${source[@]}"; do
+          PATCH="${PATCH%%::*}"
+          PATCH="${PATCH##*/}"
+          [[ ${PATCH} = *.patch ]] || continue
+          msg2 "Applying patch: ${PATCH}..."
+          patch -N -p1 < "../${PATCH}"
+      done
+  }
+
+  cd u-boot-${pkgver}
+  apply_patches
+}
+
+build() {
+  # Avoid build warnings by editing a .config option in place instead of
+  # appending an option to .config, if an option is already present
+  update_config() {
+    if ! grep -q "^$1=$2$" .config; then
+      if grep -q "^# $1 is not set$" .config; then
+        sed -i -e "s/^# $1 is not set$/$1=$2/g" .config
+      elif grep -q "^$1=" .config; then
+        sed -i -e "s/^$1=.*/$1=$2/g" .config
+      else
+        echo "$1=$2" >> .config
+      fi
+    fi
+  }
+
+  unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+
+  cd arm-trusted-firmware-${_tfaver}
+  echo -e "\nBuilding TF-A for H616 devices...\n"
+  make PLAT=sun50i_h616 SUNXI_SETUP_REGULATORS=0 bl31
+  cp build/sun50i_h616/release/bl31.bin ../u-boot-${pkgver}
+  
+  cd ../u-boot-${pkgver}
+  for i in ${h616_boards[@]}; do
+    mkdir ../bin_${i}
+    make distclean
+    make ${i}_defconfig
+    update_config 'CONFIG_IDENT_STRING' '" Manjaro Linux ARM"'
+    update_config 'CONFIG_OF_LIBFDT_OVERLAY' 'y'
+    make EXTRAVERSION=-${pkgrel}
+    mv u-boot-sunxi-with-spl.bin ../bin_${i}
+  done
+}
+
+package_uboot-opi-zero2() {
+  pkgdesc="U-Boot for OrangePi Zero2"
+  install=uboot-opi-zero2.install
+  provides=('uboot-sunxi')
+  conflicts=('uboot-sunxi')
+
+  mkdir -p "${pkgdir}/boot/extlinux"
+  install -Dm644 bin_orangepi_zero2/u-boot-sunxi-with-spl.bin -t "${pkgdir}/boot/u-boot-sunxi-with-spl-opi-zero2.bin"
+}
+
+package_uboot-opi-zero2w() {
+  pkgdesc="U-Boot for OrangePi Zero2w"
+  install=uboot-opi-zero2w.install
+  provides=('uboot-sunxi')
+  conflicts=('uboot-sunxi')
+
+  mkdir -p "${pkgdir}/boot/extlinux"
+  install -Dm644 bin_orangepi_zero2w/u-boot-sunxi-with-spl.bin -t "${pkgdir}/boot/u-boot-sunxi-with-spl-opi-zero2.bin"
+}
+
+package_uboot-opi-zero3() {
+  pkgdesc="U-Boot for OrangePi Zero3"
+  install=uboot-opi-zero3.install
+  provides=('uboot-sunxi')
+  conflicts=('uboot-sunxi')
+
+  mkdir -p "${pkgdir}/boot/extlinux"
+  install -Dm644 bin_orangepi_zero3/u-boot-sunxi-with-spl.bin -t "${pkgdir}/boot/u-boot-sunxi-with-spl-opi-zero2.bin"
+}
+
+package_uboot-walnutpi-1b() {
+  pkgdesc="U-Boot for WalnutPi 1b"
+  install=uboot-walnutpi-1b.install
+  provides=('uboot-sunxi')
+  conflicts=('uboot-sunxi')
+
+  mkdir -p "${pkgdir}/boot/extlinux"
+  install -Dm644 bin_walnutpi_1b/u-boot-sunxi-with-spl.bin -t "${pkgdir}/boot/u-boot-sunxi-with-spl-walnutpi-1b.bin"
+}
