@@ -16,7 +16,7 @@
 
 pkgname=ffmpeg
 pkgver=8.0.1
-pkgrel=2
+pkgrel=3
 epoch=3
 pkgdesc='Complete solution to record, convert and stream audio and video'
 arch=(aarch64)
@@ -133,6 +133,7 @@ source=(
   0013-avcodec-Add-V4L2-Request-API-av1-hwaccel.patch
   0014-avutil-hwcontext_v4l2request-Add-support-for-AFBC_16.patch
   0015-avutil-hwcontext_v4l2request-Add-support-for-BROADCO.patch
+  0016-libavutil-add-extra-fourcc.patch
 )
 
 b2sums=('0796d77c58d5db487ccda15454dadf129a6e0ae2a5a9cec562c86f2050b1e9314164c7f2dbf0a6c8cdae37dfd5e28f494d5ac248e970bc7f01b097100971fe8a'
@@ -150,7 +151,8 @@ b2sums=('0796d77c58d5db487ccda15454dadf129a6e0ae2a5a9cec562c86f2050b1e9314164c7f
         '4ace61ab5d95c7676e909186f459b25679c1956c0e830f371d7e0a8d5e30e9cf790f96919ca43cc9bfaf48e265f5f375aaae8e57aa6ecc4a1300fe4ca453b7c9'
         'e80bb5de680f7097c32a8b610dbd3e7b48c9e9e6da958266d587f6761d709dba5d4cd2f0b6ac9281250ff0af55dc472da7a64b9968acf589641861269977431c'
         'f1256cc5534326f9a734a3937db680a4534f1be48405c7e4eec3bcde7ac3f50856394237bdf94cddd193ac999932f0840c786e588e133fca7510830589af2b6b'
-        'da3a7fd5f071a0ef15375149f54d890a1932bd819809e3965134b87f95cf0b44fd203fac23f46a432251595f6e5d749cb515c1baed53a78166daa98351aa1d1b')
+        'da3a7fd5f071a0ef15375149f54d890a1932bd819809e3965134b87f95cf0b44fd203fac23f46a432251595f6e5d749cb515c1baed53a78166daa98351aa1d1b'
+        '927a54a61bc99fb6ca2842715559961dc9d57c60ab8c6b5859b532ee95ca20affdc074c60e46aec722c081d762350e15276d57fe4022fdfdfaafc089735601e5')
 
 prepare() {
   cd ffmpeg
