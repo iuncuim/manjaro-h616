@@ -75,8 +75,16 @@ optdepends=(
 provides=('mpv' 'mpv-git')
 conflicts=('mpv')
 options=('!emptydirs')
-source=('git+https://github.com/philipl/mpv.git#branch=v4l2request')
-sha256sums=('SKIP')
+source=('git+https://github.com/philipl/mpv.git#branch=v4l2request'
+        '0001-fix-build.patch')
+sha256sums=('SKIP'
+            'SKIP')
+
+prepare() {
+  cd mpv
+
+  git apply -3 ../0001-fix-build.patch
+}
 
 build() {
     arch-meson mpv build \
