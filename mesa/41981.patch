@@ -1,0 +1,479 @@
+From ec2a6d0b8337065ca8681ad645e2bc9f355a5a34 Mon Sep 17 00:00:00 2001
+From: Ryan Mckeever <ryan.mckeever@collabora.com>
+Date: Thu, 4 Jun 2026 17:27:59 -0700
+Subject: [PATCH 1/3] docs: advertise VK_KHR_multiview support for Bifrost
+
+Fixes: a1376449c80 ("panvk: Expose support for multiview on v7")
+---
+ docs/features.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/docs/features.txt b/docs/features.txt
+index b92ffa33fb4..a93808fc869 100644
+--- a/docs/features.txt
++++ b/docs/features.txt
+@@ -457,7 +457,7 @@ Vulkan 1.1 -- all DONE: anv, hk, kk, lvp, nvk, panvk/v10+, pvr, radv, tu, vn
+   VK_KHR_maintenance1                                   DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_maintenance2                                   DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_maintenance3                                   DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+-  VK_KHR_multiview                                      DONE (anv, dzn, hasvk, lvp, nvk, panvk/v10+, pvr, radv, tu, v3dv, vn)
++  VK_KHR_multiview                                      DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_relaxed_block_layout                           DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_sampler_ycbcr_conversion                       DONE (anv, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_shader_draw_parameters                         DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, vn)
+-- 
+2.55.0
+
+
+From 8f8a54cc58be9ee0db67145eba643c02a42cde12 Mon Sep 17 00:00:00 2001
+From: Ryan Mckeever <ryan.mckeever@collabora.com>
+Date: Tue, 23 Jun 2026 22:31:47 -0700
+Subject: [PATCH 2/3] pan/bi: set branch reconvergence at loop exit points
+
+A clause requires reconvergence if it has a successor that can be executed
+without first executing the clause itself. Separate iterations of a loop
+are treated separately here. So when the loop iteration count is not
+warp-invariant, we also need branch reconvergence at loop exit points.
+
+This commit is setting reconvergence for all such locations, so we could
+do better by checking for a warp-invariant iteration count.
+---
+ .../compiler/bifrost/bifrost/bi_schedule.c    |  2 +-
+ .../compiler/bifrost/bifrost_compile.c        | 32 +++++++++++++------
+ src/panfrost/compiler/bifrost/compiler.h      |  3 ++
+ 3 files changed, 26 insertions(+), 11 deletions(-)
+
+diff --git a/src/panfrost/compiler/bifrost/bifrost/bi_schedule.c b/src/panfrost/compiler/bifrost/bifrost/bi_schedule.c
+index c655956afae..6349a1de8cf 100644
+--- a/src/panfrost/compiler/bifrost/bifrost/bi_schedule.c
++++ b/src/panfrost/compiler/bifrost/bifrost/bi_schedule.c
+@@ -2017,7 +2017,7 @@ bi_schedule_block(bi_context *ctx, bi_block *block)
+    if (!list_is_empty(&block->clauses)) {
+       bi_clause *last_clause =
+          list_last_entry(&block->clauses, bi_clause, link);
+-      if (bi_reconverge_branches(block))
++      if (bi_reconverge_branches(block) || block->needs_reconvergence_on_exit)
+          last_clause->flow_control = BIFROST_FLOW_NBTB_UNCONDITIONAL;
+    }
+ 
+diff --git a/src/panfrost/compiler/bifrost/bifrost_compile.c b/src/panfrost/compiler/bifrost/bifrost_compile.c
+index 091dced0517..226dabb308f 100644
+--- a/src/panfrost/compiler/bifrost/bifrost_compile.c
++++ b/src/panfrost/compiler/bifrost/bifrost_compile.c
+@@ -30,7 +30,8 @@ static void pan_stats_verbose(FILE *f, const char *prefix, bi_context *ctx,
+  * clause of the shader, this range must be valid instructions or zero. */
+ #define BIFROST_SHADER_PREFETCH 128
+ 
+-static bi_block *emit_cf_list(bi_context *ctx, struct exec_list *list);
++static bi_block *emit_cf_list(bi_context *ctx, struct exec_list *list,
++                              bool loop_body);
+ 
+ static bi_index
+ bi_preload(bi_builder *b, enum bi_preload val)
+@@ -3671,7 +3672,7 @@ create_empty_block(bi_context *ctx)
+ }
+ 
+ static bi_block *
+-emit_block(bi_context *ctx, nir_block *block)
++emit_block(bi_context *ctx, nir_block *block, bool loop_body)
+ {
+    if (ctx->after_block) {
+       ctx->current_block = ctx->after_block;
+@@ -3692,11 +3693,15 @@ emit_block(bi_context *ctx, nir_block *block)
+       bi_emit_instr(&_b, instr);
+    }
+ 
++   /* We need branch reconvergence in the break block of a loop. */
++   ctx->current_block->needs_reconvergence_on_exit =
++      loop_body && nir_block_ends_in_break(block);
++
+    return ctx->current_block;
+ }
+ 
+ static void
+-emit_if(bi_context *ctx, nir_if *nif)
++emit_if(bi_context *ctx, nir_if *nif, bool loop_body)
+ {
+    bi_block *before_block = ctx->current_block;
+ 
+@@ -3707,15 +3712,21 @@ emit_if(bi_context *ctx, nir_if *nif)
+                      bi_zero(), BI_CMPF_EQ);
+ 
+    /* Emit the two subblocks. */
+-   bi_block *then_block = emit_cf_list(ctx, &nif->then_list);
++   bi_block *then_block = emit_cf_list(ctx, &nif->then_list, loop_body);
+    bi_block *end_then_block = ctx->current_block;
+ 
+    /* Emit second block */
+ 
+-   bi_block *else_block = emit_cf_list(ctx, &nif->else_list);
++   bi_block *else_block = emit_cf_list(ctx, &nif->else_list, loop_body);
+    bi_block *end_else_block = ctx->current_block;
+    ctx->after_block = create_empty_block(ctx);
+ 
++   /* TODO: determine why this is needed */
++   if (then_block->needs_reconvergence_on_exit)
++      else_block->needs_reconvergence_on_exit = true;
++   else if (else_block->needs_reconvergence_on_exit)
++      then_block->needs_reconvergence_on_exit = true;
++
+    /* Now that we have the subblocks emitted, fix up the branches */
+ 
+    assert(then_block);
+@@ -3753,7 +3764,7 @@ emit_loop(bi_context *ctx, nir_loop *nloop)
+    ctx->after_block->loop_header = true;
+ 
+    /* Emit the body itself */
+-   emit_cf_list(ctx, &nloop->body);
++   emit_cf_list(ctx, &nloop->body, true);
+ 
+    /* Branch back to loop back */
+    bi_builder _b = bi_init_builder(ctx, bi_after_block(ctx->current_block));
+@@ -3771,14 +3782,15 @@ emit_loop(bi_context *ctx, nir_loop *nloop)
+ }
+ 
+ static bi_block *
+-emit_cf_list(bi_context *ctx, struct exec_list *list)
++emit_cf_list(bi_context *ctx, struct exec_list *list, bool loop_body)
+ {
+    bi_block *start_block = NULL;
+ 
+    foreach_list_typed(nir_cf_node, node, node, list) {
+       switch (node->type) {
+       case nir_cf_node_block: {
+-         bi_block *block = emit_block(ctx, nir_cf_node_as_block(node));
++         bi_block *block = emit_block(ctx, nir_cf_node_as_block(node),
++                                      loop_body);
+ 
+          if (!start_block)
+             start_block = block;
+@@ -3787,7 +3799,7 @@ emit_cf_list(bi_context *ctx, struct exec_list *list)
+       }
+ 
+       case nir_cf_node_if:
+-         emit_if(ctx, nir_cf_node_as_if(node));
++         emit_if(ctx, nir_cf_node_as_if(node), loop_body);
+          break;
+ 
+       case nir_cf_node_loop:
+@@ -4309,7 +4321,7 @@ bi_compile_variant_nir(nir_shader *nir,
+ 
+       ctx->ssa_alloc += impl->ssa_alloc;
+ 
+-      emit_cf_list(ctx, &impl->body);
++      emit_cf_list(ctx, &impl->body, false);
+       bi_emit_phis_deferred(ctx);
+       break; /* TODO: Multi-function shaders */
+    }
+diff --git a/src/panfrost/compiler/bifrost/compiler.h b/src/panfrost/compiler/bifrost/compiler.h
+index 39b4f8d09a0..7f3c3de3a06 100644
+--- a/src/panfrost/compiler/bifrost/compiler.h
++++ b/src/panfrost/compiler/bifrost/compiler.h
+@@ -970,6 +970,9 @@ typedef struct bi_block {
+    bool unconditional_jumps;
+    bool loop_header;
+ 
++   /* whether this is a loop exit point that needs branch reconvergence */
++   bool needs_reconvergence_on_exit;
++
+    /* Per 32-bit word live masks for the block indexed by node */
+    uint8_t *live_in;
+    uint8_t *live_out;
+-- 
+2.55.0
+
+
+From 91191ba13a1282c5e9828fb828b500e4cd4efe88 Mon Sep 17 00:00:00 2001
+From: Ryan Mckeever <ryan.mckeever@collabora.com>
+Date: Tue, 2 Jun 2026 23:04:45 -0700
+Subject: [PATCH 3/3] panvk: enable Vulkan 1.1 and subgroups on Bifrost
+
+---
+ docs/drivers/panfrost.rst                     |  4 +--
+ docs/features.txt                             | 28 +++++++--------
+ docs/relnotes/new_features.txt                | 16 +++++++++
+ src/panfrost/ci/panfrost-g52-fails.txt        | 12 -------
+ src/panfrost/ci/panfrost-g52-skips.txt        |  6 ----
+ .../vulkan/panvk_vX_physical_device.c         | 36 +++++++++----------
+ 6 files changed, 49 insertions(+), 53 deletions(-)
+
+diff --git a/docs/drivers/panfrost.rst b/docs/drivers/panfrost.rst
+index 840a1114ff2..ad1d1dbfa13 100644
+--- a/docs/drivers/panfrost.rst
++++ b/docs/drivers/panfrost.rst
+@@ -22,9 +22,9 @@ The following hardware is currently supported:
+ | T760, T820, T830   | Midgard (v5)  | 3.1       | 3.1    |        |
+ | T860, T880         |               |           |        |        |
+ +--------------------+---------------+-----------+--------+--------+
+-| G72                | Bifrost (v6)  | 3.1       | 3.1    | 1.0    |
++| G72                | Bifrost (v6)  | 3.1       | 3.1    | 1.1    |
+ +--------------------+---------------+-----------+--------+--------+
+-| G31, G51, G52, G76 | Bifrost (v7)  | 3.1       | 3.1    | 1.0    |
++| G31, G51, G52, G76 | Bifrost (v7)  | 3.1       | 3.1    | 1.1    |
+ +--------------------+---------------+-----------+--------+--------+
+ | G57                | Valhall (v9)  | 3.1       | 3.1    |        |
+ +--------------------+---------------+-----------+--------+--------+
+diff --git a/docs/features.txt b/docs/features.txt
+index a93808fc869..68fb0496452 100644
+--- a/docs/features.txt
++++ b/docs/features.txt
+@@ -438,7 +438,7 @@ we DO NOT WANT implementations of these extensions for Mesa.
+ 
+ Vulkan 1.0 -- all DONE: anv, dzn, hk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn
+ 
+-Vulkan 1.1 -- all DONE: anv, hk, kk, lvp, nvk, panvk/v10+, pvr, radv, tu, vn
++Vulkan 1.1 -- all DONE: anv, hk, kk, lvp, nvk, panvk, pvr, radv, tu, vn
+ 
+   VK_KHR_16bit_storage                                  DONE (anv, dzn, hasvk, lvp, nvk, panvk, radv, tu/a650+, v3dv, vn)
+   VK_KHR_bind_memory2                                   DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+@@ -479,7 +479,7 @@ Vulkan 1.2 -- all DONE: anv, hk, nvk, panvk/v10+, pvr, tu, vn
+   VK_KHR_shader_atomic_int64                            DONE (anv, lvp, nvk, panvk/v10+, radv, vn, tu/a740+)
+   VK_KHR_shader_float16_int8                            DONE (anv, dzn, hasvk, kk, lvp, nvk, panvk, radv, tu, v3dv, vn)
+   VK_KHR_shader_float_controls                          DONE (anv, dzn, hasvk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+-  VK_KHR_shader_subgroup_extended_types                 DONE (anv, hasvk, kk, lvp, nvk, panvk/v10+, pvr, radv, tu, v3dv, vn)
++  VK_KHR_shader_subgroup_extended_types                 DONE (anv, hasvk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_spirv_1_4                                      DONE (anv, dzn, hasvk, kk, lvp, nvk, panvk/v10+, pvr, radv, tu, v3dv, vn)
+   VK_KHR_timeline_semaphore                             DONE (anv, dzn, hasvk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_uniform_buffer_standard_layout                 DONE (anv, dzn, hasvk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+@@ -496,7 +496,7 @@ Vulkan 1.3 -- all DONE: anv, hk, kk, lvp, nvk, panvk/v10+, radv, tu, vn, v3dv
+   VK_KHR_copy_commands2                                 DONE (anv, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_dynamic_rendering                              DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_format_feature_flags2                          DONE (anv, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+-  VK_KHR_maintenance4                                   DONE (anv, hasvk, lvp, nvk, panvk/v10+, pvr, radv, tu, v3dv, vn)
++  VK_KHR_maintenance4                                   DONE (anv, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_shader_integer_dot_product                     DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_shader_non_semantic_info                       DONE (anv, hasvk, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_shader_terminate_invocation                    DONE (anv, hasvk, lvp, nvk, panvk, radv, tu, v3dv, vn)
+@@ -511,7 +511,7 @@ Vulkan 1.3 -- all DONE: anv, hk, kk, lvp, nvk, panvk/v10+, radv, tu, vn, v3dv
+   VK_EXT_pipeline_creation_feedback                     DONE (anv, hasvk, lvp, nvk, panvk, radv, tu, v3dv, vn)
+   VK_EXT_private_data                                   DONE (anv, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_EXT_shader_demote_to_helper_invocation             DONE (anv, hasvk, lvp, nvk, panvk, radv, tu, v3dv, vn)
+-  VK_EXT_subgroup_size_control                          DONE (anv, dzn, hasvk, lvp, nvk, panvk/v10+, pvr, radv, tu, v3dv, vn)
++  VK_EXT_subgroup_size_control                          DONE (anv, dzn, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_EXT_texel_buffer_alignment                         DONE (anv, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_EXT_texture_compression_astc_hdr                   DONE (panvk, tu, vn)
+   VK_EXT_tooling_info                                   DONE (anv, hasvk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+@@ -524,12 +524,12 @@ Vulkan 1.4 -- all DONE: anv, hk, lvp, nvk, panvk/v10+, radv/gfx8+, tu/a7xx+, vn
+   VK_KHR_index_type_uint8                               DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_line_rasterization                             DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_load_store_op_none                             DONE (anv, kk, lvp, nvk, panvk, radv, tu, v3dv, vn)
+-  VK_KHR_maintenance5                                   DONE (anv, hasvk, kk, lvp, nvk, panvk/v10+, pvr, radv, tu, v3dv, vn)
++  VK_KHR_maintenance5                                   DONE (anv, hasvk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_maintenance6                                   DONE (anv, hasvk, kk, lvp, nvk, panvk/v10+, radv, tu, vn)
+   VK_KHR_map_memory2                                    DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, vn)
+   VK_KHR_push_descriptor                                DONE (anv, hasvk, kk, lvp, nvk, panvk, radv, tu, vn)
+   VK_KHR_shader_expect_assume                           DONE (anv, dzn, hasvk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+-  VK_KHR_shader_float_controls2                         DONE (anv, lvp, nvk, panvk/v10+, radv, tu, vn)
++  VK_KHR_shader_float_controls2                         DONE (anv, lvp, nvk, panvk, radv, tu, vn)
+   VK_KHR_shader_subgroup_rotate                         DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, vn)
+   VK_KHR_vertex_attribute_divisor                       DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_EXT_host_image_copy                                DONE (anv, kk, lvp, nvk/Turing+, panvk, radv/gfx10+, tu, vn)
+@@ -561,8 +561,8 @@ Khronos extensions that are not part of any Vulkan version:
+   VK_KHR_get_surface_capabilities2                      DONE (anv, dzn, hasvk, hk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_incremental_present                            DONE (anv, hasvk, hk, lvp, nvk, pvr, radv, tu, v3dv, vn)
+   VK_KHR_internally_synchronized_queues                 DONE (anv, panvk, radv, tu)
+-  VK_KHR_maintenance7                                   DONE (anv, hk, kk, lvp, nvk, panvk/v10+, radv, tu, vn)
+-  VK_KHR_maintenance8                                   DONE (anv, hk, kk, lvp, nvk, panvk/v10+, radv, tu)
++  VK_KHR_maintenance7                                   DONE (anv, hk, kk, lvp, nvk, panvk, radv, tu, vn)
++  VK_KHR_maintenance8                                   DONE (anv, hk, kk, lvp, nvk, panvk, radv, tu)
+   VK_KHR_maintenance9                                   DONE (anv, hk, kk, lvp, nvk, panvk, radv)
+   VK_KHR_maintenance10                                  DONE (anv, kk, lvp, nvk, radv)
+   VK_KHR_maintenance11                                  DONE (anv, lvp, radv)
+@@ -584,10 +584,10 @@ Khronos extensions that are not part of any Vulkan version:
+   VK_KHR_shader_clock                                   DONE (anv, hasvk, lvp, nvk, panvk, radv, tu, vn)
+   VK_KHR_shader_constant_data                           DONE (anv, radv)
+   VK_KHR_shader_fma                                     DONE (kk, nvk, panvk, radv, vn)
+-  VK_KHR_shader_maximal_reconvergence                   DONE (anv, hk, kk, lvp, nvk, panvk/v10+, radv, vn)
+-  VK_KHR_shader_quad_control                            DONE (anv, hk, lvp, nvk, panvk/v10+, radv, vn)
++  VK_KHR_shader_maximal_reconvergence                   DONE (anv, hk, kk, lvp, nvk, panvk, radv, vn)
++  VK_KHR_shader_quad_control                            DONE (anv, hk, lvp, nvk, panvk, radv, vn)
+   VK_KHR_shader_relaxed_extended_instruction            DONE (anv, hasvk, hk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+-  VK_KHR_shader_subgroup_uniform_control_flow           DONE (anv, hasvk, hk, kk, nvk, panvk/v10+, pvr, radv, tu, vn)
++  VK_KHR_shader_subgroup_uniform_control_flow           DONE (anv, hasvk, hk, kk, nvk, panvk, pvr, radv, tu, vn)
+   VK_KHR_shader_untyped_pointers                        DONE (anv, kk, nvk, panvk/v9+, radv, vn)
+   VK_KHR_shared_presentable_image                       not started
+   VK_KHR_surface                                        DONE (anv, dzn, hasvk, hk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
+@@ -729,9 +729,9 @@ Khronos extensions that are not part of any Vulkan version:
+   VK_ANDROID_external_memory_android_hardware_buffer    DONE (anv, hasvk, lvp, panvk, radv, tu, v3dv, vn)
+   VK_ANDROID_native_buffer                              DONE (anv, hasvk, lvp, panvk, radv, tu, v3dv, vn)
+   VK_ARM_rasterization_order_attachment_access          DONE (lvp, panvk/v10+, tu, vn)
+-  VK_ARM_scheduling_controls                            DONE (panvk/v10+)
+-  VK_ARM_shader_core_builtins                           DONE (panvk/v9+)
+-  VK_ARM_shader_core_properties                         DONE (panvk/v10+)
++  VK_ARM_scheduling_controls                            DONE (panvk)
++  VK_ARM_shader_core_builtins                           DONE (panvk)
++  VK_ARM_shader_core_properties                         DONE (panvk)
+   VK_GOOGLE_decorate_string                             DONE (anv, hasvk, hk, kk, lvp, nvk, panvk, radv, tu, vn)
+   VK_GOOGLE_display_timing                              DONE (anv, panvk, pvr, radv, tu, v3dv)
+   VK_GOOGLE_hlsl_functionality1                         DONE (anv, hasvk, hk, kk, lvp, nvk, panvk, radv, tu, vn)
+diff --git a/docs/relnotes/new_features.txt b/docs/relnotes/new_features.txt
+index adf5d022ef5..c4f219c1bc2 100644
+--- a/docs/relnotes/new_features.txt
++++ b/docs/relnotes/new_features.txt
+@@ -43,5 +44,21 @@ VK_EXT_shader_tile_image on panvk
+ VK_KHR_internally_synchronized_queues on panvk
+ VK_KHR_workgroup_memory_explicit_layout on panvk
+ VK_EXT_device_memory_report on pvr
+ VK_EXT_descriptor_heap enabled by default on anv, RADV
+ VK_EXT_device_address_binding_report on panvk
++Vulkan 1.1 on panvk/v6-7
++VK_KHR_maintenance4 on panvk/v6-7
++VK_KHR_maintenance5 on panvk/v6-7
++VK_KHR_maintenance7 on panvk/v6-7
++VK_KHR_maintenance8 on panvk/v6-7
++VK_KHR_shader_float_controls2 on panvk/v6-7
++VK_KHR_shader_maximal_reconvergence on panvk/v6-7
++VK_KHR_shader_quad_control on panvk/v6-7
++VK_KHR_shader_subgroup_extended_types on panvk/v6-7
++VK_KHR_shader_subgroup_uniform_control_flow on panvk/v6-7
++VK_EXT_subgroup_size_control on panvk/v6-7
++VK_ARM_shader_core_builtins on panvk/v6-7
++VK_ARM_shader_core_properties on panvk/v6-7
++VK_ARM_scheduling_controls on panvk/v6-7
++shaderCoreBuiltins on panvk/v6-7
++schedulingControls on panvk/v6-7
+
+diff --git a/src/panfrost/ci/panfrost-g52-fails.txt b/src/panfrost/ci/panfrost-g52-fails.txt
+index 4b4bc11bd70..72fbfa63e31 100644
+--- a/src/panfrost/ci/panfrost-g52-fails.txt
++++ b/src/panfrost/ci/panfrost-g52-fails.txt
+@@ -298,8 +298,6 @@ dEQP-VK.api.object_management.max_concurrent.device_group,Fail
+ # CTS bug: https://gerrit.khronos.org/c/vk-gl-cts/+/19823
+ dEQP-VK.api.device_init.create_device_global_priority.basic,Fail
+ dEQP-VK.api.device_init.create_device_global_priority_khr.basic,Fail
+-dEQP-VK.api.device_init.create_device_global_priority_query.basic,Fail
+-dEQP-VK.api.device_init.create_device_global_priority_query_khr.basic,Fail
+ 
+ # New failures with VKCTS 1.4.4.0
+ dEQP-VK.pipeline.fast_linked_library.vertex_input.misc.unbound_input,Crash
+@@ -328,13 +326,3 @@ dEQP-VK.pipeline.fast_linked_library.vertex_input.misc.unbound_input_dynamic_int
+ dEQP-VK.pipeline.fast_linked_library.vertex_input.misc.unbound_input_integer,Crash
+ dEQP-VK.pipeline.monolithic.vertex_input.misc.unbound_input_dynamic_integer,Crash
+ dEQP-VK.pipeline.monolithic.vertex_input.misc.unbound_input_integer,Crash
+-dEQP-VK.wsi.acquire_drm_display.acquire_drm_display_invalid_fd,Crash
+-dEQP-VK.wsi.acquire_drm_display.acquire_drm_display_not_master,Crash
+-dEQP-VK.wsi.acquire_drm_display.acquire_drm_display_unowned_connector_id,Crash
+-dEQP-VK.wsi.acquire_drm_display.acquire_drm_display,Crash
+-dEQP-VK.wsi.acquire_drm_display.get_drm_display_invalid_connector_id,Crash
+-dEQP-VK.wsi.acquire_drm_display.get_drm_display_invalid_fd,Crash
+-dEQP-VK.wsi.acquire_drm_display.get_drm_display_not_master,Crash
+-dEQP-VK.wsi.acquire_drm_display.get_drm_display_unowned_connector_id,Crash
+-dEQP-VK.wsi.acquire_drm_display.get_drm_display,Crash
+-dEQP-VK.wsi.acquire_drm_display.release_display,Crash
+diff --git a/src/panfrost/ci/panfrost-g52-skips.txt b/src/panfrost/ci/panfrost-g52-skips.txt
+index 991de0324a5..7994601160a 100644
+--- a/src/panfrost/ci/panfrost-g52-skips.txt
++++ b/src/panfrost/ci/panfrost-g52-skips.txt
+@@ -52,12 +52,6 @@ dEQP-VK.compute.pipeline.zero_initialize_workgroup_memory.max_workgroup_memory.6
+ dEQP-VK.compute.pipeline.zero_initialize_workgroup_memory.types.f32mat3x3
+ dEQP-VK.compute.pipeline.zero_initialize_workgroup_memory.types.f32mat4x4
+ 
+-# tests are broken with Vulkan 1.0: https://gerrit.khronos.org/c/vk-gl-cts/+/19823
+-dEQP-VK.wsi.direct_drm.*
+-
+-# more tests broken on Vulkan 1.0: https://gitlab.khronos.org/Tracker/vk-gl-cts/-/issues/6409
+-dEQP-VK.wsi.*.maintenance1.*.bind_image*
+-
+ # Almost all crashes
+ dEQP-VK.wsi.*present_timing.*
+ 
+diff --git a/src/panfrost/vulkan/panvk_vX_physical_device.c b/src/panfrost/vulkan/panvk_vX_physical_device.c
+index 29e3972b9b7..372a00be013 100644
+--- a/src/panfrost/vulkan/panvk_vX_physical_device.c
++++ b/src/panfrost/vulkan/panvk_vX_physical_device.c
+@@ -39,8 +39,6 @@ panvk_per_arch(get_physical_device_extensions)(
+    const struct panvk_instance *instance,
+    struct vk_device_extension_table *ext)
+ {
+-   bool has_vk1_1 = PAN_ARCH >= 10;
+-   bool has_vk1_2 = PAN_ARCH >= 10;
+    bool has_gralloc = vk_android_get_ugralloc() != NULL;
+ 
+    *ext = (struct vk_device_extension_table){
+@@ -81,11 +79,11 @@ panvk_per_arch(get_physical_device_extensions)(
+       .KHR_maintenance1 = true,
+       .KHR_maintenance2 = true,
+       .KHR_maintenance3 = true,
+-      .KHR_maintenance4 = has_vk1_1,
+-      .KHR_maintenance5 = has_vk1_1,
+-      .KHR_maintenance6 = has_vk1_1,
+-      .KHR_maintenance7 = has_vk1_1,
+-      .KHR_maintenance8 = has_vk1_1,
++      .KHR_maintenance4 = true,
++      .KHR_maintenance5 = true,
++      .KHR_maintenance6 = PAN_ARCH >= 10,
++      .KHR_maintenance7 = true,
++      .KHR_maintenance8 = true,
+       .KHR_maintenance9 = true,
+       .KHR_map_memory2 = true,
+       .KHR_multiview = true,
+@@ -102,17 +100,17 @@ panvk_per_arch(get_physical_device_extensions)(
+       .KHR_shader_draw_parameters = true,
+       .KHR_shader_expect_assume = true,
+       .KHR_shader_float_controls = true,
+-      .KHR_shader_float_controls2 = has_vk1_1,
++      .KHR_shader_float_controls2 = true,
+       .KHR_shader_float16_int8 = true,
+       .KHR_shader_fma = true,
+       .KHR_shader_integer_dot_product = true,
+-      .KHR_shader_maximal_reconvergence = has_vk1_1,
++      .KHR_shader_maximal_reconvergence = true,
+       .KHR_shader_non_semantic_info = true,
+-      .KHR_shader_quad_control = has_vk1_2,
++      .KHR_shader_quad_control = true,
+       .KHR_shader_relaxed_extended_instruction = true,
+-      .KHR_shader_subgroup_extended_types = has_vk1_1,
++      .KHR_shader_subgroup_extended_types = true,
+       .KHR_shader_subgroup_rotate = true,
+-      .KHR_shader_subgroup_uniform_control_flow = has_vk1_1,
++      .KHR_shader_subgroup_uniform_control_flow = true,
+       .KHR_shader_terminate_invocation = true,
+       .KHR_shader_untyped_pointers = PAN_ARCH >= 9,
+       .KHR_spirv_1_4 = PAN_ARCH >= 10,
+@@ -212,7 +210,7 @@ panvk_per_arch(get_physical_device_extensions)(
+       .EXT_shader_subgroup_vote = true,
+       .EXT_shader_tile_image = PAN_ARCH >= 9,
+       .EXT_shader_uniform_buffer_unsized_array = true,
+-      .EXT_subgroup_size_control = has_vk1_1,
++      .EXT_subgroup_size_control = true,
+ #ifdef PANVK_USE_WSI_PLATFORM
+       .EXT_swapchain_maintenance1 = true,
+ #endif
+@@ -237,9 +235,9 @@ panvk_per_arch(get_physical_device_extensions)(
+ 
+       .VALVE_mutable_descriptor_type = PAN_ARCH >= 9,
+ 
+-      .ARM_shader_core_builtins = PAN_ARCH >= 9,
+-      .ARM_shader_core_properties = has_vk1_1,
+-      .ARM_scheduling_controls = PAN_ARCH >= 10,
++      .ARM_shader_core_builtins = true,
++      .ARM_shader_core_properties = true,
++      .ARM_scheduling_controls = true,
+       .ARM_rasterization_order_attachment_access = PAN_ARCH >= 10,
+    };
+ }
+@@ -727,10 +725,10 @@ panvk_per_arch(get_physical_device_features)(
+       .deviceMemoryReport = true,
+ 
+       /* VK_ARM_shader_core_builtins */
+-      .shaderCoreBuiltins = PAN_ARCH >= 9,
++      .shaderCoreBuiltins = true,
+ 
+       /* VK_ARM_scheduling_controls */
+-      .schedulingControls = PAN_ARCH >= 10,
++      .schedulingControls = true,
+ 
+ #ifdef PANVK_USE_WSI_PLATFORM
+       /* KHR_swapchain_maintenance1 */
+@@ -764,7 +762,7 @@ get_api_version()
+    if (PAN_ARCH >= 10)
+       return VK_MAKE_API_VERSION(0, 1, 4, VK_HEADER_VERSION);
+ 
+-   return VK_MAKE_API_VERSION(0, 1, 0, VK_HEADER_VERSION);
++   return VK_MAKE_API_VERSION(0, 1, 1, VK_HEADER_VERSION);
+ }
+ 
+ static VkConformanceVersion
+-- 
+2.55.0
+

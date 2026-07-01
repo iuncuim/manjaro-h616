@@ -1,0 +1,15 @@
+diff --git a/src/panfrost/vulkan/jm/panvk_vX_cmd_draw.c b/src/panfrost/vulkan/jm/panvk_vX_cmd_draw.c
+index b5e7501..6a67593 100644
+--- a/src/panfrost/vulkan/jm/panvk_vX_cmd_draw.c
++++ b/src/panfrost/vulkan/jm/panvk_vX_cmd_draw.c
+@@ -138,8 +138,8 @@ prepare_driver_set_vs(struct panvk_cmd_buffer *cmdbuf)
+          cfg.frequency = per_instance ? MALI_ATTRIBUTE_FREQUENCY_INSTANCE
+                                       : MALI_ATTRIBUTE_FREQUENCY_VERTEX;
+          cfg.format = pan_pipe_format_v9[pfmt].hw;
+-         cfg.table = 0;
+-         cfg.buffer_index = vb_offset + attrib->binding;
++         cfg.table = vb_offset;
++         cfg.buffer_index = attrib->binding;
+          cfg.offset_enable = true;
+          cfg.offset = attrib->offset;
+          cfg.stride = dyns->vi_binding_strides[attrib->binding];
