@@ -265,7 +265,7 @@ index a93808fc869..68fb0496452 100644
    VK_KHR_shader_expect_assume                           DONE (anv, dzn, hasvk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
 -  VK_KHR_shader_float_controls2                         DONE (anv, lvp, nvk, panvk/v10+, radv, tu, vn)
 +  VK_KHR_shader_float_controls2                         DONE (anv, lvp, nvk, panvk, radv, tu, vn)
-   VK_KHR_shader_subgroup_rotate                         DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, vn)
+   VK_KHR_shader_subgroup_rotate                         DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv/vc7+, vn)
    VK_KHR_vertex_attribute_divisor                       DONE (anv, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
    VK_EXT_host_image_copy                                DONE (anv, kk, lvp, nvk/Turing+, panvk, radv/gfx10+, tu, vn)
 @@ -561,8 +561,8 @@ Khronos extensions that are not part of any Vulkan version:
@@ -282,11 +282,11 @@ index a93808fc869..68fb0496452 100644
 @@ -584,10 +584,10 @@ Khronos extensions that are not part of any Vulkan version:
    VK_KHR_shader_clock                                   DONE (anv, hasvk, lvp, nvk, panvk, radv, tu, vn)
    VK_KHR_shader_constant_data                           DONE (anv, radv)
-   VK_KHR_shader_fma                                     DONE (kk, nvk, panvk, radv, vn)
+   VK_KHR_shader_fma                                     DONE (anv, kk, nvk, panvk, radv, vn)
 -  VK_KHR_shader_maximal_reconvergence                   DONE (anv, hk, kk, lvp, nvk, panvk/v10+, radv, vn)
--  VK_KHR_shader_quad_control                            DONE (anv, hk, lvp, nvk, panvk/v10+, radv, vn)
+-  VK_KHR_shader_quad_control                            DONE (anv, hk, lvp, nvk, panvk/v10+, radv, v3dv/vc7+, vn)
 +  VK_KHR_shader_maximal_reconvergence                   DONE (anv, hk, kk, lvp, nvk, panvk, radv, vn)
-+  VK_KHR_shader_quad_control                            DONE (anv, hk, lvp, nvk, panvk, radv, vn)
++  VK_KHR_shader_quad_control                            DONE (anv, hk, lvp, nvk, panvk, radv, v3dv/vc7+, vn)
    VK_KHR_shader_relaxed_extended_instruction            DONE (anv, hasvk, hk, kk, lvp, nvk, panvk, pvr, radv, tu, v3dv, vn)
 -  VK_KHR_shader_subgroup_uniform_control_flow           DONE (anv, hasvk, hk, kk, nvk, panvk/v10+, pvr, radv, tu, vn)
 +  VK_KHR_shader_subgroup_uniform_control_flow           DONE (anv, hasvk, hk, kk, nvk, panvk, pvr, radv, tu, vn)
@@ -306,32 +306,6 @@ index a93808fc869..68fb0496452 100644
    VK_GOOGLE_decorate_string                             DONE (anv, hasvk, hk, kk, lvp, nvk, panvk, radv, tu, vn)
    VK_GOOGLE_display_timing                              DONE (anv, panvk, pvr, radv, tu, v3dv)
    VK_GOOGLE_hlsl_functionality1                         DONE (anv, hasvk, hk, kk, lvp, nvk, panvk, radv, tu, vn)
-diff --git a/docs/relnotes/new_features.txt b/docs/relnotes/new_features.txt
-index adf5d022ef5..c4f219c1bc2 100644
---- a/docs/relnotes/new_features.txt
-+++ b/docs/relnotes/new_features.txt
-@@ -43,5 +44,21 @@ VK_EXT_shader_tile_image on panvk
- VK_KHR_internally_synchronized_queues on panvk
- VK_KHR_workgroup_memory_explicit_layout on panvk
- VK_EXT_device_memory_report on pvr
- VK_EXT_descriptor_heap enabled by default on anv, RADV
- VK_EXT_device_address_binding_report on panvk
-+Vulkan 1.1 on panvk/v6-7
-+VK_KHR_maintenance4 on panvk/v6-7
-+VK_KHR_maintenance5 on panvk/v6-7
-+VK_KHR_maintenance7 on panvk/v6-7
-+VK_KHR_maintenance8 on panvk/v6-7
-+VK_KHR_shader_float_controls2 on panvk/v6-7
-+VK_KHR_shader_maximal_reconvergence on panvk/v6-7
-+VK_KHR_shader_quad_control on panvk/v6-7
-+VK_KHR_shader_subgroup_extended_types on panvk/v6-7
-+VK_KHR_shader_subgroup_uniform_control_flow on panvk/v6-7
-+VK_EXT_subgroup_size_control on panvk/v6-7
-+VK_ARM_shader_core_builtins on panvk/v6-7
-+VK_ARM_shader_core_properties on panvk/v6-7
-+VK_ARM_scheduling_controls on panvk/v6-7
-+shaderCoreBuiltins on panvk/v6-7
-+schedulingControls on panvk/v6-7
 
 diff --git a/src/panfrost/ci/panfrost-g52-fails.txt b/src/panfrost/ci/panfrost-g52-fails.txt
 index 4b4bc11bd70..72fbfa63e31 100644

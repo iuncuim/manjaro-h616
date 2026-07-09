@@ -30,7 +30,7 @@ pkgname=(
   vulkan-mesa-layers
   mesa-docs
 )
-pkgver=26.1.branchpoint.r4070.g58b14a6f563
+pkgver=26.1.branchpoint.r4700.g058b45eede9
 pkgrel=1
 
 pkgdesc="Open-source OpenGL drivers"
@@ -104,7 +104,7 @@ options=(
 )
 source=(
   "git+https://gitlab.freedesktop.org/mesa/mesa.git#branch=main"
-  "40244.patch"
+  #"40244.patch"
   "41981.patch"
   "9999-garbage.patch"
 )
@@ -157,7 +157,7 @@ for _crate in "${!_crates[@]}"; do
 done
 
 b2sums=('SKIP'
-        'SKIP'
+        #'SKIP'
         'SKIP'
         'SKIP'
         '431439d31632d177aeb15f910b4f546efa76d54fc74fc8e140399dc5e54eca33fd606f11dbfb48fa83067c8474ee512e62751895d5948367b65ab08b984284e5'
@@ -192,7 +192,7 @@ b2sums=('SKIP'
 
 # https://docs.mesa3d.org/relnotes.html
 sha256sums=('SKIP'
-            'SKIP'
+            #'SKIP'
             'SKIP'
             'SKIP'
             '67914ab451f3bfd2e69e5e9d2ef3858484e7074d63f204fd166ec391b54de21d'
