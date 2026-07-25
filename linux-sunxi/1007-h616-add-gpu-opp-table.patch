@@ -1,16 +1,16 @@
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
-index d98c731b1..3664ab079 100644
+index 7ef1142..4550526 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
-@@ -215,6 +215,7 @@ gpu: gpu@1800000 {
- 			clocks = <&ccu CLK_GPU0>, <&ccu CLK_BUS_GPU>;
+@@ -248,6 +248,7 @@
  			clock-names = "core", "bus";
+ 			power-domains = <&prcm_ppu 2>;
  			resets = <&ccu RST_BUS_GPU>;
 +			operating-points-v2 = <&gpu_opp_table>;
  			status = "disabled";
  		};
  
-@@ -1310,4 +1311,32 @@ ddr_temp_critical: ddr-trip-0 {
+@@ -1596,4 +1597,36 @@
  			};
  		};
  	};
@@ -41,13 +41,17 @@ index d98c731b1..3664ab079 100644
 +			opp-hz = /bits/ 64 <648000000>;
 +			opp-microvolt = <960000 960000 990000>;
 +		};
++		opp-792000000 {
++			opp-hz = /bits/ 64 <792000000>;
++			opp-microvolt = <990000 990000 1050000>;
++		};
 +	};
  };
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
-index 24d8b8d54..dbef7f41a 100644
+index 4a1754e..92104c3 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
-@@ -88,7 +88,7 @@ reg_dcdc1: dcdc1 {
+@@ -87,7 +87,7 @@
  			reg_dcdc2: dcdc2 {
  				regulator-always-on;
  				regulator-min-microvolt = <810000>;
@@ -57,10 +61,10 @@ index 24d8b8d54..dbef7f41a 100644
  			};
  
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-index 67f0b6e0b..c75240c66 100644
+index 372bcb0..2260f87 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-@@ -365,14 +365,14 @@ regulators {
+@@ -362,14 +362,14 @@
  			reg_dcdc1: dcdc1 {
  				regulator-always-on;
  				regulator-min-microvolt = <900000>;
@@ -74,10 +78,7 @@ index 67f0b6e0b..c75240c66 100644
 -				regulator-min-microvolt = <940000>;
 -				regulator-max-microvolt = <940000>;
 +				regulator-min-microvolt = <900000>;
-+				regulator-max-microvolt = <990000>;
++				regulator-max-microvolt = <1050000>;
  				regulator-name = "vdd-gpu-sys";
  			};
  
--- 
-2.49.0
-

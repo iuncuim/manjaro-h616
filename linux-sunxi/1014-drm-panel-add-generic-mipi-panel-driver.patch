@@ -164,10 +164,10 @@ index 000000000..d70cf0063
 +        };
 +    };
 diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-index f1d188200..c7fc8bbfe 100644
+index 396044f..68d33a0 100644
 --- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
 +++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
-@@ -703,6 +703,8 @@ patternProperties:
+@@ -739,6 +739,8 @@ patternProperties:
      description: Shenzhen Hope Microelectronics Co., Ltd.
    "^hoperun,.*":
      description: Jiangsu HopeRun Software Co., Ltd.
@@ -177,10 +177,10 @@ index f1d188200..c7fc8bbfe 100644
      description: Hewlett Packard Inc.
    "^hpe,.*":
 diff --git a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
-index 2edfa7bf4..7d635eaaf 100644
+index 53e6b70..6d07444 100644
 --- a/arch/arm64/boot/dts/allwinner/Makefile
 +++ b/arch/arm64/boot/dts/allwinner/Makefile
-@@ -51,10 +51,21 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-orangepi-zero2w.dtb
+@@ -58,10 +58,21 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-orangepi-zero2w.dtb
  dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-orangepi-zero3.dtb
  dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-transpeed-8k618-t.dtb
  dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-yuzukihd-chameleon.dtb
@@ -204,7 +204,7 @@ index 2edfa7bf4..7d635eaaf 100644
  dtb-$(CONFIG_ARCH_SUNXI) += sun55i-t527-avaota-a1.dtb
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg28xx.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg28xx.dts
 new file mode 100644
-index 000000000..baba1b345
+index 0000000..baba1b3
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg28xx.dts
 @@ -0,0 +1,16 @@
@@ -226,7 +226,7 @@ index 000000000..baba1b345
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp.dts
 new file mode 100644
-index 000000000..54bfa86de
+index 0000000..54bfa86
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp.dts
 @@ -0,0 +1,16 @@
@@ -248,7 +248,7 @@ index 000000000..54bfa86de
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx.dts
 new file mode 100644
-index 000000000..7bfca1312
+index 0000000..7bfca13
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx.dts
 @@ -0,0 +1,16 @@
@@ -270,7 +270,7 @@ index 000000000..7bfca1312
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-rev6-panel.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-rev6-panel.dts
 new file mode 100644
-index 000000000..eb5156d77
+index 0000000..eb5156d
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-rev6-panel.dts
 @@ -0,0 +1,11 @@
@@ -286,10 +286,10 @@ index 000000000..eb5156d77
 +	compatible = "anbernic,rg35xx-plus-rev6-panel", "panel-mipi-dpi-spi";
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-index 9be4dab3c..0f70498ef 100644
+index d131259..bf5c80d 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-@@ -237,7 +237,7 @@ spi_lcd: spi {
+@@ -237,7 +237,7 @@
  		num-chipselects = <1>;
  
  		panel: panel@0 {
@@ -300,7 +300,7 @@ index 9be4dab3c..0f70498ef 100644
  
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-rev6-panel.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-rev6-panel.dts
 new file mode 100644
-index 000000000..8e9b4dafd
+index 0000000..8e9b4da
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-rev6-panel.dts
 @@ -0,0 +1,11 @@
@@ -317,7 +317,7 @@ index 000000000..8e9b4dafd
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-rev6-panel.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-rev6-panel.dts
 new file mode 100644
-index 000000000..51d929e0a
+index 0000000..51d929e
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-rev6-panel.dts
 @@ -0,0 +1,11 @@
@@ -334,7 +334,7 @@ index 000000000..51d929e0a
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro.dts
 new file mode 100644
-index 000000000..eeb95d076
+index 0000000..eeb95d0
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro.dts
 @@ -0,0 +1,12 @@
@@ -352,7 +352,7 @@ index 000000000..eeb95d076
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-v2-panel.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-v2-panel.dts
 new file mode 100644
-index 000000000..7b2de4d48
+index 0000000..7b2de4d
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-v2-panel.dts
 @@ -0,0 +1,11 @@
@@ -369,7 +369,7 @@ index 000000000..7b2de4d48
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h.dts
 new file mode 100644
-index 000000000..9f9058016
+index 0000000..9f90580
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h.dts
 @@ -0,0 +1,15 @@
@@ -390,7 +390,7 @@ index 000000000..9f9058016
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v.dts
 new file mode 100644
-index 000000000..6c27854ca
+index 0000000..6c27854
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v.dts
 @@ -0,0 +1,15 @@
@@ -411,7 +411,7 @@ index 000000000..6c27854ca
 +};
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx.dts
 new file mode 100644
-index 000000000..5e10fd5ee
+index 0000000..5e10fd5
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx.dts
 @@ -0,0 +1,21 @@
@@ -437,12 +437,12 @@ index 000000000..5e10fd5ee
 +	compatible = "anbernic,rgcubexx-panel", "panel-mipi-dpi-spi";
 +};
 diff --git a/drivers/gpu/drm/panel/Kconfig b/drivers/gpu/drm/panel/Kconfig
-index 407c5f6a2..c2d825282 100644
+index 7450b27..1294e3a 100644
 --- a/drivers/gpu/drm/panel/Kconfig
 +++ b/drivers/gpu/drm/panel/Kconfig
-@@ -451,6 +451,16 @@ config DRM_PANEL_MANTIX_MLAF057WE51
- 	  has a resolution of 720x1440 pixels, a built in backlight and touch
- 	  controller.
+@@ -541,6 +541,16 @@ config DRM_PANEL_MOTOROLA_MOT
+ 	  unknown. The panel has a 540x960 resolution and uses 24 bit RGB per
+ 	  pixel.
  
 +config DRM_PANEL_MIPI
 +	tristate "Generic MIPI-DSI/DPI(+SPI) panel"
@@ -458,23 +458,23 @@ index 407c5f6a2..c2d825282 100644
  	tristate "NEC NL8048HL11 RGB panel"
  	depends on GPIOLIB && OF && SPI
 diff --git a/drivers/gpu/drm/panel/Makefile b/drivers/gpu/drm/panel/Makefile
-index 3615a761b..10a79c062 100644
+index c2c5cf8..bef3d6f 100644
 --- a/drivers/gpu/drm/panel/Makefile
 +++ b/drivers/gpu/drm/panel/Makefile
-@@ -44,6 +44,7 @@ obj-$(CONFIG_DRM_PANEL_LG_LB035Q02) += panel-lg-lb035q02.o
- obj-$(CONFIG_DRM_PANEL_LG_LG4573) += panel-lg-lg4573.o
+@@ -51,6 +51,7 @@ obj-$(CONFIG_DRM_PANEL_LG_LG4573) += panel-lg-lg4573.o
  obj-$(CONFIG_DRM_PANEL_LG_SW43408) += panel-lg-sw43408.o
+ obj-$(CONFIG_DRM_PANEL_LXD_M9189A) += panel-lxd-m9189a.o
  obj-$(CONFIG_DRM_PANEL_MAGNACHIP_D53E6EA8966) += panel-magnachip-d53e6ea8966.o
 +obj-$(CONFIG_DRM_PANEL_MIPI) += panel-mipi.o
+ obj-$(CONFIG_DRM_PANEL_MOTOROLA_MOT) += panel-motorola-mot.o
  obj-$(CONFIG_DRM_PANEL_NEC_NL8048HL11) += panel-nec-nl8048hl11.o
  obj-$(CONFIG_DRM_PANEL_NEWVISION_NV3051D) += panel-newvision-nv3051d.o
- obj-$(CONFIG_DRM_PANEL_NEWVISION_NV3052C) += panel-newvision-nv3052c.o
 diff --git a/drivers/gpu/drm/panel/panel-mipi.c b/drivers/gpu/drm/panel/panel-mipi.c
 new file mode 100644
-index 000000000..a4da1fd2e
+index 0000000..b32afea
 --- /dev/null
 +++ b/drivers/gpu/drm/panel/panel-mipi.c
-@@ -0,0 +1,1181 @@
+@@ -0,0 +1,1179 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Generic MIPI-DSI/DPI(+SPI) Panel Driver
@@ -1139,7 +1139,7 @@ index 000000000..a4da1fd2e
 +	 * TODO: Remove once all drm drivers call
 +	 * drm_connector_set_orientation_from_panel()
 +	 */
-+	drm_connector_set_panel_orientation(connector, mipi->orientation);
++	//drm_connector_set_panel_orientation(connector, mipi->orientation);
 +
 +	return count;
 +}
@@ -1450,9 +1450,10 @@ index 000000000..a4da1fd2e
 +	struct panel_mipi *mipi;
 +	int err;
 +
-+	mipi = devm_kzalloc(dev, sizeof(*mipi), GFP_KERNEL);
-+	if (!mipi)
-+		return -ENOMEM;
++	mipi = devm_drm_panel_alloc(dev, struct panel_mipi, panel,
++				    &panel_mipi_funcs, connector_type);
++	if (IS_ERR(mipi))
++		return PTR_ERR(mipi);
 +
 +	mutex_init(&mipi->lock);
 +
@@ -1489,9 +1490,6 @@ index 000000000..a4da1fd2e
 +	err = panel_mipi_probe_modes(dev, mipi);
 +	if (err)
 +		return err;
-+
-+	/* DRM panel setup */
-+	drm_panel_init(&mipi->panel, dev, &panel_mipi_funcs, connector_type);
 +
 +	err = panel_mipi_set_backlight(&mipi->panel, dev, mipi);
 +	if (err)
@@ -1656,6 +1654,3 @@ index 000000000..a4da1fd2e
 +MODULE_DESCRIPTION("Generic MIPI-DSI/DPI(+SPI) Panel Driver");
 +MODULE_AUTHOR("Hironori KIKUCHI <kikuchan98@gmail.com>");
 +MODULE_LICENSE("GPL");
--- 
-2.51.0
-

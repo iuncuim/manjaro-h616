@@ -1,8 +1,8 @@
 diff --git a/drivers/bluetooth/hci_ldisc.c b/drivers/bluetooth/hci_ldisc.c
-index acba83156..3d4f33488 100644
+index 47f4902b4..b7b1c312c 100644
 --- a/drivers/bluetooth/hci_ldisc.c
 +++ b/drivers/bluetooth/hci_ldisc.c
-@@ -666,6 +666,12 @@ static int hci_uart_register_dev(struct hci_uart *hu)
+@@ -694,6 +694,12 @@ static int hci_uart_register_dev(struct hci_uart *hu)
  	hdev->setup = hci_uart_setup;
  	SET_HCIDEV_DEV(hdev, hu->tty->dev);
  
@@ -13,7 +13,7 @@ index acba83156..3d4f33488 100644
 +		hci_set_quirk(hdev,HCI_QUIRK_BROKEN_PARK_LINK_STATUS);
 +
  	if (test_bit(HCI_UART_RAW_DEVICE, &hu->hdev_flags))
- 		set_bit(HCI_QUIRK_RAW_DEVICE, &hdev->quirks);
+ 		hci_set_quirk(hdev, HCI_QUIRK_RAW_DEVICE);
  
 diff --git a/drivers/net/wireless/Kconfig b/drivers/net/wireless/Kconfig
 index c6599594d..73e9f3913 100644
@@ -543,7 +543,7 @@ index 000000000..f97b8365a
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/tty-sdio/lpm.c b/drivers/net/wireless/uwe5622/tty-sdio/lpm.c
 new file mode 100644
-index 000000000..adfa41507
+index 000000000..38d908e67
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/tty-sdio/lpm.c
 @@ -0,0 +1,148 @@
@@ -725,10 +725,10 @@ index 000000000..5239e0dae
 +
 diff --git a/drivers/net/wireless/uwe5622/tty-sdio/rfkill.c b/drivers/net/wireless/uwe5622/tty-sdio/rfkill.c
 new file mode 100644
-index 000000000..66ce92603
+index 000000000..cc942e724
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/tty-sdio/rfkill.c
-@@ -0,0 +1,84 @@
+@@ -0,0 +1,83 @@
 +/*
 + * Copyright (C) 2015 Spreadtrum Communications Inc.
 + *
@@ -751,7 +751,6 @@ index 000000000..66ce92603
 +#include <linux/gpio.h>
 +#include <linux/ioport.h>
 +#include <linux/clk.h>
-+#include <linux/of_gpio.h>
 +#include <linux/version.h>
 +#include <marlin_platform.h>
 +
@@ -3706,10 +3705,10 @@ index 000000000..fcf139d90
 +
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/boot/wcn_integrate.h b/drivers/net/wireless/uwe5622/unisocwcn/boot/wcn_integrate.h
 new file mode 100644
-index 000000000..757078ceb
+index 000000000..bcd162370
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/boot/wcn_integrate.h
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,201 @@
 +/*
 + * Copyright (C) 2017 Spreadtrum Communications Inc.
 + *
@@ -3742,7 +3741,6 @@ index 000000000..757078ceb
 +#include <linux/mm.h>
 +#include <linux/module.h>
 +#include <linux/mfd/syscon.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_address.h>
 +#include <linux/of_device.h>
 +#include <linux/proc_fs.h>
@@ -5102,10 +5100,10 @@ index 000000000..638accb95
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/boot/wcn_integrate_dev.c b/drivers/net/wireless/uwe5622/unisocwcn/boot/wcn_integrate_dev.c
 new file mode 100644
-index 000000000..3af696680
+index 000000000..2907b09da
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/boot/wcn_integrate_dev.c
-@@ -0,0 +1,856 @@
+@@ -0,0 +1,855 @@
 +/*
 + * Copyright (C) 2017 Spreadtrum Communications Inc.
 + *
@@ -5129,7 +5127,6 @@ index 000000000..3af696680
 +#include <linux/mm.h>
 +#include <linux/module.h>
 +#include <linux/mfd/syscon.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_address.h>
 +#include <linux/of_device.h>
 +#include <linux/proc_fs.h>
@@ -15163,10 +15160,10 @@ index 000000000..602432afa
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/gnss/gnss_pmnotify_ctl.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/gnss/gnss_pmnotify_ctl.c
 new file mode 100644
-index 000000000..6bf78a2bd
+index 000000000..cd76a88be
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/gnss/gnss_pmnotify_ctl.c
-@@ -0,0 +1,148 @@
+@@ -0,0 +1,147 @@
 +/*
 + * Copyright (C) 2017 Spreadtrum Communications Inc.
 + * This software is licensed under the terms of the GNU General Public
@@ -15191,7 +15188,6 @@ index 000000000..6bf78a2bd
 +#include <linux/miscdevice.h>
 +#include <linux/major.h>
 +#include <linux/of.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_device.h>
 +#include <linux/proc_fs.h>
 +#include <linux/poll.h>
@@ -15705,10 +15701,10 @@ index 000000000..715631a6a
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/mem_pd_mgr.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/mem_pd_mgr.c
 new file mode 100644
-index 000000000..f013b9d49
+index 000000000..7b9d87eaa
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/mem_pd_mgr.c
-@@ -0,0 +1,813 @@
+@@ -0,0 +1,812 @@
 +/*
 + * Copyright (C) 2013 Spreadtrum Communications Inc.
 + *
@@ -15734,7 +15730,6 @@ index 000000000..f013b9d49
 +#include <linux/kthread.h>
 +#include <linux/module.h>
 +#include <linux/of.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_device.h>
 +#include <linux/platform_device.h>
 +#include <linux/slab.h>
@@ -19050,10 +19045,10 @@ index 000000000..f57581216
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_boot.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_boot.c
 new file mode 100644
-index 000000000..6c52c3334
+index 000000000..5d22df7a8
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_boot.c
-@@ -0,0 +1,4113 @@
+@@ -0,0 +1,4123 @@
 +/*
 + * Copyright (C) 2015 Spreadtrum Communications Inc.
 + *
@@ -19075,7 +19070,6 @@ index 000000000..6c52c3334
 +#include <linux/kernel.h>
 +#include <linux/module.h>
 +#include <linux/mfd/syscon.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_device.h>
 +#include <linux/platform_device.h>
 +#include <linux/regulator/consumer.h>
@@ -19086,6 +19080,25 @@ index 000000000..6c52c3334
 +#include <linux/version.h>
 +#include <linux/vmalloc.h>
 +#include <linux/workqueue.h>
++#include <linux/gpio.h>
++#include <linux/of.h>
++
++
++static inline int of_get_named_gpio(struct device_node *np,
++				    const char *propname, int index)
++{
++	struct gpio_desc *desc;
++
++	desc = fwnode_gpiod_get_index(of_fwnode_handle(np), propname,
++				      index, GPIOD_ASIS, NULL);
++	if (IS_ERR(desc))
++		return PTR_ERR(desc);
++	{
++		int gpio = desc_to_gpio(desc);
++		gpiod_put(desc);
++		return gpio;
++	}
++}
 +#include <marlin_platform.h>
 +#include <wcn_bus.h>
 +
@@ -19281,6 +19294,11 @@ index 000000000..6c52c3334
 +	int reset;
 +	int chip_en;
 +	int int_ap;
++	struct gpio_desc *reset_desc;
++	struct gpio_desc *chip_en_desc;
++	struct gpio_desc *int_ap_desc;
++	struct gpio_desc *bt_wake_desc;
++
 +	/* power sequence */
 +	/* VDDIO->DVDD12->chip_en->rst_N->AVDD12->AVDD33 */
 +	struct regulator *dvdd12;
@@ -20426,36 +20444,24 @@ index 000000000..6c52c3334
 +static int marlin_registsr_bt_wake(struct device *dev)
 +{
 +	struct device_node *np;
-+	int bt_wake_host_gpio, ret = 0;
++	int ret = 0;
 +
 +	np = of_find_compatible_node(NULL, NULL, "allwinner,sunxi-btlpm");
 +	if (!np) {
 +		WCN_ERR("dts node for bt_wake not found");
 +		return -EINVAL;
 +	}
-+	bt_wake_host_gpio = of_get_named_gpio(np, "bt_hostwake", 0);
-+	if (!gpio_is_valid(bt_wake_host_gpio)) {
-+		WCN_ERR("bt_hostwake irq is invalid: %d\n",
-+			bt_wake_host_gpio);
-+		return -EINVAL;
-+	}
-+
-+	ret = devm_gpio_request_one(dev, bt_wake_host_gpio, GPIOF_OUT_INIT_LOW,
-+				"bt-wake-host-gpio");
-+	if (ret) {
-+		WCN_ERR("bt-wake-host-gpio request err: %d\n",
-+			bt_wake_host_gpio);
++	marlin_dev->bt_wake_desc = fwnode_gpiod_get_index(of_fwnode_handle(np),
++						       "bt_hostwake", 0,
++						       GPIOD_IN,
++						       "bt-wake-host-gpio");
++	if (IS_ERR(marlin_dev->bt_wake_desc)) {
++		ret = PTR_ERR(marlin_dev->bt_wake_desc);
++		WCN_ERR("bt_hostwake irq is invalid: %d\n", ret);
 +		return ret;
 +	}
 +
-+	ret = gpio_direction_input(bt_wake_host_gpio);
-+	if (ret < 0) {
-+		WCN_ERR("%s, gpio-%d input set fail!\n", __func__,
-+			bt_wake_host_gpio);
-+		return ret;
-+	}
-+
-+	marlin_dev->bt_wake_host_int_num = gpio_to_irq(bt_wake_host_gpio);
++	marlin_dev->bt_wake_host_int_num = gpiod_to_irq(marlin_dev->bt_wake_desc);
 +
 +	WCN_INFO("%s bt_hostwake gpio=%d intnum=%d\n", __func__,
 +		 bt_wake_host_gpio, marlin_dev->bt_wake_host_int_num);
@@ -20469,8 +20475,7 @@ index 000000000..6c52c3334
 +	ret = dev_pm_set_wake_irq(dev,
 +		marlin_dev->bt_wake_host_int_num);
 +	if (ret < 0) {
-+		WCN_ERR("can't enable wakeup src for bt_hostwake %d\n",
-+			bt_wake_host_gpio);
++		WCN_ERR("can't enable wakeup src for bt_hostwake\n");
 +		return ret;
 +	}
 +
@@ -23313,7 +23318,7 @@ index 000000000..6fef7fa4f
 +
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_dump.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_dump.c
 new file mode 100644
-index 000000000..5c432c77c
+index 000000000..66a664830
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_dump.c
 @@ -0,0 +1,1603 @@
@@ -23789,9 +23794,9 @@ index 000000000..5c432c77c
 +		return -1;
 +	}
 +
-+	strncpy(head->version, WCN_DUMP_VERSION_NAME,
++	memcpy(head->version, WCN_DUMP_VERSION_NAME,
 +		strlen(WCN_DUMP_VERSION_NAME));
-+	strncpy(head->sub_version, WCN_DUMP_VERSION_SUB_NAME,
++	memcpy(head->sub_version, WCN_DUMP_VERSION_SUB_NAME,
 +		strlen(WCN_DUMP_VERSION_SUB_NAME));
 +	head->n_sec = cpu_to_le32(cnt);
 +	len = head_len;
@@ -24948,7 +24953,7 @@ index 000000000..98910bfee
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_dump_integrate.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_dump_integrate.c
 new file mode 100644
-index 000000000..43d9c8467
+index 000000000..b0204412a
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_dump_integrate.c
 @@ -0,0 +1,386 @@
@@ -25104,10 +25109,10 @@ index 000000000..43d9c8467
 +		return -1;
 +	}
 +
-+	strncpy(head->version, WCN_DUMP_VERSION_NAME,
-+		strlen(WCN_DUMP_VERSION_NAME)+1);
-+	strncpy(head->sub_version, WCN_DUMP_VERSION_SUB_NAME,
-+		strlen(WCN_DUMP_VERSION_SUB_NAME)+1);
++	memcpy(head->version, WCN_DUMP_VERSION_NAME,
++		strlen(WCN_DUMP_VERSION_NAME) + 1);
++	memcpy(head->sub_version, WCN_DUMP_VERSION_SUB_NAME,
++		strlen(WCN_DUMP_VERSION_SUB_NAME) + 1);
 +	head->n_sec = cpu_to_le32(cnt);
 +	len = head_len;
 +	for (i = 0; i < cnt; i++) {
@@ -26230,7 +26235,7 @@ index 000000000..7121823e7
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_parn_parser.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_parn_parser.c
 new file mode 100644
-index 000000000..20aea5e73
+index 000000000..e57dcec1a
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_parn_parser.c
 @@ -0,0 +1,207 @@
@@ -26419,7 +26424,7 @@ index 000000000..20aea5e73
 +			continue;
 +		}
 +		memset(fstab_name, 0, sizeof(fstab_name));
-+		strncpy(fstab_name, fstab_dir[loop], sizeof(fstab_name));
++		memcpy(fstab_name, fstab_dir[loop], sizeof(fstab_name));
 +		if (strlen(fstab_name) > 1)
 +			fstab_name[strlen(fstab_name)] = '/';
 +		iterate_dir(file1, &ctx);
@@ -26472,7 +26477,7 @@ index 000000000..210a2ff96
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_procfs.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_procfs.c
 new file mode 100644
-index 000000000..77b4ec259
+index 000000000..c1722c23a
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_procfs.c
 @@ -0,0 +1,1284 @@
@@ -26574,7 +26579,7 @@ index 000000000..77b4ec259
 +
 +#if (CONFIG_CP2_ASSERT)
 +	memset(mdbg_proc->assert.buf, 0, MDBG_ASSERT_SIZE);
-+	strncpy(mdbg_proc->assert.buf, str, len);
++	memcpy(mdbg_proc->assert.buf, str, len);
 +	WCN_INFO("mdbg_assert_interface:%s\n",
 +		(char *)(mdbg_proc->assert.buf));
 +
@@ -28554,7 +28559,7 @@ index 000000000..616183e5a
 +int swd_dump_arm_reg(void);
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_txrx.c b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_txrx.c
 new file mode 100644
-index 000000000..2fd7f3988
+index 000000000..9a51c4281
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/platform/wcn_txrx.c
 @@ -0,0 +1,343 @@
@@ -29830,7 +29835,7 @@ index 000000000..d8c035e16
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_common.c b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_common.c
 new file mode 100644
-index 000000000..8dbf21437
+index 000000000..e046e2b97
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_common.c
 @@ -0,0 +1,1466 @@
@@ -31302,7 +31307,7 @@ index 000000000..8dbf21437
 +}
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_ctl.c b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_ctl.c
 new file mode 100644
-index 000000000..8000bfea3
+index 000000000..6c3fea4ad
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_ctl.c
 @@ -0,0 +1,1242 @@
@@ -31312,12 +31317,12 @@ index 000000000..8000bfea3
 +#include <linux/irq.h>
 +#include <linux/kthread.h>
 +#include <linux/mmc/host.h>
-+#include <linux/of_gpio.h>
 +#include <linux/slab.h>
 +#include <linux/uaccess.h>
 +#include <linux/version.h>
 +#include <linux/vmalloc.h>
 +#include <linux/ktime.h>
++#include <linux/gpio.h>
 +#include <wcn_bus.h>
 +
 +#include "sdiohal.h"
@@ -32550,7 +32555,7 @@ index 000000000..8000bfea3
 +
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c
 new file mode 100644
-index 000000000..472e09f5b
+index 000000000..e97329491
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/sdio/sdiohal_main.c
 @@ -0,0 +1,2312 @@
@@ -32579,8 +32584,8 @@ index 000000000..472e09f5b
 +#include <linux/module.h>
 +#include <linux/of.h>
 +#include <linux/of_device.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_platform.h>
++#include <linux/gpio.h>
 +#include <linux/pm_runtime.h>
 +#include <linux/mmc/card.h>
 +#include <linux/mmc/core.h>
@@ -36053,7 +36058,7 @@ index 000000000..215469f54
 +wcn_slp-objs += $(slp-c-objs)
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/sleep/sdio_int.c b/drivers/net/wireless/uwe5622/unisocwcn/sleep/sdio_int.c
 new file mode 100644
-index 000000000..f3dec551e
+index 000000000..93cf1f719
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/sleep/sdio_int.c
 @@ -0,0 +1,360 @@
@@ -36554,10 +36559,10 @@ index 000000000..2a1bbf248
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/sleep/slp_mgr.c b/drivers/net/wireless/uwe5622/unisocwcn/sleep/slp_mgr.c
 new file mode 100644
-index 000000000..65f37abc4
+index 000000000..77a8846c1
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/sleep/slp_mgr.c
-@@ -0,0 +1,205 @@
+@@ -0,0 +1,204 @@
 +/*
 + * Copyright (C) 2013 Spreadtrum Communications Inc.
 + *
@@ -36584,7 +36589,6 @@ index 000000000..65f37abc4
 +#include <linux/kthread.h>
 +#include <linux/module.h>
 +#include <linux/of.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_device.h>
 +#include <linux/platform_device.h>
 +#include <linux/spinlock.h>
@@ -39297,7 +39301,7 @@ index 000000000..f1339f9dc
 +}
 diff --git a/drivers/net/wireless/uwe5622/unisocwcn/usb/wcn_usb_rx_tx.c b/drivers/net/wireless/uwe5622/unisocwcn/usb/wcn_usb_rx_tx.c
 new file mode 100644
-index 000000000..28ade1f39
+index 000000000..080b00f95
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwcn/usb/wcn_usb_rx_tx.c
 @@ -0,0 +1,1719 @@
@@ -40924,7 +40928,7 @@ index 000000000..28ade1f39
 +
 +	udev = ep->intf->udev;
 +	pipe = usb_sndbulkpipe(udev, endpoint->bEndpointAddress);
-+	strncpy(buf, loop_check_cmd, strlen(loop_check_cmd));
++	memcpy(buf, loop_check_cmd, strlen(loop_check_cmd));
 +	usb_fill_bulk_urb(urb, udev, pipe, buf, strlen(loop_check_cmd) + 1,
 +				     loop_check_callback, buf);
 +	if (usb_submit_urb(urb, GFP_KERNEL))
@@ -44171,10 +44175,10 @@ index 000000000..91bcfee46
 +}
 diff --git a/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c
 new file mode 100644
-index 000000000..ea0871179
+index 000000000..75b9fa1bf
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c
-@@ -0,0 +1,3990 @@
+@@ -0,0 +1,3993 @@
 +/*
 + * Copyright (C) 2015 Spreadtrum Communications Inc.
 + *
@@ -44606,7 +44610,7 @@ index 000000000..ea0871179
 +	if (!vif->ndev)
 +		mac = vif->wdev.address;
 +	else
-+		mac = vif->ndev->dev_addr;
++		mac = (u8 *)vif->ndev->dev_addr;
 +
 +	if (sprdwl_open_fw(priv, &vif_ctx_id, vif->mode, mac)) {
 +		wl_ndev_log(L_ERR, vif->ndev, "%s failed!\n", __func__);
@@ -44680,7 +44684,7 @@ index 000000000..ea0871179
 +	return wiphy->interface_modes & BIT(type);
 +}
 +
-+int sprdwl_check_p2p_coex(struct sprdwl_priv *priv)
++static int sprdwl_check_p2p_coex(struct sprdwl_priv *priv)
 +{
 +	if (mode_to_vif(priv, SPRDWL_MODE_P2P_CLIENT) ||
 +		mode_to_vif(priv, SPRDWL_MODE_P2P_GO))
@@ -44879,12 +44883,12 @@ index 000000000..ea0871179
 +	return ret;
 +}
 +
-+static int sprdwl_cfg80211_add_key(struct wiphy *wiphy, struct net_device *ndev,
++static int sprdwl_cfg80211_add_key(struct wiphy *wiphy, struct wireless_dev *wdev,
 +				   int link_id, u8 key_index, bool pairwise,
 +				   const u8 *mac_addr,
 +				   struct key_params *params)
 +{
-+	struct sprdwl_vif *vif = netdev_priv(ndev);
++	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
 +
 +	vif->key_index[pairwise] = key_index;
 +	vif->key_len[pairwise][key_index] = params->key_len;
@@ -44901,11 +44905,11 @@ index 000000000..ea0871179
 +						 mac_addr);
 +}
 +
-+static int sprdwl_cfg80211_del_key(struct wiphy *wiphy, struct net_device *ndev,
++static int sprdwl_cfg80211_del_key(struct wiphy *wiphy, struct wireless_dev *wdev,
 +				   int link_id, u8 key_index, bool pairwise,
 +				   const u8 *mac_addr)
 +{
-+	struct sprdwl_vif *vif = netdev_priv(ndev);
++	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
 +
 +	//wl_ndev_log(L_DBG, ndev, "%s key_index=%d, pairwise=%d\n",
 +	//		__func__, key_index, pairwise);
@@ -45027,7 +45031,7 @@ index 000000000..ea0871179
 +		wl_ndev_log(L_ERR, ndev, "%s invalid SSID!\n", __func__);
 +		return -EINVAL;
 +	}
-+	strncpy(vif->ssid, settings->ssid, settings->ssid_len);
++	memcpy(vif->ssid, settings->ssid, settings->ssid_len);
 +	vif->ssid_len = settings->ssid_len;
 +
 +#ifdef STA_SOFTAP_SCC_MODE
@@ -45098,7 +45102,7 @@ index 000000000..ea0871179
 +	*(data + index) = (u8)(settings->ssid_len + 1);
 +	index += 1;
 +	/* copy ssid */
-+	strncpy(data + index, settings->ssid, settings->ssid_len);
++	memcpy(data + index, settings->ssid, settings->ssid_len);
 +	index += settings->ssid_len;
 +	/* set hidden ssid flag */
 +	*(data + index) = (u8)settings->hidden_ssid;
@@ -45187,14 +45191,14 @@ index 000000000..ea0871179
 +}
 +
 +static int sprdwl_cfg80211_add_station(struct wiphy *wiphy,
-+					   struct net_device *ndev, const u8 *mac,
++					   struct wireless_dev *wdev, const u8 *mac,
 +					   struct station_parameters *params)
 +{
 +	return 0;
 +}
 +
 +static int sprdwl_cfg80211_del_station(struct wiphy *wiphy,
-+					   struct net_device *ndev,
++					   struct wireless_dev *wdev,
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 83)
 +					   struct station_del_parameters *params
 +#else
@@ -45203,22 +45207,22 @@ index 000000000..ea0871179
 +					)
 +
 +{
-+	struct sprdwl_vif *vif = netdev_priv(ndev);
++	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 83)
 +	if (!params->mac) {
 +#else
 +	if (!mac) {
 +#endif
-+		wl_ndev_log(L_DBG, ndev, "ignore NULL MAC address!\n");
++		wl_ndev_log(L_DBG, vif->ndev, "ignore NULL MAC address!\n");
 +		goto out;
 +	}
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 83)
-+	wl_ndev_log(L_DBG, ndev, "%s %pM reason:%d\n", __func__, params->mac,
++	wl_ndev_log(L_DBG, vif->ndev, "%s %pM reason:%d\n", __func__, params->mac,
 +			params->reason_code);
 +	sprdwl_del_station(vif->priv, vif->ctx_id, params->mac,
 +			params->reason_code);
 +#else
-+	wl_ndev_log(L_DBG, ndev, "%s %pM\n", __func__, mac);
++	wl_ndev_log(L_DBG, vif->ndev, "%s %pM\n", __func__, mac);
 +	sprdwl_del_station(vif->priv, vif->ctx_id, mac,
 +			   WLAN_REASON_DEAUTH_LEAVING);
 +#endif
@@ -45230,7 +45234,7 @@ index 000000000..ea0871179
 +
 +static int
 +sprdwl_cfg80211_change_station(struct wiphy *wiphy,
-+				   struct net_device *ndev, const u8 *mac,
++				   struct wireless_dev *wdev, const u8 *mac,
 +				   struct station_parameters *params)
 +{
 +	return 0;
@@ -45238,10 +45242,10 @@ index 000000000..ea0871179
 +
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 4, 83)
 +static int sprdwl_cfg80211_get_station(struct wiphy *wiphy,
-+					   struct net_device *ndev, const u8 *mac,
++					   struct wireless_dev *wdev, const u8 *mac,
 +					   struct station_info *sinfo)
 +{
-+	struct sprdwl_vif *vif = netdev_priv(ndev);
++	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
 +	struct sprdwl_cmd_get_station sta;
 +	struct sprdwl_rate_info *rate;
 +	int ret;
@@ -45250,10 +45254,10 @@ index 000000000..ea0871179
 +			 BIT(NL80211_STA_INFO_TX_PACKETS) |
 +			 BIT(NL80211_STA_INFO_RX_BYTES) |
 +			 BIT(NL80211_STA_INFO_RX_PACKETS);
-+	sinfo->tx_bytes = ndev->stats.tx_bytes;
-+	sinfo->tx_packets = ndev->stats.tx_packets;
-+	sinfo->rx_bytes = ndev->stats.rx_bytes;
-+	sinfo->rx_packets = ndev->stats.rx_packets;
++	sinfo->tx_bytes = vif->ndev->stats.tx_bytes;
++	sinfo->tx_packets = vif->ndev->stats.tx_packets;
++	sinfo->rx_bytes = vif->ndev->stats.rx_bytes;
++	sinfo->rx_packets = vif->ndev->stats.rx_packets;
 +
 +	/* Get current station info */
 +	ret = sprdwl_get_station(vif->priv, vif->ctx_id,
@@ -45301,7 +45305,7 @@ index 000000000..ea0871179
 +		sinfo->txrate.legacy = rate->legacy;
 +	}
 +
-+	wl_ndev_log(L_DBG, ndev, "%s signal %d legacy %d mcs:%d flags:0x:%x\n",
++	wl_ndev_log(L_DBG, vif->ndev, "%s signal %d legacy %d mcs:%d flags:0x:%x\n",
 +			__func__, sinfo->signal, sinfo->txrate.legacy,
 +			rate->mcs, rate->flags);
 +out:
@@ -45310,10 +45314,10 @@ index 000000000..ea0871179
 +
 +#else
 +static int sprdwl_cfg80211_get_station(struct wiphy *wiphy,
-+					   struct net_device *ndev, const u8 *mac,
++					   struct wireless_dev *wdev, const u8 *mac,
 +					   struct station_info *sinfo)
 +{
-+	struct sprdwl_vif *vif = netdev_priv(ndev);
++	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
 +	struct sprdwl_cmd_get_station sta;
 +	struct sprdwl_rate_info *rate;
 +	int ret;
@@ -45322,10 +45326,10 @@ index 000000000..ea0871179
 +			 STATION_INFO_TX_PACKETS |
 +			 STATION_INFO_RX_BYTES |
 +			 STATION_INFO_RX_PACKETS;
-+	sinfo->tx_bytes = ndev->stats.tx_bytes;
-+	sinfo->tx_packets = ndev->stats.tx_packets;
-+	sinfo->rx_bytes = ndev->stats.rx_bytes;
-+	sinfo->rx_packets = ndev->stats.rx_packets;
++	sinfo->tx_bytes = vif->ndev->stats.tx_bytes;
++	sinfo->tx_packets = vif->ndev->stats.tx_packets;
++	sinfo->rx_bytes = vif->ndev->stats.rx_bytes;
++	sinfo->rx_packets = vif->ndev->stats.rx_packets;
 +
 +	/* Get current station info */
 +	ret = sprdwl_get_station(vif->priv, vif->ctx_id,
@@ -45400,10 +45404,10 @@ index 000000000..ea0871179
 +			netif_carrier_on(vif->ndev);
 +			netif_wake_queue(vif->ndev);
 +		}
-+		cfg80211_new_sta(vif->ndev, addr, &sinfo, GFP_KERNEL);
++		cfg80211_new_sta(&vif->wdev, addr, &sinfo, GFP_KERNEL);
 +		wl_ndev_log(L_DBG, vif->ndev, "New station (%pM) connected\n", addr);
 +	} else {
-+		cfg80211_del_sta(vif->ndev, addr, GFP_KERNEL);
++		cfg80211_del_sta(&vif->wdev, addr, GFP_KERNEL);
 +		wl_ndev_log(L_DBG, vif->ndev, "The station (%pM) disconnected\n",
 +				addr);
 +		trace_deauth_reason(vif->mode, 0, REMOTE_EVENT);
@@ -45715,7 +45719,7 @@ index 000000000..ea0871179
 +			if (!ssids[i].ssid_len)
 +				continue;
 +			scan_ssids->len = ssids[i].ssid_len;
-+			strncpy(scan_ssids->ssid, ssids[i].ssid,
++			memcpy(scan_ssids->ssid, ssids[i].ssid,
 +				strlen(ssids[i].ssid));
 +			scan_ssids_len += (ssids[i].ssid_len
 +					   + sizeof(scan_ssids->len));
@@ -46190,7 +46194,7 @@ index 000000000..ea0871179
 +	if (!sme->ssid) {
 +		wl_ndev_log(L_DBG, ndev, "No SSID specified!\n");
 +	} else {
-+		strncpy(con.ssid, sme->ssid, sme->ssid_len);
++		memcpy(con.ssid, sme->ssid, sme->ssid_len);
 +		con.ssid_len = sme->ssid_len;
 +		vif->sm_state = SPRDWL_CONNECTING;
 +
@@ -46205,7 +46209,7 @@ index 000000000..ea0871179
 +		ret = sprdwl_connect(vif->priv, vif->ctx_id, &con);
 +		if (ret)
 +			goto err;
-+		strncpy(vif->ssid, sme->ssid, sme->ssid_len);
++		memcpy(vif->ssid, sme->ssid, sme->ssid_len);
 +		vif->ssid_len = sme->ssid_len;
 +		wl_ndev_log(L_DBG, ndev, "%s %s\n", __func__, vif->ssid);
 +	}
@@ -46826,12 +46830,15 @@ index 000000000..ea0871179
 +static int sprdwl_cfg80211_remain_on_channel(struct wiphy *wiphy,
 +						 struct wireless_dev *wdev,
 +						 struct ieee80211_channel *chan,
-+						 unsigned int duration, u64 *cookie)
++						 unsigned int duration, u64 *cookie,
++						 const u8 *rx_addr)
 +{
 +	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
 +	enum nl80211_channel_type channel_type = 0;
 +	static u64 remain_index;
 +	int ret;
++
++	(void)rx_addr;
 +
 +	*cookie = vif->listen_cookie = ++remain_index;
 +	wl_ndev_log(L_DBG, wdev->netdev, "%s %d for %dms, cookie %lld\n",
@@ -47339,7 +47346,7 @@ index 000000000..ea0871179
 +						SPRDWL_SUBCMD_ADD, num, mac_addr);
 +}
 +
-+int sprdwl_cfg80211_set_power_mgmt(struct wiphy *wiphy, struct net_device *ndev,
++static int sprdwl_cfg80211_set_power_mgmt(struct wiphy *wiphy, struct net_device *ndev,
 +				   bool enabled, int timeout)
 +{
 +	struct sprdwl_vif *vif = netdev_priv(ndev);
@@ -58737,7 +58744,7 @@ index 000000000..0c81ef0d7
 +#endif /*__NPI_H__*/
 diff --git a/drivers/net/wireless/uwe5622/unisocwifi/qos.c b/drivers/net/wireless/uwe5622/unisocwifi/qos.c
 new file mode 100644
-index 000000000..d0e42a882
+index 000000000..a419e8b6c
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/qos.c
 @@ -0,0 +1,866 @@
@@ -60246,10 +60253,10 @@ index 000000000..fdabd9d74
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwifi/reorder.c b/drivers/net/wireless/uwe5622/unisocwifi/reorder.c
 new file mode 100644
-index 000000000..c6c77648d
+index 000000000..127fb31f1
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/reorder.c
-@@ -0,0 +1,1020 @@
+@@ -0,0 +1,1025 @@
 +/*
 + * Copyright (C) 2016 Spreadtrum Communications Inc.
 + *
@@ -61087,6 +61094,11 @@ index 000000000..c6c77648d
 +		wlan_filter_event(ba_entry, ba_event);
 +		break;
 +	case SPRDWL_DELTXBA_EVENT:
++		if (ba_event->sta_lut_index >= MAX_LUT_NUM) {
++			wl_err("%s: DELTXBA invalid sta_lut_index %u\n",
++			       __func__, ba_event->sta_lut_index);
++			break;
++		}
 +		peer_entry = &intf->peer_entry[ba_event->sta_lut_index];
 +		qos_index = tid_map_to_qosindex(ba_event->tid);
 +		peer_entry = &intf->peer_entry[ba_event->sta_lut_index];
@@ -65130,7 +65142,7 @@ index 000000000..a1b2f8544
 +#endif /* __SPRDWL_H__ */
 diff --git a/drivers/net/wireless/uwe5622/unisocwifi/tcp_ack.c b/drivers/net/wireless/uwe5622/unisocwifi/tcp_ack.c
 new file mode 100644
-index 000000000..4db766fba
+index 000000000..c347fe541
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/tcp_ack.c
 @@ -0,0 +1,606 @@
@@ -66095,10 +66107,10 @@ index 000000000..196ff4531
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwifi/tx_msg.c b/drivers/net/wireless/uwe5622/unisocwifi/tx_msg.c
 new file mode 100644
-index 000000000..f1c356306
+index 000000000..9994b9302
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/tx_msg.c
-@@ -0,0 +1,1904 @@
+@@ -0,0 +1,1911 @@
 +/*
 + * Copyright (C) 2016 Spreadtrum Communications Inc.
 + *
@@ -67378,6 +67390,13 @@ index 000000000..f1c356306
 +			return -EPERM;
 +		}
 +#endif
++		if (dscr->sta_lut_index >= MAX_LUT_NUM) {
++			wl_err("%s: invalid sta_lut_index %u\n", __func__,
++			       dscr->sta_lut_index);
++			INIT_LIST_HEAD(&msg->list);
++			sprdwl_free_msg_buf(msg, msg->msglist);
++			return -EINVAL;
++		}
 +		/*send group in BK to avoid FW hang*/
 +		if ((msg->mode == SPRDWL_MODE_AP ||
 +			msg->mode == SPRDWL_MODE_P2P_GO) &&
@@ -74748,7 +74767,7 @@ index 000000000..31042f86d
 +#endif//__WCN_WRAPPER_H__
 diff --git a/drivers/net/wireless/uwe5622/unisocwifi/wl_core.c b/drivers/net/wireless/uwe5622/unisocwifi/wl_core.c
 new file mode 100644
-index 000000000..10208fd8c
+index 000000000..105fceb54
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/wl_core.c
 @@ -0,0 +1,852 @@
@@ -75456,12 +75475,12 @@ index 000000000..10208fd8c
 +		ret = -ENXIO;
 +		goto err_core_create;
 +	}
-+	strncpy(priv->wl_ver.kernel_ver, utsname()->release,
++	memcpy(priv->wl_ver.kernel_ver, utsname()->release,
 +			sizeof(priv->wl_ver.kernel_ver));
-+	strncpy(priv->wl_ver.drv_ver, SPRDWL_DRIVER_VERSION,
++	memcpy(priv->wl_ver.drv_ver, SPRDWL_DRIVER_VERSION,
 +			sizeof(priv->wl_ver.drv_ver));
-+	strncpy(priv->wl_ver.update, SPRDWL_UPDATE, sizeof(priv->wl_ver.update));
-+	strncpy(priv->wl_ver.reserve, SPRDWL_RESERVE, sizeof(priv->wl_ver.reserve));
++	memcpy(priv->wl_ver.update, SPRDWL_UPDATE, sizeof(priv->wl_ver.update));
++	memcpy(priv->wl_ver.reserve, SPRDWL_RESERVE, sizeof(priv->wl_ver.reserve));
 +	wl_info("Spreadtrum WLAN Version:");
 +	wl_info("Kernel:%s,Driver:%s,update:%s,reserved:%s\n",
 +			 utsname()->release, SPRDWL_DRIVER_VERSION,
@@ -75829,10 +75848,10 @@ index 000000000..0d039c18e
 +#endif
 diff --git a/drivers/net/wireless/uwe5622/unisocwifi/wl_intf.c b/drivers/net/wireless/uwe5622/unisocwifi/wl_intf.c
 new file mode 100644
-index 000000000..a6def0e06
+index 000000000..002c3fb1f
 --- /dev/null
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/wl_intf.c
-@@ -0,0 +1,1949 @@
+@@ -0,0 +1,1959 @@
 +/*
 + * Copyright (C) 2016 Spreadtrum Communications Inc.
 + *
@@ -77400,6 +77419,11 @@ index 000000000..a6def0e06
 +
 +	i = sta_lut->sta_lut_index;
 +
++	if (i >= MAX_LUT_NUM) {
++		wl_err("%s: invalid sta_lut_index %u\n", __func__, i);
++		return;
++	}
++
 +	wl_debug("ctx_id:%d,action:%d,lut:%d\n", sta_lut->ctx_id,
 +		sta_lut->action, sta_lut->sta_lut_index);
 +	switch (sta_lut->action) {
@@ -77476,6 +77500,11 @@ index 000000000..a6def0e06
 +		u16 tid = 0;
 +
 +		addba = (struct host_addba_param *)(rbuf + 1);
++		if (addba->lut_index >= MAX_LUT_NUM) {
++			wl_err("%s: ADDBA invalid lut_index %u\n", __func__,
++			       addba->lut_index);
++			goto out;
++		}
 +		peer_entry = &intf->peer_entry[addba->lut_index];
 +		tid = addba->addba_param.tid;
 +		if (!test_and_clear_bit(tid, &peer_entry->ba_tx_done_map))
@@ -78408,10 +78437,10 @@ index 000000000..4e745903e
 +
 +#endif
 diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
-index a8586c305..f9b62f72a 100644
+index 38186a245..b1be51c0d 100644
 --- a/include/net/bluetooth/hci.h
 +++ b/include/net/bluetooth/hci.h
-@@ -72,6 +72,12 @@
+@@ -69,6 +69,12 @@
  
  /* HCI device quirks */
  enum {
@@ -78425,10 +78454,10 @@ index a8586c305..f9b62f72a 100644
  	 * closing the transport instead of when opening it.
  	 *
 diff --git a/net/bluetooth/hci_sync.c b/net/bluetooth/hci_sync.c
-index 609b035e5..07f421cac 100644
+index 3be8c3581..dad748d3b 100644
 --- a/net/bluetooth/hci_sync.c
 +++ b/net/bluetooth/hci_sync.c
-@@ -4121,7 +4121,7 @@ static int hci_setup_link_policy_sync(struct hci_dev *hdev)
+@@ -4230,7 +4230,7 @@ static int hci_setup_link_policy_sync(struct hci_dev *hdev)
  		link_policy |= HCI_LP_HOLD;
  	if (lmp_sniff_capable(hdev))
  		link_policy |= HCI_LP_SNIFF;
@@ -78438,5 +78467,5 @@ index 609b035e5..07f421cac 100644
  
  	cp.policy = cpu_to_le16(link_policy);
 -- 
-2.49.0
+2.55.0
 

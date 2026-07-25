@@ -1,6 +1,5 @@
-from warpme's https://github.com/warpme/minimyth2/tree/master/script/kernel/
 diff --git a/drivers/net/wireless/Kconfig b/drivers/net/wireless/Kconfig
-index 73e9f3913..98b695f24 100644
+index 73e9f39..98b695f 100644
 --- a/drivers/net/wireless/Kconfig
 +++ b/drivers/net/wireless/Kconfig
 @@ -37,6 +37,7 @@ source "drivers/net/wireless/uwe5622/Kconfig"
@@ -12,7 +11,7 @@ index 73e9f3913..98b695f24 100644
  source "drivers/net/wireless/virtual/Kconfig"
  
 diff --git a/drivers/net/wireless/Makefile b/drivers/net/wireless/Makefile
-index 0959a2b12..20a8dfb6b 100644
+index 0959a2b..20a8dfb 100644
 --- a/drivers/net/wireless/Makefile
 +++ b/drivers/net/wireless/Makefile
 @@ -22,5 +22,6 @@ obj-$(CONFIG_WLAN_VENDOR_SILABS) += silabs/
@@ -24,43 +23,40 @@ index 0959a2b12..20a8dfb6b 100644
  obj-$(CONFIG_WLAN) += virtual/
 diff --git a/drivers/net/wireless/aic8800_sdio/Kconfig b/drivers/net/wireless/aic8800_sdio/Kconfig
 new file mode 100644
-index 000000000..66c20f6d8
+index 0000000..a81837d
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/Kconfig
-@@ -0,0 +1,18 @@
-+config AIC_WLAN_SUPPORT
-+	bool "AIC wireless Support"
+@@ -0,0 +1,17 @@
++config AIC_SDIO_WLAN_SUPPORT
++	bool "AIC 8800 SDIO wireless Support"
 +	default n
 +	help
-+	  This is support for aic wireless chip.
++	  This is support for aic 8800 wireless chip with SDIO interface.
 +
 +config AIC_FW_PATH
-+	depends on AIC_WLAN_SUPPORT
++	depends on AIC_SDIO_WLAN_SUPPORT
 +	string "Firmware & config file path"
-+	default "/vendor/etc/firmware"
-+	#default "/lib/firmware/aic8800_sdio"
++	default "/lib/firmware/aic8800_sdio"
 +	help
 +	  Path to the firmware & config file.
 +
-+if AIC_WLAN_SUPPORT
-+source "drivers/net/wireless/aic8800/aic8800_fdrv/Kconfig"
-+source "drivers/net/wireless/aic8800/aic8800_btlpm/Kconfig"
++if AIC_SDIO_WLAN_SUPPORT
++source "drivers/net/wireless/aic8800_sdio/aic8800_fdrv/Kconfig"
++source "drivers/net/wireless/aic8800_sdio/aic8800_btlpm/Kconfig"
 +endif
 diff --git a/drivers/net/wireless/aic8800_sdio/Makefile b/drivers/net/wireless/aic8800_sdio/Makefile
 new file mode 100644
-index 000000000..cac155948
+index 0000000..c5cfd30
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/Makefile
-@@ -0,0 +1,91 @@
+@@ -0,0 +1,89 @@
 +CONFIG_AIC8800_BTLPM_SUPPORT := m
 +CONFIG_AIC8800_WLAN_SUPPORT := m
-+CONFIG_AIC_WLAN_SUPPORT := m
++CONFIG_AIC_SDIO_WLAN_SUPPORT := m
 +
 +obj-$(CONFIG_AIC8800_BTLPM_SUPPORT) += aic8800_btlpm/
 +obj-$(CONFIG_AIC8800_WLAN_SUPPORT) += aic8800_fdrv/
-+obj-$(CONFIG_AIC_WLAN_SUPPORT) += aic8800_bsp/
-+
-+MAKEFLAGS +=-j$(shell nproc)
++obj-$(CONFIG_AIC_SDIO_WLAN_SUPPORT) += aic8800_bsp/
 +
 +########## config option ##########
 +export CONFIG_USE_FW_REQUEST = n
@@ -145,7 +141,7 @@ index 000000000..cac155948
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/Makefile b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/Makefile
 new file mode 100644
-index 000000000..bcccfbdbb
+index 0000000..bcccfbd
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/Makefile
 @@ -0,0 +1,136 @@
@@ -287,7 +283,7 @@ index 000000000..bcccfbdbb
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800d80_compat.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800d80_compat.c
 new file mode 100644
-index 000000000..ae94ac146
+index 0000000..7ddbc97
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800d80_compat.c
 @@ -0,0 +1,252 @@
@@ -450,7 +446,7 @@ index 000000000..ae94ac146
 +		return ret;
 +	}
 +	rd_version_val = rd_patch_addr_cfm.memdata;
-+	printk("rd_version_val=%08X\n", rd_version_val);
++	pr_info("rd_version_val=%08X\n", rd_version_val);
 +	sdiodev->fw_version_uint = rd_version_val;
 +	if (rd_version_val > 0x06090100) {
 +		patch_buff_addr = rd_patch_addr + 12;
@@ -545,7 +541,7 @@ index 000000000..ae94ac146
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800d80_compat.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800d80_compat.h
 new file mode 100644
-index 000000000..209565826
+index 0000000..2095658
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800d80_compat.h
 @@ -0,0 +1,24 @@
@@ -575,7 +571,7 @@ index 000000000..209565826
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800dc_compat.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800dc_compat.c
 new file mode 100644
-index 000000000..796a32168
+index 0000000..796a321
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800dc_compat.c
 @@ -0,0 +1,2275 @@
@@ -2856,7 +2852,7 @@ index 000000000..796a32168
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800dc_compat.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800dc_compat.h
 new file mode 100644
-index 000000000..67074cecf
+index 0000000..67074ce
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic8800dc_compat.h
 @@ -0,0 +1,37 @@
@@ -2899,7 +2895,7 @@ index 000000000..67074cecf
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_driver.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_driver.c
 new file mode 100644
-index 000000000..40dd98b03
+index 0000000..d59915e
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_driver.c
 @@ -0,0 +1,2051 @@
@@ -3377,7 +3373,7 @@ index 000000000..40dd98b03
 +#endif
 +
 +#define MD5(x) x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15]
-+#define MD5PINRT "file md5:%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\r\n"
++#define MD5PINRT "file md5:%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
 +
 +int rwnx_load_firmware(u32 **fw_buf, const char *name, struct device *device)
 +{
@@ -3391,13 +3387,13 @@ index 000000000..40dd98b03
 +	int size = 0;
 +	int ret = 0;
 +
-+	printk("%s: request firmware = %s \n", __func__ ,name);
++	pr_info("%s: request firmware = %s \n", __func__ ,name);
 +
 +
 +	ret = request_firmware(&fw, name, NULL);
 +
 +	if (ret < 0) {
-+		printk("Load %s fail\n", name);
++		pr_err("Load %s fail\n", name);
 +		release_firmware(fw);
 +		return -1;
 +	}
@@ -3406,7 +3402,7 @@ index 000000000..40dd98b03
 +	dst = (u32 *)fw->data;
 +
 +	if (size <= 0) {
-+		printk("wrong size of firmware file\n");
++		pr_err("wrong size of firmware file\n");
 +		release_firmware(fw);
 +		return -1;
 +	}
@@ -3421,7 +3417,7 @@ index 000000000..40dd98b03
 +	MD5Init(&md5);
 +	MD5Update(&md5, (unsigned char *)buffer, size);
 +	MD5Final(&md5, decrypt);
-+	printk(MD5PINRT, MD5(decrypt));
++	pr_info(MD5PINRT, MD5(decrypt));
 +
 +	release_firmware(fw);
 +
@@ -3438,11 +3434,11 @@ index 000000000..40dd98b03
 +
 +	#ifdef CONFIG_FIRMWARE_ARRAY
 +		size = aicwf_get_firmware_array((char*)name, fw_buf);
-+		printk("%s size:%d \r\n", __func__, size);
++		pr_info("%s size:%d \r\n", __func__, size);
 +		MD5Init(&md5);
 +		MD5Update(&md5, (unsigned char *)*fw_buf, size);
 +		MD5Final(&md5, decrypt);
-+		printk(MD5PINRT, MD5(decrypt));
++		pr_info(MD5PINRT, MD5(decrypt));
 +
 +		return size;
 +	#endif
@@ -3460,18 +3456,18 @@ index 000000000..40dd98b03
 +	    len = snprintf(path, AICBSP_FW_PATH_MAX, "%s/%s", AICBSP_FW_PATH, name);
 +    }
 +	if (len >= AICBSP_FW_PATH_MAX) {
-+		printk("%s: %s file's path too long\n", __func__, name);
++		pr_err("%s: %s file's path too long\n", __func__, name);
 +		*fw_buf = NULL;
 +		__putname(path);
 +		return -1;
 +	}
 +
-+	printk("%s :firmware path = %s  \n", __func__, path);
++	pr_info("%s :firmware path = %s  \n", __func__, path);
 +
 +	/* open the firmware file */
 +	fp = filp_open(path, O_RDONLY, 0);
 +	if (IS_ERR_OR_NULL(fp)) {
-+		printk("%s: %s file failed to open\n", __func__, name);
++		pr_err("%s: %s file failed to open\n", __func__, name);
 +		*fw_buf = NULL;
 +		__putname(path);
 +		fp = NULL;
@@ -3480,7 +3476,7 @@ index 000000000..40dd98b03
 +
 +	size = i_size_read(file_inode(fp));
 +	if (size <= 0) {
-+		printk("%s: %s file size invalid %d\n", __func__, name, size);
++		pr_err("%s: %s file size invalid %d\n", __func__, name, size);
 +		*fw_buf = NULL;
 +		__putname(path);
 +		filp_close(fp, NULL);
@@ -3508,7 +3504,7 @@ index 000000000..40dd98b03
 +#endif
 +
 +	if (size != rdlen) {
-+		printk("%s: %s file rdlen invalid %ld\n", __func__, name, (long int)rdlen);
++		pr_err("%s: %s file rdlen invalid %ld\n", __func__, name, (long int)rdlen);
 +		*fw_buf = NULL;
 +		__putname(path);
 +		filp_close(fp, NULL);
@@ -3554,7 +3550,7 @@ index 000000000..40dd98b03
 +	MD5Update(&md5, (unsigned char *)buffer, size);
 +	MD5Final(&md5, decrypt);
 +
-+	printk(MD5PINRT, MD5(decrypt));
++	pr_info(MD5PINRT, MD5(decrypt));
 +
 +	return size;
 +#endif
@@ -4144,12 +4140,12 @@ index 000000000..40dd98b03
 +	u32 *dst = NULL;
 +	int err = 0;
 +
-+	printk("%s\n",__func__);
++	pr_info("%s\n",__func__);
 +
 +	/* load aic firmware */
 +	size = rwnx_load_firmware(&dst, filename, dev);
 +	if (size <= 0) {
-+		printk("wrong size of firmware file\n");
++		pr_err("wrong size of firmware file\n");
 +#ifndef CONFIG_FIRMWARE_ARRAY
 +		vfree(dst);
 +#endif
@@ -4208,13 +4204,13 @@ index 000000000..40dd98b03
 +	/* load aic firmware */
 +	size = rwnx_load_firmware((u32 **)&rawdata, filename, NULL);
 +	if (size <= 0) {
-+		printk("wrong size of firmware file\n");
++		pr_err("wrong size of firmware file\n");
 +		goto err;
 +	}
 +
 +	p = rawdata;
 +	if (memcmp(p, AICBT_PT_TAG, sizeof(AICBT_PT_TAG) < 16 ? sizeof(AICBT_PT_TAG) : 16)) {
-+		printk("TAG err\n");
++		pr_err("TAG err\n");
 +		goto err;
 +	}
 +	p += 16;
@@ -4394,15 +4390,15 @@ index 000000000..40dd98b03
 +    		*(data + 15) = aicbt_info[sdiodev->chipid].lpm_enable;
 +    		*(data + 17) = aicbt_info[sdiodev->chipid].txpwr_lvl;
 +
-+            printk("%s bt btmode[%d]:%d \r\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].btmode);
-+    		printk("%s bt uart_baud[%d]:%d \r\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].uart_baud);
-+    		printk("%s bt uart_flowctrl[%d]:%d \r\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].uart_flowctrl);
-+    		printk("%s bt lpm_enable[%d]:%d \r\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].lpm_enable);
-+    		printk("%s bt tx_pwr[%d]:%d \r\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].txpwr_lvl);
++        	pr_info("%s bt btmode[%d]:%d\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].btmode);
++    		pr_info("%s bt uart_baud[%d]:%d\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].uart_baud);
++    		pr_info("%s bt uart_flowctrl[%d]:%d\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].uart_flowctrl);
++    		pr_info("%s bt lpm_enable[%d]:%d\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].lpm_enable);
++    		pr_info("%s bt tx_pwr[%d]:%d\n", __func__, sdiodev->chipid, aicbt_info[sdiodev->chipid].txpwr_lvl);
 +    	}
 +
 +    	if (AICBT_PT_VER == p->type) {
-+    		printk("aicbsp: bt patch version: %s\n", (char *)p->data);
++    		pr_info("aicbsp: bt patch version: %s\n", (char *)p->data);
 +    		continue;
 +    	}
 +
@@ -4427,7 +4423,7 @@ index 000000000..40dd98b03
 +    int ret = 0;
 +    struct aicbt_patch_table *head = aicbt_patch_table_alloc(aicbsp_firmware_list[aicbsp_info.cpmode].bt_table);
 +	if (head == NULL){
-+        printk("aicbt_patch_table_alloc fail\n");
++        pr_err("aicbt_patch_table_alloc fail\n");
 +        return -1;
 +    }
 +
@@ -4438,7 +4434,7 @@ index 000000000..40dd98b03
 +	}
 +
 +	if (aicbt_patch_table_load(sdiodev, head)) {
-+		 printk("aicbt_patch_table_load fail\n");
++		 pr_err("aicbt_patch_table_load fail\n");
 +        ret = -1;
 +		goto err;
 +	}
@@ -4883,7 +4879,7 @@ index 000000000..40dd98b03
 +int aicbsp_resv_mem_init(void)
 +{
 +    int i = 0;
-+	printk("%s \n",__func__);
++	pr_info("%s \n",__func__);
 +    for (i = 0; i < sizeof(resv_skb) / sizeof(resv_skb[0]); i++) {
 +            resv_skb[i].skb = dev_alloc_skb(resv_skb[i].size);
 +    }
@@ -4893,7 +4889,7 @@ index 000000000..40dd98b03
 +int aicbsp_resv_mem_deinit(void)
 +{
 +    int i = 0;
-+	printk("%s \n",__func__);
++	pr_info("%s \n",__func__);
 +    for (i = 0; i < sizeof(resv_skb) / sizeof(resv_skb[0]); i++) {
 +            if (resv_skb[i].used == 0 && resv_skb[i].skb)
 +                    dev_kfree_skb(resv_skb[i].skb);
@@ -4922,7 +4918,7 @@ index 000000000..40dd98b03
 +            }
 +    }
 +
-+    printk("aicbsp: %s, alloc %s succuss, id: %d, size: %d\n", __func__,
++	pr_info("aicbsp: %s, alloc %s succuss, id: %d, size: %d\n", __func__,
 +                    resv_skb[id].name, resv_skb[id].id, resv_skb[id].size);
 +
 +    resv_skb[id].used = 1;
@@ -4936,7 +4932,7 @@ index 000000000..40dd98b03
 +void aicbsp_resv_mem_kfree_skb(struct sk_buff *skb, uint32_t id)
 +{
 +	resv_skb[id].used = 0;
-+	printk("aicbsp: %s, free %s succuss, id: %d, size: %d\n", __func__,
++	pr_info("aicbsp: %s, free %s succuss, id: %d, size: %d\n", __func__,
 +                    resv_skb[id].name, resv_skb[id].id, resv_skb[id].size);
 +}
 +EXPORT_SYMBOL_GPL(aicbsp_resv_mem_kfree_skb);
@@ -4956,10 +4952,10 @@ index 000000000..40dd98b03
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_driver.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_driver.h
 new file mode 100644
-index 000000000..9b42fdbad
+index 0000000..d16dc15
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_driver.h
-@@ -0,0 +1,581 @@
+@@ -0,0 +1,586 @@
 +/**
 + ******************************************************************************
 + *
@@ -5011,14 +5007,19 @@ index 000000000..9b42fdbad
 +#define AICWFDBG(level, args, arg...)	\
 +do {	\
 +	if (aicwf_dbg_level_bsp & level) {	\
-+		printk(AICWF_LOG#level")\t" args, ##arg); \
++		if ((level) & LOGERROR) \
++			printk(KERN_ERR AICWF_LOG#level")\t" args, ##arg); \
++		else if ((level) & LOGINFO) \
++			printk(KERN_INFO AICWF_LOG#level")\t" args, ##arg); \
++		else \
++			printk(KERN_DEBUG AICWF_LOG#level")\t" args, ##arg); \
 +	}	\
 +} while (0)
 +
 +#define RWNX_DBG(fmt, ...)	\
 +do {	\
 +	if (aicwf_dbg_level_bsp & LOGTRACE) {	\
-+		printk(AICWF_LOG"LOGTRACE)\t"fmt , ##__VA_ARGS__); 	\
++		printk(KERN_DEBUG AICWF_LOG"LOGTRACE)\t"fmt , ##__VA_ARGS__); 	\
 +	}	\
 +} while (0)
 +
@@ -5543,7 +5544,7 @@ index 000000000..9b42fdbad
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_export.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_export.h
 new file mode 100644
-index 000000000..249d6ec08
+index 0000000..249d6ec
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_export.h
 @@ -0,0 +1,65 @@
@@ -5614,10 +5615,10 @@ index 000000000..249d6ec08
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_main.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_main.c
 new file mode 100644
-index 000000000..7666a1f09
+index 0000000..6924904
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aic_bsp_main.c
-@@ -0,0 +1,393 @@
+@@ -0,0 +1,394 @@
 +#include <linux/module.h>
 +#include <linux/inetdevice.h>
 +#include <linux/errno.h>
@@ -5635,7 +5636,8 @@ index 000000000..7666a1f09
 +#define DRV_AUTHOR            "AICSemi"
 +#define DRV_VERS_MOD          "1.0"
 +
-+int aicwf_dbg_level_bsp = LOGERROR|LOGINFO|LOGDEBUG|LOGTRACE;
++//int aicwf_dbg_level_bsp = LOGERROR|LOGINFO|LOGDEBUG|LOGTRACE;
++int aicwf_dbg_level_bsp = LOGERROR;
 +
 +static struct platform_device *aicbsp_pdev;
 +
@@ -5951,8 +5953,8 @@ index 000000000..7666a1f09
 +static int __init aicbsp_init(void)
 +{
 +	int ret;
-+	printk("%s\n", __func__);
-+	printk("RELEASE_DATE:%s\r\n", RELEASE_DATE);
++	pr_info("%s\n", __func__);
++	pr_info("RELEASE_DATE:%s\r\n", RELEASE_DATE);
 +
 +	aicbsp_info.cpmode = testmode;
 +
@@ -6001,7 +6003,7 @@ index 000000000..7666a1f09
 +#ifdef CONFIG_PREALLOC_TXQ
 +    aicwf_prealloc_txq_free();
 +#endif
-+	printk("%s\n", __func__);
++	pr_info("%s\n", __func__);
 +}
 +
 +module_init(aicbsp_init);
@@ -6013,7 +6015,7 @@ index 000000000..7666a1f09
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio.c
 new file mode 100644
-index 000000000..4a9707c03
+index 0000000..3246be4
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio.c
 @@ -0,0 +1,1980 @@
@@ -6115,7 +6117,7 @@ index 000000000..4a9707c03
 +		func->vendor != SDIO_VENDOR_ID_AIC8800D80 &&
 +		func->device != SDIO_DEVICE_ID_AIC8800D80 &&
 +		func->device != SDIO_DEVICE_ID_AIC8800D80_FUNC2){
-+			printk("VID:%x DID:%X \r\n", func->vendor, func->device);
++			pr_info("VID:%x DID:%X \r\n", func->vendor, func->device);
 +			aicbsp_load_fw_in_fdrv = true;
 +    }
 +
@@ -6208,7 +6210,7 @@ index 000000000..4a9707c03
 +#ifdef CONFIG_GPIO_WAKEUP
 +			//BT_SLEEP:true,BT_WAKEUP:false
 +			rfkill_rk_sleep_bt(true);
-+			printk("%s BT wake default to SLEEP\r\n", __func__);
++			pr_info("%s BT wake default to SLEEP\r\n", __func__);
 +#endif
 +#endif
 +
@@ -6333,7 +6335,7 @@ index 000000000..4a9707c03
 +	bus_if->bus_priv.sdio = sdiodev;
 +	if(sdiodev->chipid == PRODUCT_ID_AIC8800DC || sdiodev->chipid == PRODUCT_ID_AIC8800DW){
 +		dev_set_drvdata(&sdiodev->func_msg->dev, bus_if);
-+		printk("the device is PRODUCT_ID_AIC8800DC \n");
++		pr_info("the device is PRODUCT_ID_AIC8800DC \n");
 +	}
 +	dev_set_drvdata(&func->dev, bus_if);
 +	sdiodev->dev = &func->dev;
@@ -6529,7 +6531,7 @@ index 000000000..4a9707c03
 +	if (down_timeout(&aic_chipup_sem, msecs_to_jiffies(2000)) == 0) {
 +		aicbsp_unreg_sdio_notify();
 +		if(aicbsp_load_fw_in_fdrv){
-+			printk("%s load fw in fdrv\r\n", __func__);
++			pr_info("%s load fw in fdrv\r\n", __func__);
 +			return -1;
 +		}
 +		return 0;
@@ -6595,7 +6597,7 @@ index 000000000..4a9707c03
 +		//may add mmc_rescan here
 +	}
 +	if (down_timeout(aicbsp_probe_semaphore, msecs_to_jiffies(2000)) != 0){
-+		printk("%s aicbsp_sdio_probe fail\r\n", __func__);
++		pr_info("%s aicbsp_sdio_probe fail\r\n", __func__);
 +		return -1;
 +	}
 +
@@ -7999,7 +8001,7 @@ index 000000000..4a9707c03
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio.h
 new file mode 100644
-index 000000000..68efaf5f6
+index 0000000..68efaf5
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio.h
 @@ -0,0 +1,148 @@
@@ -8153,7 +8155,7 @@ index 000000000..68efaf5f6
 +#endif /*_AICWF_SDMMC_H_*/
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio_txrxif.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio_txrxif.c
 new file mode 100644
-index 000000000..82bacf945
+index 0000000..82bacf9
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio_txrxif.c
 @@ -0,0 +1,465 @@
@@ -8624,7 +8626,7 @@ index 000000000..82bacf945
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio_txrxif.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio_txrxif.h
 new file mode 100644
-index 000000000..801e0ea49
+index 0000000..6a02aa0
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicsdio_txrxif.h
 @@ -0,0 +1,214 @@
@@ -8664,15 +8666,15 @@ index 000000000..801e0ea49
 +#define sdio_err(fmt, ...)          pr_err("aicbsp: sdio_err:<%s,%d>: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 +#define usb_err(fmt, ...)           pr_err("aicbsp: usb_err:<%s,%d>: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 +#if DBG_LEVEL >= DEBUG_DEBUG_LEVEL
-+#define sdio_dbg(fmt, ...)          printk("aicbsp: " fmt, ##__VA_ARGS__)
-+#define usb_dbg(fmt, ...)           printk("aicbsp: " fmt, ##__VA_ARGS__)
++#define sdio_dbg(fmt, ...)          pr_debug("aicbsp: " fmt, ##__VA_ARGS__)
++#define usb_dbg(fmt, ...)           pr_debug("aicbsp: " fmt, ##__VA_ARGS__)
 +#else
 +#define sdio_dbg(fmt, ...)
 +#define usb_dbg(fmt, ...)
 +#endif
 +#if DBG_LEVEL >= DEBUG_INFO_LEVEL
-+#define sdio_info(fmt, ...)         printk("aicbsp: " fmt, ##__VA_ARGS__)
-+#define usb_info(fmt, ...)          printk("aicbsp: " fmt, ##__VA_ARGS__)
++#define sdio_info(fmt, ...)         pr_info("aicbsp: " fmt, ##__VA_ARGS__)
++#define usb_info(fmt, ...)          pr_info("aicbsp: " fmt, ##__VA_ARGS__)
 +#else
 +#define sdio_info(fmt, ...)
 +#define usb_info(fmt, ...)
@@ -8844,7 +8846,7 @@ index 000000000..801e0ea49
 +#endif /* _AICWF_TXRXIF_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_firmware_array.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_firmware_array.c
 new file mode 100644
-index 000000000..77130f76b
+index 0000000..77130f7
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_firmware_array.c
 @@ -0,0 +1,16138 @@
@@ -24989,7 +24991,7 @@ index 000000000..77130f76b
 \ No newline at end of file
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_firmware_array.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_firmware_array.h
 new file mode 100644
-index 000000000..dcf38e9ba
+index 0000000..dcf38e9
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_firmware_array.h
 @@ -0,0 +1,3 @@
@@ -24998,7 +25000,7 @@ index 000000000..dcf38e9ba
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_txq_prealloc.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_txq_prealloc.c
 new file mode 100644
-index 000000000..9514c416b
+index 0000000..9514c41
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_txq_prealloc.c
 @@ -0,0 +1,62 @@
@@ -25066,7 +25068,7 @@ index 000000000..9514c416b
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_txq_prealloc.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_txq_prealloc.h
 new file mode 100644
-index 000000000..ce4ee0747
+index 0000000..ce4ee07
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/aicwf_txq_prealloc.h
 @@ -0,0 +1,4 @@
@@ -25076,7 +25078,7 @@ index 000000000..ce4ee0747
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/md5.c b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/md5.c
 new file mode 100644
-index 000000000..3d7b65375
+index 0000000..3d7b653
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/md5.c
 @@ -0,0 +1,161 @@
@@ -25243,7 +25245,7 @@ index 000000000..3d7b65375
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/md5.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/md5.h
 new file mode 100644
-index 000000000..6ed5c0f8e
+index 0000000..6ed5c0f
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/md5.h
 @@ -0,0 +1,48 @@
@@ -25297,7 +25299,7 @@ index 000000000..6ed5c0f8e
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_bsp/rwnx_version_gen.h b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/rwnx_version_gen.h
 new file mode 100644
-index 000000000..ed5429ee9
+index 0000000..ed5429e
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_bsp/rwnx_version_gen.h
 @@ -0,0 +1,4 @@
@@ -25307,7 +25309,7 @@ index 000000000..ed5429ee9
 +#define RELEASE_DATE "2024_0327_3561b08f"
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/Kconfig b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/Kconfig
 new file mode 100644
-index 000000000..ff7aaa649
+index 0000000..ff7aaa6
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/Kconfig
 @@ -0,0 +1,5 @@
@@ -25318,7 +25320,7 @@ index 000000000..ff7aaa649
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/Makefile b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/Makefile
 new file mode 100644
-index 000000000..6d59301f9
+index 0000000..6d59301
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/Makefile
 @@ -0,0 +1,83 @@
@@ -25407,10 +25409,10 @@ index 000000000..6d59301f9
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic8800_btlpm.c b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic8800_btlpm.c
 new file mode 100644
-index 000000000..52d768d83
+index 0000000..ca98248
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic8800_btlpm.c
-@@ -0,0 +1,1167 @@
+@@ -0,0 +1,1166 @@
 +/*
 + *
 + * This program is free software; you can redistribute it and/or modify
@@ -25445,7 +25447,6 @@ index 000000000..52d768d83
 +#include <linux/bitops.h>
 +#include <linux/termios.h>
 +#include <linux/gpio.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_platform.h>
 +#include <linux/pm_wakeirq.h>
 +
@@ -26580,7 +26581,7 @@ index 000000000..52d768d83
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic_bluetooth_main.c b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic_bluetooth_main.c
 new file mode 100644
-index 000000000..122d867f0
+index 0000000..122d867
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic_bluetooth_main.c
 @@ -0,0 +1,88 @@
@@ -26674,7 +26675,7 @@ index 000000000..122d867f0
 +MODULE_LICENSE("GPL");
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic_bsp_export.h b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic_bsp_export.h
 new file mode 100644
-index 000000000..88f6b565c
+index 0000000..88f6b56
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/aic_bsp_export.h
 @@ -0,0 +1,19 @@
@@ -26699,10 +26700,10 @@ index 000000000..88f6b565c
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/lpm.c b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/lpm.c
 new file mode 100644
-index 000000000..6e9b71564
+index 0000000..d5b047e
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/lpm.c
-@@ -0,0 +1,1111 @@
+@@ -0,0 +1,1120 @@
 +/*
 + *
 + * This program is free software; you can redistribute it and/or modify
@@ -26737,7 +26738,6 @@ index 000000000..6e9b71564
 +#include <linux/bitops.h>
 +#include <linux/termios.h>
 +#include <linux/gpio.h>
-+#include <linux/of_gpio.h>
 +#include <linux/of_platform.h>
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
 +#include <linux/pm_wakeirq.h>
@@ -27474,6 +27474,16 @@ index 000000000..6e9b71564
 +}
 +#endif
 +
++enum of_gpio_flags {
++	OF_GPIO_ACTIVE_LOW = 0x1,
++	OF_GPIO_SINGLE_ENDED = 0x2,
++	OF_GPIO_OPEN_DRAIN = 0x4,
++	OF_GPIO_TRANSITORY = 0x8,
++	OF_GPIO_PULL_UP = 0x10,
++	OF_GPIO_PULL_DOWN = 0x20,
++	OF_GPIO_PULL_DISABLE = 0x40,
++};
++
 +static int bluesleep_probe(struct platform_device *pdev)
 +{
 +#if 1
@@ -27488,7 +27498,7 @@ index 000000000..6e9b71564
 +	if (!bsi)
 +		return -ENOMEM;
 +
-+	bsi->host_wake = of_get_named_gpio_flags(np, "bt_hostwake", 0, &config);
++	bsi->host_wake = of_get_named_gpio(np, "bt_hostwake", 0);
 +	if (!gpio_is_valid(bsi->host_wake)) {
 +		BT_ERR("get gpio bt_hostwake failed\n");
 +		ret = -EINVAL;
@@ -27496,7 +27506,7 @@ index 000000000..6e9b71564
 +	}
 +
 +	/* set host_wake_assert */
-+	bsi->host_wake_assert = (config == OF_GPIO_ACTIVE_LOW) ? 0 : 1;
++	bsi->host_wake_assert = (config == GPIOF_ACTIVE_LOW) ? 0 : 1;
 +	BT_DBG("bt_hostwake gpio=%d assert=%d\n", bsi->host_wake, bsi->host_wake_assert);
 +
 +	if (assert_level != -1) {
@@ -27543,7 +27553,7 @@ index 000000000..6e9b71564
 +#endif
 +	}
 +
-+	bsi->ext_wake = of_get_named_gpio_flags(np, "bt_wake", 0, &config);
++	bsi->ext_wake = of_get_named_gpio(np, "bt_wake", 0);
 +	if (!gpio_is_valid(bsi->ext_wake)) {
 +		BT_ERR("get gpio bt_wake failed\n");
 +		ret = -EINVAL;
@@ -27616,11 +27626,11 @@ index 000000000..6e9b71564
 +	return 0;
 +
 +err3:
-+	devm_gpio_free(dev, bsi->ext_wake);
++	//todo devm_gpio_free(dev, bsi->ext_wake);
 +err2:
 +	device_init_wakeup(dev, false);
 +err1:
-+	devm_gpio_free(dev, bsi->host_wake);
++	//todo devm_gpio_free(dev, bsi->host_wake);
 +err0:
 +	devm_kfree(dev, bsi);
 +
@@ -27816,7 +27826,7 @@ index 000000000..6e9b71564
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/lpm.h b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/lpm.h
 new file mode 100644
-index 000000000..0ff9dca14
+index 0000000..0ff9dca
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/lpm.h
 @@ -0,0 +1,21 @@
@@ -27843,10 +27853,10 @@ index 000000000..0ff9dca14
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/rfkill.c b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/rfkill.c
 new file mode 100644
-index 000000000..5caf3f83a
+index 0000000..033e212
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/rfkill.c
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,80 @@
 +/*
 + * This software is licensed under the terms of the GNU General Public
 + * License version 2, as published by the Free Software Foundation, and
@@ -27867,7 +27877,6 @@ index 000000000..5caf3f83a
 +#include <linux/gpio.h>
 +#include <linux/ioport.h>
 +#include <linux/clk.h>
-+#include <linux/of_gpio.h>
 +#include <linux/version.h>
 +#include "aic_bsp_export.h"
 +
@@ -27930,7 +27939,7 @@ index 000000000..5caf3f83a
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/rfkill.h b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/rfkill.h
 new file mode 100644
-index 000000000..ce0d5761a
+index 0000000..ce0d576
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_btlpm/rfkill.h
 @@ -0,0 +1,17 @@
@@ -27953,7 +27962,7 @@ index 000000000..ce0d5761a
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/Kconfig b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/Kconfig
 new file mode 100644
-index 000000000..c26f2b4af
+index 0000000..c26f2b4
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/Kconfig
 @@ -0,0 +1,5 @@
@@ -27964,10 +27973,10 @@ index 000000000..c26f2b4af
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/Makefile b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/Makefile
 new file mode 100644
-index 000000000..8c10df7e1
+index 0000000..92dc1e9
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/Makefile
-@@ -0,0 +1,380 @@
+@@ -0,0 +1,382 @@
 +EXTRA_CFLAGS += $(USER_EXTRA_CFLAGS)
 +EXTRA_CFLAGS += -Wno-implicit-fallthrough
 +#EXTRA_CFLAGS += -Wno-unused-function
@@ -28102,7 +28111,7 @@ index 000000000..8c10df7e1
 +
 +# extra DEBUG config
 +CONFIG_RWNX_SW_PROFILING ?= n
-+CONFIG_RWNX_DBG ?= y
++CONFIG_RWNX_DBG ?= n
 +CONFIG_DEBUG_FS ?= n
 +
 +obj-$(CONFIG_AIC8800_WLAN_SUPPORT) := $(MODULE_NAME).o
@@ -28172,6 +28181,8 @@ index 000000000..8c10df7e1
 +ccflags-y += -DNX_TXDESC_CNT=64
 +ccflags-y += -DNX_TX_MAX_RATES=4
 +ccflags-y += -DNX_CHAN_CTXT_CNT=3
++
++ccflags-y += -Wno-incompatible-pointer-types
 +
 +# FW ARCH:
 +ccflags-$(CONFIG_RWNX_SDM) += -DCONFIG_RWNX_SDM
@@ -28350,7 +28361,7 @@ index 000000000..8c10df7e1
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_br_ext.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_br_ext.c
 new file mode 100644
-index 000000000..dd038e39f
+index 0000000..dd038e3
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_br_ext.c
 @@ -0,0 +1,1569 @@
@@ -29925,7 +29936,7 @@ index 000000000..dd038e39f
 +#endif /* CONFIG_BR_SUPPORT */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_br_ext.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_br_ext.h
 new file mode 100644
-index 000000000..71ebeb293
+index 0000000..71ebeb2
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_br_ext.h
 @@ -0,0 +1,73 @@
@@ -30004,7 +30015,7 @@ index 000000000..71ebeb293
 +#endif /* _AIC_BR_EXT_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_bsp_export.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_bsp_export.h
 new file mode 100644
-index 000000000..bd806fad5
+index 0000000..bd806fa
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_bsp_export.h
 @@ -0,0 +1,58 @@
@@ -30068,7 +30079,7 @@ index 000000000..bd806fad5
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_btsdio.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_btsdio.c
 new file mode 100644
-index 000000000..643f94698
+index 0000000..643f946
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_btsdio.c
 @@ -0,0 +1,1310 @@
@@ -31384,7 +31395,7 @@ index 000000000..643f94698
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_btsdio.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_btsdio.h
 new file mode 100644
-index 000000000..719c2c6bc
+index 0000000..719c2c6
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_btsdio.h
 @@ -0,0 +1,549 @@
@@ -31939,7 +31950,7 @@ index 000000000..719c2c6bc
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_vendor.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_vendor.c
 new file mode 100644
-index 000000000..0cc6d5a39
+index 0000000..0cc6d5a
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_vendor.c
 @@ -0,0 +1,909 @@
@@ -32854,7 +32865,7 @@ index 000000000..0cc6d5a39
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_vendor.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_vendor.h
 new file mode 100644
-index 000000000..0e1e3e0c7
+index 0000000..0e1e3e0
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aic_vendor.h
 @@ -0,0 +1,346 @@
@@ -33206,7 +33217,7 @@ index 000000000..0e1e3e0c7
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800d80.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800d80.c
 new file mode 100644
-index 000000000..7f50fe6bf
+index 0000000..7f50fe6
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800d80.c
 @@ -0,0 +1,66 @@
@@ -33278,7 +33289,7 @@ index 000000000..7f50fe6bf
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800d80.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800d80.h
 new file mode 100644
-index 000000000..df3e9d963
+index 0000000..df3e9d9
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800d80.h
 @@ -0,0 +1,9 @@
@@ -33293,7 +33304,7 @@ index 000000000..df3e9d963
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800dc.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800dc.c
 new file mode 100644
-index 000000000..f817fc042
+index 0000000..f817fc0
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800dc.c
 @@ -0,0 +1,542 @@
@@ -33841,7 +33852,7 @@ index 000000000..f817fc042
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800dc.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800dc.h
 new file mode 100644
-index 000000000..249703b68
+index 0000000..249703b
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_compat_8800dc.h
 @@ -0,0 +1,15 @@
@@ -33862,10 +33873,10 @@ index 000000000..249703b68
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_debug.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_debug.h
 new file mode 100644
-index 000000000..25a576656
+index 0000000..85e58d2
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_debug.h
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,61 @@
 +
 +
 +#define RWNX_FN_ENTRY_STR ">>> %s()\n", __func__
@@ -33891,14 +33902,19 @@ index 000000000..25a576656
 +#define AICWFDBG(level, args, arg...)	\
 +do {	\
 +	if (aicwf_dbg_level & level) {	\
-+		printk(AICWF_LOG#level")\t" args, ##arg); \
++		if ((level) & LOGERROR) \
++			printk(KERN_ERR AICWF_LOG#level")\t" args, ##arg); \
++		else if ((level) & LOGINFO) \
++			printk(KERN_INFO AICWF_LOG#level")\t" args, ##arg); \
++		else \
++			printk(KERN_DEBUG AICWF_LOG#level")\t" args, ##arg); \
 +	}	\
 +} while (0)
 +
 +#define RWNX_DBG(fmt, ...)	\
 +do {	\
 +	if (aicwf_dbg_level & LOGTRACE) {	\
-+		printk(AICWF_LOG"LOGTRACE)\t"fmt , ##__VA_ARGS__); 	\
++		printk(KERN_DEBUG AICWF_LOG"LOGTRACE)\t"fmt , ##__VA_ARGS__); 	\
 +	}	\
 +} while (0)
 +
@@ -33924,7 +33940,7 @@ index 000000000..25a576656
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_rx_prealloc.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_rx_prealloc.c
 new file mode 100644
-index 000000000..59502b89a
+index 0000000..59502b8
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_rx_prealloc.c
 @@ -0,0 +1,97 @@
@@ -34027,7 +34043,7 @@ index 000000000..59502b89a
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_rx_prealloc.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_rx_prealloc.h
 new file mode 100644
-index 000000000..64a494aee
+index 0000000..64a494a
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_rx_prealloc.h
 @@ -0,0 +1,24 @@
@@ -34058,7 +34074,7 @@ index 000000000..64a494aee
 \ No newline at end of file
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_sdio.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_sdio.c
 new file mode 100644
-index 000000000..3ab130af7
+index 0000000..cba199d
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_sdio.c
 @@ -0,0 +1,2591 @@
@@ -34593,15 +34609,15 @@ index 000000000..3ab130af7
 +
 +	if(vid == SDIO_VENDOR_ID_AIC8801 && did == SDIO_DEVICE_ID_AIC8801){
 +		sdio_dev->chipid = PRODUCT_ID_AIC8801;
-+		AICWFDBG(LOGINFO, "%s USE AIC8801\r\n", __func__);
++		AICWFDBG(LOGINFO, "%s USE AIC8801\r", __func__);
 +		return 0;
 +	}else if(vid == SDIO_VENDOR_ID_AIC8800DC && did == SDIO_DEVICE_ID_AIC8800DC){
 +		sdio_dev->chipid = PRODUCT_ID_AIC8800DC;
-+		AICWFDBG(LOGINFO, "%s USE AIC8800DC\r\n", __func__);
++		AICWFDBG(LOGINFO, "%s USE AIC8800DC\r", __func__);
 +		return 0;
 +	}else if(vid == SDIO_VENDOR_ID_AIC8800D80 && did == SDIO_DEVICE_ID_AIC8800D80){
 +		sdio_dev->chipid = PRODUCT_ID_AIC8800D80;
-+		AICWFDBG(LOGINFO, "%s USE AIC8800D80\r\n", __func__);
++		AICWFDBG(LOGINFO, "%s USE AIC8800D80\r", __func__);
 +		return 0;
 +	}else{
 +		return -1;
@@ -36021,7 +36037,7 @@ index 000000000..3ab130af7
 +#endif
 +
 +	if (sdiodev->bus_if->state == BUS_DOWN_ST) {
-+		sdio_err("bus down\n");
++		sdio_info("bus down\n");
 +		return;
 +	}
 +
@@ -36655,7 +36671,7 @@ index 000000000..3ab130af7
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_sdio.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_sdio.h
 new file mode 100644
-index 000000000..4ca6de280
+index 0000000..4ca6de2
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_sdio.h
 @@ -0,0 +1,186 @@
@@ -36847,7 +36863,7 @@ index 000000000..4ca6de280
 +#endif /*_AICWF_SDMMC_H_*/
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_tcp_ack.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_tcp_ack.c
 new file mode 100644
-index 000000000..fa30efd81
+index 0000000..40be026
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_tcp_ack.c
 @@ -0,0 +1,633 @@
@@ -37486,7 +37502,7 @@ index 000000000..fa30efd81
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_tcp_ack.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_tcp_ack.h
 new file mode 100644
-index 000000000..d872e635c
+index 0000000..d872e63
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_tcp_ack.h
 @@ -0,0 +1,111 @@
@@ -37603,7 +37619,7 @@ index 000000000..d872e635c
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_txrxif.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_txrxif.c
 new file mode 100644
-index 000000000..47613d7c6
+index 0000000..47613d7
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_txrxif.c
 @@ -0,0 +1,885 @@
@@ -38494,7 +38510,7 @@ index 000000000..47613d7c6
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_txrxif.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_txrxif.h
 new file mode 100644
-index 000000000..2a0644279
+index 0000000..655cf29
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_txrxif.h
 @@ -0,0 +1,262 @@
@@ -38540,18 +38556,18 @@ index 000000000..2a0644279
 +#define sdio_err(fmt, ...)          pr_err("sdio_err:<%s,%d>: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 +#define usb_err(fmt, ...)           pr_err("usb_err:<%s,%d>: " fmt, __func__, __LINE__, ##__VA_ARGS__)
 +#if DBG_LEVEL >= DEBUG_DEBUG_LEVEL
-+#define txrx_dbg(fmt, ...)          printk("txrx: " fmt, ##__VA_ARGS__)
-+#define sdio_dbg(fmt, ...)          printk("aicsdio: " fmt, ##__VA_ARGS__)
-+#define usb_dbg(fmt, ...)           printk("aicusb: " fmt, ##__VA_ARGS__)
++#define txrx_dbg(fmt, ...)          pr_debug("txrx: " fmt, ##__VA_ARGS__)
++#define sdio_dbg(fmt, ...)          pr_debug("aicsdio: " fmt, ##__VA_ARGS__)
++#define usb_dbg(fmt, ...)           pr_debug("aicusb: " fmt, ##__VA_ARGS__)
 +#else
 +#define txrx_dbg(fmt, ...)
 +#define sdio_dbg(fmt, ...)
 +#define usb_dbg(fmt, ...)
 +#endif
 +#if DBG_LEVEL >= DEBUG_INFO_LEVEL
-+#define txrx_info(fmt, ...)         printk("aicsdio: " fmt, ##__VA_ARGS__)
-+#define sdio_info(fmt, ...)         printk("aicsdio: " fmt, ##__VA_ARGS__)
-+#define usb_info(fmt, ...)          printk("aicusb: " fmt, ##__VA_ARGS__)
++#define txrx_info(fmt, ...)         pr_info("aicsdio: " fmt, ##__VA_ARGS__)
++#define sdio_info(fmt, ...)         pr_info("aicsdio: " fmt, ##__VA_ARGS__)
++#define usb_info(fmt, ...)          pr_info("aicusb: " fmt, ##__VA_ARGS__)
 +#else
 +#define txrx_info(fmt, ...)
 +#define sdio_info(fmt, ...)
@@ -38762,7 +38778,7 @@ index 000000000..2a0644279
 +#endif /* _AICWF_TXRXIF_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_usb.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_usb.c
 new file mode 100644
-index 000000000..9344217c2
+index 0000000..9344217
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_usb.c
 @@ -0,0 +1,957 @@
@@ -39725,7 +39741,7 @@ index 000000000..9344217c2
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_usb.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_usb.h
 new file mode 100644
-index 000000000..cc3619b2d
+index 0000000..cc3619b
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/aicwf_usb.h
 @@ -0,0 +1,99 @@
@@ -39830,7 +39846,7 @@ index 000000000..cc3619b2d
 +#endif /* _AICWF_USB_H_       */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/hal_desc.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/hal_desc.h
 new file mode 100644
-index 000000000..17cb02526
+index 0000000..17cb025
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/hal_desc.h
 @@ -0,0 +1,353 @@
@@ -40189,7 +40205,7 @@ index 000000000..17cb02526
 +#endif // _HAL_DESC_H_
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_compat.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_compat.h
 new file mode 100644
-index 000000000..069f69ee5
+index 0000000..069f69e
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_compat.h
 @@ -0,0 +1,25 @@
@@ -40220,7 +40236,7 @@ index 000000000..069f69ee5
 +#endif /* _IPC_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_host.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_host.c
 new file mode 100644
-index 000000000..7746f4097
+index 0000000..7746f40
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_host.c
 @@ -0,0 +1,52 @@
@@ -40278,7 +40294,7 @@ index 000000000..7746f4097
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_host.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_host.h
 new file mode 100644
-index 000000000..583b66889
+index 0000000..583b668
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_host.h
 @@ -0,0 +1,168 @@
@@ -40452,7 +40468,7 @@ index 000000000..583b66889
 +#endif // _IPC_HOST_H_
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_shared.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_shared.h
 new file mode 100644
-index 000000000..7e2fedcb1
+index 0000000..7e2fedc
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/ipc_shared.h
 @@ -0,0 +1,785 @@
@@ -41243,7 +41259,7 @@ index 000000000..7e2fedcb1
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_mac.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_mac.h
 new file mode 100644
-index 000000000..2753d4d23
+index 0000000..2753d4d
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_mac.h
 @@ -0,0 +1,564 @@
@@ -41813,7 +41829,7 @@ index 000000000..2753d4d23
 +#endif // LMAC_MAC_H_
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_msg.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_msg.h
 new file mode 100644
-index 000000000..91a4e2913
+index 0000000..91a4e29
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_msg.h
 @@ -0,0 +1,3082 @@
@@ -44901,7 +44917,7 @@ index 000000000..91a4e2913
 +#endif // LMAC_MSG_H_
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_types.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_types.h
 new file mode 100644
-index 000000000..83b112290
+index 0000000..83b1122
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/lmac_types.h
 @@ -0,0 +1,62 @@
@@ -44969,7 +44985,7 @@ index 000000000..83b112290
 +#endif // _LMAC_INT_H_
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/md5.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/md5.c
 new file mode 100644
-index 000000000..3d7b65375
+index 0000000..3d7b653
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/md5.c
 @@ -0,0 +1,161 @@
@@ -45136,7 +45152,7 @@ index 000000000..3d7b65375
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/md5.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/md5.h
 new file mode 100644
-index 000000000..6ed5c0f8e
+index 0000000..6ed5c0f
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/md5.h
 @@ -0,0 +1,48 @@
@@ -45190,7 +45206,7 @@ index 000000000..6ed5c0f8e
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/reg_access.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/reg_access.h
 new file mode 100644
-index 000000000..568146624
+index 0000000..5681466
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/reg_access.h
 @@ -0,0 +1,148 @@
@@ -45344,7 +45360,7 @@ index 000000000..568146624
 +#endif /* REG_ACCESS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/regdb.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/regdb.c
 new file mode 100644
-index 000000000..0f8777066
+index 0000000..0f87770
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/regdb.c
 @@ -0,0 +1,2898 @@
@@ -48248,7 +48264,7 @@ index 000000000..0f8777066
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_bfmer.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_bfmer.c
 new file mode 100644
-index 000000000..b39cf0f20
+index 0000000..b39cf0f
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_bfmer.c
 @@ -0,0 +1,105 @@
@@ -48359,7 +48375,7 @@ index 000000000..b39cf0f20
 +#endif /* CONFIG_RWNX_FULLMAC */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_bfmer.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_bfmer.h
 new file mode 100644
-index 000000000..4ce16496e
+index 0000000..4ce1649
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_bfmer.h
 @@ -0,0 +1,100 @@
@@ -48465,7 +48481,7 @@ index 000000000..4ce16496e
 +#endif /* _RWNX_BFMER_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cfgfile.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cfgfile.c
 new file mode 100644
-index 000000000..39a5a2514
+index 0000000..39a5a25
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cfgfile.c
 @@ -0,0 +1,239 @@
@@ -48710,7 +48726,7 @@ index 000000000..39a5a2514
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cfgfile.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cfgfile.h
 new file mode 100644
-index 000000000..7dc96fe58
+index 0000000..7dc96fe
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cfgfile.h
 @@ -0,0 +1,35 @@
@@ -48751,7 +48767,7 @@ index 000000000..7dc96fe58
 +#endif /* _RWNX_CFGFILE_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cmds.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cmds.c
 new file mode 100644
-index 000000000..36f4686ed
+index 0000000..36f4686
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cmds.c
 @@ -0,0 +1,539 @@
@@ -49296,7 +49312,7 @@ index 000000000..36f4686ed
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cmds.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cmds.h
 new file mode 100644
-index 000000000..b757a65cf
+index 0000000..b757a65
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_cmds.h
 @@ -0,0 +1,124 @@
@@ -49426,7 +49442,7 @@ index 000000000..b757a65cf
 +#endif /* _RWNX_CMDS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_compat.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_compat.h
 new file mode 100644
-index 000000000..9287eca60
+index 0000000..9287eca
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_compat.h
 @@ -0,0 +1,446 @@
@@ -49878,7 +49894,7 @@ index 000000000..9287eca60
 +#endif /* _RWNX_COMPAT_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_debugfs.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_debugfs.c
 new file mode 100644
-index 000000000..5a2840805
+index 0000000..5a28408
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_debugfs.c
 @@ -0,0 +1,2455 @@
@@ -52339,7 +52355,7 @@ index 000000000..5a2840805
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_debugfs.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_debugfs.h
 new file mode 100644
-index 000000000..7f5c7c9c5
+index 0000000..7f5c7c9
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_debugfs.h
 @@ -0,0 +1,202 @@
@@ -52547,7 +52563,7 @@ index 000000000..7f5c7c9c5
 +#endif /* _RWNX_DEBUGFS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_defs.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_defs.h
 new file mode 100644
-index 000000000..4e966dee2
+index 0000000..4e966de
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_defs.h
 @@ -0,0 +1,746 @@
@@ -53299,7 +53315,7 @@ index 000000000..4e966dee2
 +#endif /* _RWNX_DEFS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_dini.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_dini.c
 new file mode 100644
-index 000000000..17d55da11
+index 0000000..17d55da
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_dini.c
 @@ -0,0 +1,297 @@
@@ -53602,7 +53618,7 @@ index 000000000..17d55da11
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_dini.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_dini.h
 new file mode 100644
-index 000000000..d9f57c10e
+index 0000000..d9f57c1
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_dini.h
 @@ -0,0 +1,20 @@
@@ -53628,7 +53644,7 @@ index 000000000..d9f57c10e
 +#endif /* _RWNX_DINI_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_events.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_events.h
 new file mode 100644
-index 000000000..3bd59807f
+index 0000000..3bd5980
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_events.h
 @@ -0,0 +1,1326 @@
@@ -54960,7 +54976,7 @@ index 000000000..3bd59807f
 +#include <trace/define_trace.h>
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_fw_trace.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_fw_trace.c
 new file mode 100644
-index 000000000..9151c8b81
+index 0000000..9151c8b
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_fw_trace.c
 @@ -0,0 +1,48 @@
@@ -55014,7 +55030,7 @@ index 000000000..9151c8b81
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_fw_trace.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_fw_trace.h
 new file mode 100644
-index 000000000..795679095
+index 0000000..7956790
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_fw_trace.h
 @@ -0,0 +1,35 @@
@@ -55055,7 +55071,7 @@ index 000000000..795679095
 +#endif /* _RWNX_FW_TRACE_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_gki.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_gki.c
 new file mode 100644
-index 000000000..7f6333d91
+index 0000000..7f6333d
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_gki.c
 @@ -0,0 +1,408 @@
@@ -55469,7 +55485,7 @@ index 000000000..7f6333d91
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_gki.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_gki.h
 new file mode 100644
-index 000000000..a41f57832
+index 0000000..a41f578
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_gki.h
 @@ -0,0 +1,72 @@
@@ -55547,7 +55563,7 @@ index 000000000..a41f57832
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_irqs.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_irqs.c
 new file mode 100644
-index 000000000..8ba95b703
+index 0000000..8ba95b7
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_irqs.c
 @@ -0,0 +1,65 @@
@@ -55618,7 +55634,7 @@ index 000000000..8ba95b703
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_irqs.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_irqs.h
 new file mode 100644
-index 000000000..d3fb4519c
+index 0000000..d3fb451
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_irqs.h
 @@ -0,0 +1,20 @@
@@ -55644,10 +55660,10 @@ index 000000000..d3fb4519c
 +#endif /* _RWNX_IRQS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_main.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_main.c
 new file mode 100644
-index 000000000..e1a2eb55a
+index 0000000..8e3ba9c
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_main.c
-@@ -0,0 +1,7391 @@
+@@ -0,0 +1,7401 @@
 +/**
 + ******************************************************************************
 + *
@@ -56160,7 +56176,8 @@ index 000000000..e1a2eb55a
 +
 +
 +extern uint8_t scanning;
-+int aicwf_dbg_level = LOGERROR|LOGINFO|LOGDEBUG|LOGTRACE;
++//int aicwf_dbg_level = LOGERROR|LOGINFO|LOGDEBUG|LOGTRACE;
++int aicwf_dbg_level = LOGERROR;
 +module_param(aicwf_dbg_level, int, 0660);
 +int testmode = 0;
 +char aic_fw_path[200];
@@ -56420,7 +56437,11 @@ index 000000000..e1a2eb55a
 +		cfg80211_disconnected(vif->ndev, 0, NULL, 0, 0, GFP_KERNEL);
 +		#endif
 +	} else {
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
++		wiphy_lock(vif->wdev.wiphy);
++#else
 +		mutex_lock(&vif->wdev.mtx);
++#endif
 +		__acquire(&vif->wdev.mtx);
 +		spin_lock_bh(&rwnx_hw->cb_lock);
 +		rwnx_chanctx_unlink(vif);
@@ -56432,13 +56453,17 @@ index 000000000..e1a2eb55a
 +			rwnx_txq_vif_stop(vif, RWNX_TXQ_STOP_CHAN, rwnx_hw);
 +		spin_unlock_bh(&rwnx_hw->cb_lock);
 +#if (LINUX_VERSION_CODE >= HIGH_KERNEL_VERSION3)
-+		cfg80211_ch_switch_notify(vif->ndev, &csa->chandef, 0, 0);
++		cfg80211_ch_switch_notify(vif->ndev, &csa->chandef, 0);
 +#elif (LINUX_VERSION_CODE >= HIGH_KERNEL_VERSION)
 +		cfg80211_ch_switch_notify(vif->ndev, &csa->chandef, 0);
 +#else
 +		cfg80211_ch_switch_notify(vif->ndev, &csa->chandef);
 +#endif
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 0))
++		wiphy_lock(vif->wdev.wiphy);
++#else
 +		mutex_unlock(&vif->wdev.mtx);
++#endif
 +		__release(&vif->wdev.mtx);
 +	}
 +	rwnx_del_csa(vif);
@@ -58259,7 +58284,7 @@ index 000000000..e1a2eb55a
 +        buf = command + (strlen(CMD_SET_VAR_STR) + 1);
 +        max_bytes_to_read = 0;
 +    } else {
-+        printk("invalid cmd: %s\r\n", command);
++        pr_debug("invalid cmd: %s\r\n", command);
 +        return -1;
 +    }
 +    if (len < 0) {
@@ -58663,10 +58688,11 @@ index 000000000..e1a2eb55a
 +		bool found = false;
 +		list_for_each_entry(master_vif, &rwnx_hw->vifs, list) {
 +			if ((RWNX_VIF_TYPE(master_vif) == NL80211_IFTYPE_AP) &&
-+				!(!memcmp(master_vif->ndev->dev_addr, params->macaddr,
-+						   ETH_ALEN))) {
-+				 found = true;
-+				 break;
++			     !(!memcmp(master_vif->ndev->dev_addr, params->macaddr, ETH_ALEN)))
++			{
++				memcmp(master_vif->ndev->dev_addr_shadow, params->macaddr, ETH_ALEN);
++				found = true;
++				break;
 +			}
 +		}
 +
@@ -58808,7 +58834,7 @@ index 000000000..e1a2eb55a
 +	int vif_idx = -1;
 +	int i;
 +
-+	printk("rwnx_virtual_interface_add: %d, %s\n", type, name);
++	pr_debug("rwnx_virtual_interface_add: %d, %s\n", type, name);
 +
 +	if (type == NL80211_IFTYPE_AP_VLAN) {
 +		min_idx = NX_VIRT_DEV_MAX;
@@ -58839,7 +58865,7 @@ index 000000000..e1a2eb55a
 +	wdev->wiphy = rwnx_hw->wiphy;
 +	wdev->iftype = type;
 +
-+	printk("rwnx_virtual_interface_add, ifname=%s, wdev=%p, vif_idx=%d\n", name, wdev, vif_idx);
++	pr_debug("rwnx_virtual_interface_add, ifname=%s, wdev=%p, vif_idx=%d\n", name, wdev, vif_idx);
 +
 +	#ifndef CONFIG_USE_P2P0
 +	vif->is_p2p_vif = 1;
@@ -59146,7 +59172,7 @@ index 000000000..e1a2eb55a
 +	int ret = 0;
 +
 +	//do nothing
-+	printk("P2P interface started\n");
++	pr_info("P2P interface started\n");
 +
 +	return ret;
 +}
@@ -61211,7 +61237,7 @@ index 000000000..e1a2eb55a
 +	} else {
 +		INIT_WORK(&csa->work, rwnx_csa_finish);
 +#if LINUX_VERSION_CODE >= HIGH_KERNEL_VERSION4
-+		cfg80211_ch_switch_started_notify(dev, &csa->chandef, 0, params->count, false, 0);
++		cfg80211_ch_switch_started_notify(dev, &csa->chandef, 0, params->count, false);
 +#elif LINUX_VERSION_CODE >= HIGH_KERNEL_VERSION2
 +		cfg80211_ch_switch_started_notify(dev, &csa->chandef, 0, params->count, false);
 +#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
@@ -61665,7 +61691,7 @@ index 000000000..e1a2eb55a
 + * @get_station: get station information for the station identified by @mac
 + */
 +static int rwnx_cfg80211_get_station(struct wiphy *wiphy,
-+	struct net_device *dev,
++	struct wireless_dev *wdev,
 +#if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 16, 0))
 +	u8 *mac,
 +#else
@@ -61673,7 +61699,7 @@ index 000000000..e1a2eb55a
 +#endif
 +	struct station_info *sinfo)
 +{
-+	struct rwnx_vif *vif = netdev_priv(dev);
++	struct rwnx_vif *vif = container_of(wdev, struct rwnx_vif, wdev);
 +	struct rwnx_sta *sta = NULL;
 +
 +	if (RWNX_VIF_TYPE(vif) == NL80211_IFTYPE_MONITOR)
@@ -61704,10 +61730,10 @@ index 000000000..e1a2eb55a
 +/**
 + * @dump_station: dump station callback -- resume dump at index @idx
 + */
-+static int rwnx_cfg80211_dump_station(struct wiphy *wiphy, struct net_device *dev,
++static int rwnx_cfg80211_dump_station(struct wiphy *wiphy, struct wireless_dev *wdev,
 +									  int idx, u8 *mac, struct station_info *sinfo)
 +{
-+	struct rwnx_vif *rwnx_vif = netdev_priv(dev);
++	struct rwnx_vif *rwnx_vif = container_of(wdev, struct rwnx_vif, wdev);
 +	struct rwnx_hw *rwnx_hw = wiphy_priv(wiphy);
 +	struct rwnx_sta *sta_iter, *sta = NULL;
 +	struct mesh_peer_info_cfm peer_info_cfm;
@@ -62215,8 +62241,8 @@ index 000000000..e1a2eb55a
 +	.tdls_channel_switch = rwnx_cfg80211_tdls_channel_switch,
 +	.tdls_cancel_channel_switch = rwnx_cfg80211_tdls_cancel_channel_switch,
 +#endif
-+	.tdls_mgmt = rwnx_cfg80211_tdls_mgmt,
-+	.tdls_oper = rwnx_cfg80211_tdls_oper,
++	//todo .tdls_mgmt = rwnx_cfg80211_tdls_mgmt,
++	//todo .tdls_oper = rwnx_cfg80211_tdls_oper,
 +	.change_bss = rwnx_cfg80211_change_bss,
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0) || defined(CONFIG_WPA3_FOR_OLD_KERNEL)
 +	.external_auth = rwnx_cfg80211_external_auth,
@@ -63041,7 +63067,7 @@ index 000000000..e1a2eb55a
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_main.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_main.h
 new file mode 100644
-index 000000000..684ab081f
+index 0000000..684ab08
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_main.h
 @@ -0,0 +1,40 @@
@@ -63087,7 +63113,7 @@ index 000000000..684ab081f
 +#endif /* _RWNX_MAIN_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mesh.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mesh.c
 new file mode 100644
-index 000000000..8773db61a
+index 0000000..8773db6
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mesh.c
 @@ -0,0 +1,42 @@
@@ -63135,7 +63161,7 @@ index 000000000..8773db61a
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mesh.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mesh.h
 new file mode 100644
-index 000000000..db8950f16
+index 0000000..db8950f
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mesh.h
 @@ -0,0 +1,45 @@
@@ -63186,10 +63212,10 @@ index 000000000..db8950f16
 +#endif /* _RWNX_MESH_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mod_params.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mod_params.c
 new file mode 100644
-index 000000000..4aa6eba9c
+index 0000000..250949c
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mod_params.c
-@@ -0,0 +1,1754 @@
+@@ -0,0 +1,1749 @@
 +/**
 +******************************************************************************
 +*
@@ -64738,9 +64764,6 @@ index 000000000..4aa6eba9c
 +        // function, that needs to be called after wiphy registration
 +        memcpy(country_code, default_ccode, sizeof(default_ccode));
 +		regdomain = getRegdomainFromRwnxDB(wiphy, default_ccode);
-+        printk(KERN_CRIT
-+               "\n\n%s: CAUTION: USING PERMISSIVE CUSTOM REGULATORY RULES\n\n",
-+               __func__);
 +        wiphy->regulatory_flags |= REGULATORY_CUSTOM_REG;
 +        wiphy->regulatory_flags |= REGULATORY_IGNORE_STALE_KICKOFF;
 +        wiphy_apply_custom_regulatory(wiphy, regdomain);
@@ -64772,9 +64795,6 @@ index 000000000..4aa6eba9c
 +		// Apply custom regulatory. Note that for recent kernel versions we use instead the
 +		// REGULATORY_WIPHY_SELF_MANAGED flag, along with the regulatory_set_wiphy_regd()
 +		// function, that needs to be called after wiphy registration
-+		printk(KERN_CRIT
-+			   "\n\n%s: CAUTION: USING PERMISSIVE CUSTOM REGULATORY RULES\n\n",
-+			   __func__);
 +		wiphy->regulatory_flags |= REGULATORY_CUSTOM_REG;
 +		wiphy->regulatory_flags |= REGULATORY_IGNORE_STALE_KICKOFF;
 +		wiphy_apply_custom_regulatory(wiphy, &rwnx_regdom);
@@ -64917,11 +64937,15 @@ index 000000000..4aa6eba9c
 +// For older kernel version, the custom regulatory is applied before the wiphy
 +// registration (in rwnx_set_wiphy_params()), so nothing has to be done here
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 0, 0)
-+    if (!rwnx_hw->mod_params->custregd)
-+        return;
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
++	// nop
++#else
++	wiphy->regulatory_flags |= REGULATORY_IGNORE_STALE_KICKOFF;
++#endif
++	wiphy->regulatory_flags |= REGULATORY_WIPHY_SELF_MANAGED;
 +
-+    wiphy->regulatory_flags |= REGULATORY_IGNORE_STALE_KICKOFF;
-+    wiphy->regulatory_flags |= REGULATORY_WIPHY_SELF_MANAGED;
++	if (!rwnx_hw->mod_params->custregd)
++		return;
 +
 +    rtnl_lock();
 +	#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0)
@@ -64935,10 +64959,7 @@ index 000000000..4aa6eba9c
 +	#endif
 +
 +    else{
-+        wiphy_err(wiphy,"\n"
-+                  "*******************************************************\n"
-+                  "** CAUTION: USING PERMISSIVE CUSTOM REGULATORY RULES **\n"
-+                  "*******************************************************\n");
++	//
 +    }
 +     rtnl_unlock();
 +#endif
@@ -64946,7 +64967,7 @@ index 000000000..4aa6eba9c
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mod_params.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mod_params.h
 new file mode 100644
-index 000000000..fb407746d
+index 0000000..fb40774
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mod_params.h
 @@ -0,0 +1,70 @@
@@ -65022,7 +65043,7 @@ index 000000000..fb407746d
 +#endif /* _RWNX_MOD_PARAM_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_rx.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_rx.c
 new file mode 100644
-index 000000000..9eeccbd91
+index 0000000..9eeccbd
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_rx.c
 @@ -0,0 +1,1567 @@
@@ -66595,7 +66616,7 @@ index 000000000..9eeccbd91
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_rx.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_rx.h
 new file mode 100644
-index 000000000..b5556d160
+index 0000000..b5556d1
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_rx.h
 @@ -0,0 +1,19 @@
@@ -66620,7 +66641,7 @@ index 000000000..b5556d160
 +#endif /* _RWNX_MSG_RX_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_tx.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_tx.c
 new file mode 100644
-index 000000000..0d5007a75
+index 0000000..f34ddd1
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_tx.c
 @@ -0,0 +1,3677 @@
@@ -69081,7 +69102,7 @@ index 000000000..0d5007a75
 +	if (sme->bssid)
 +		memcpy(rwnx_vif->sta.bssid, sme->bssid, ETH_ALEN);
 +
-+	printk("%s drv_vif_index:%d connect to %s(%d) channel:%d auth_type:%d\r\n",
++	pr_debug("%s drv_vif_index:%d connect to %s(%d) channel:%d auth_type:%d\n",
 +		__func__,
 +		rwnx_vif->drv_vif_index,
 +		rwnx_vif->sta.ssid,
@@ -70054,7 +70075,7 @@ index 000000000..0d5007a75
 +		return -ENOMEM;
 +
 +	/* Set parameters for the MM_DBG_TRIGGER_REQ message */
-+	strncpy(req->error, msg, sizeof(req->error));
++	strscpy(req->error, msg, sizeof(req->error));
 +
 +	/* Send the MM_DBG_TRIGGER_REQ message to LMAC FW */
 +	return rwnx_send_msg(rwnx_hw, req, 0, -1, NULL);
@@ -70303,7 +70324,7 @@ index 000000000..0d5007a75
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_tx.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_tx.h
 new file mode 100644
-index 000000000..836f43b91
+index 0000000..836f43b
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_msg_tx.h
 @@ -0,0 +1,186 @@
@@ -70495,7 +70516,7 @@ index 000000000..836f43b91
 +#endif /* _RWNX_MSG_TX_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mu_group.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mu_group.c
 new file mode 100644
-index 000000000..538f14306
+index 0000000..538f143
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mu_group.c
 @@ -0,0 +1,659 @@
@@ -71160,7 +71181,7 @@ index 000000000..538f14306
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mu_group.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mu_group.h
 new file mode 100644
-index 000000000..c24bb0396
+index 0000000..c24bb03
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_mu_group.h
 @@ -0,0 +1,181 @@
@@ -71347,7 +71368,7 @@ index 000000000..c24bb0396
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_pci.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_pci.c
 new file mode 100644
-index 000000000..40dac9465
+index 0000000..40dac94
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_pci.c
 @@ -0,0 +1,94 @@
@@ -71447,7 +71468,7 @@ index 000000000..40dac9465
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_pci.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_pci.h
 new file mode 100644
-index 000000000..d81578cbe
+index 0000000..d81578c
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_pci.h
 @@ -0,0 +1,17 @@
@@ -71470,7 +71491,7 @@ index 000000000..d81578cbe
 +#endif /* _RWNX_PCI_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_platform.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_platform.c
 new file mode 100644
-index 000000000..69331e78a
+index 0000000..9120449
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_platform.c
 @@ -0,0 +1,2108 @@
@@ -71747,7 +71768,7 @@ index 000000000..69331e78a
 +#endif
 +
 +#define MD5(x) x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15]
-+#define MD5PINRT "file md5:%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\r\n"
++#define MD5PINRT "file md5:%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
 +
 +static int rwnx_load_firmware(u32 **fw_buf, const char *name, struct device *device)
 +{
@@ -72203,7 +72224,7 @@ index 000000000..69331e78a
 +		p--;
 +
 +	p++;
-+	strncpy(val, dst, p -dst);
++	memcpy(val, dst, p - dst);
 +	val[p - dst] = 0;
 +	return 0;
 +}
@@ -72352,7 +72373,7 @@ index 000000000..69331e78a
 +    } else if (!strcmp(command, "xtal_cap_fine")) {
 +        userconfig_info.xtal_cap.xtal_cap_fine = rwnx_atoi(value);
 +    } else {
-+        AICWFDBG(LOGERROR, "invalid cmd: %s\n", command);
++        AICWFDBG(LOGINFO, "invalid cmd: %s\n", command);
 +    }
 +}
 +
@@ -72619,7 +72640,7 @@ index 000000000..69331e78a
 +    } else if (!strcmp(command, "xtal_cap_fine")) {
 +        userconfig_info.xtal_cap.xtal_cap_fine = rwnx_atoi(value);
 +    } else {
-+        AICWFDBG(LOGERROR, "invalid cmd: %s\n", command);
++        AICWFDBG(LOGINFO, "invalid cmd: %s\n", command);
 +    }
 +}
 +
@@ -73584,7 +73605,7 @@ index 000000000..69331e78a
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_platform.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_platform.h
 new file mode 100644
-index 000000000..79c91a072
+index 0000000..79c91a0
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_platform.h
 @@ -0,0 +1,136 @@
@@ -73726,7 +73747,7 @@ index 000000000..79c91a072
 +#endif /* _RWNX_PLATFORM_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_prof.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_prof.h
 new file mode 100644
-index 000000000..5442f5882
+index 0000000..5442f58
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_prof.h
 @@ -0,0 +1,133 @@
@@ -73865,7 +73886,7 @@ index 000000000..5442f5882
 +#endif /* _RWNX_PROF_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_radar.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_radar.c
 new file mode 100644
-index 000000000..c50f2d2b1
+index 0000000..e048308
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_radar.c
 @@ -0,0 +1,1644 @@
@@ -75270,7 +75291,7 @@ index 000000000..c50f2d2b1
 +					#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)
 +					   &ctxt->chan_def,
 +					#endif
-+					   NL80211_RADAR_CAC_FINISHED, GFP_KERNEL);
++					   NL80211_RADAR_CAC_FINISHED, GFP_KERNEL, 0);
 +	rwnx_send_apm_stop_cac_req(rwnx_hw, radar->cac_vif);
 +	rwnx_chanctx_unlink(radar->cac_vif);
 +
@@ -75370,7 +75391,7 @@ index 000000000..c50f2d2b1
 +						#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 14, 0)
 +						   &ctxt->chan_def,
 +						#endif
-+						   NL80211_RADAR_CAC_ABORTED, GFP_KERNEL);
++						   NL80211_RADAR_CAC_ABORTED, GFP_KERNEL, 0);
 +		rwnx_chanctx_unlink(radar->cac_vif);
 +	}
 +
@@ -75515,7 +75536,7 @@ index 000000000..c50f2d2b1
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_radar.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_radar.h
 new file mode 100644
-index 000000000..8bc36f527
+index 0000000..8bc36f5
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_radar.h
 @@ -0,0 +1,160 @@
@@ -75681,7 +75702,7 @@ index 000000000..8bc36f527
 +#endif // _RWNX_RADAR_H_
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_rx.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_rx.c
 new file mode 100644
-index 000000000..d740f146a
+index 0000000..ef81728
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_rx.c
 @@ -0,0 +1,2501 @@
@@ -78188,7 +78209,7 @@ index 000000000..d740f146a
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_rx.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_rx.h
 new file mode 100644
-index 000000000..366353503
+index 0000000..3663535
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_rx.h
 @@ -0,0 +1,392 @@
@@ -78586,7 +78607,7 @@ index 000000000..366353503
 +#endif /* _RWNX_RX_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_strs.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_strs.c
 new file mode 100644
-index 000000000..52ffbf64c
+index 0000000..52ffbf6
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_strs.c
 @@ -0,0 +1,266 @@
@@ -78858,7 +78879,7 @@ index 000000000..52ffbf64c
 +};
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_strs.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_strs.h
 new file mode 100644
-index 000000000..7dc83aba8
+index 0000000..7dc83ab
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_strs.h
 @@ -0,0 +1,31 @@
@@ -78895,7 +78916,7 @@ index 000000000..7dc83aba8
 +#endif /* _RWNX_STRS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tdls.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tdls.c
 new file mode 100644
-index 000000000..34196edac
+index 0000000..46dba27
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tdls.c
 @@ -0,0 +1,785 @@
@@ -79016,11 +79037,11 @@ index 000000000..34196edac
 +
 +	switch (action_code) {
 +	case WLAN_PUB_ACTION_TDLS_DISCOVER_RES:
-+		skb_put(skb, 1 + sizeof(mgmt->u.action.u.tdls_discover_resp));
++		skb_put(skb, 1 + sizeof(mgmt->u.action.tdls_discover_resp));
 +		mgmt->u.action.category = WLAN_CATEGORY_PUBLIC;
-+		mgmt->u.action.u.tdls_discover_resp.action_code = WLAN_PUB_ACTION_TDLS_DISCOVER_RES;
-+		mgmt->u.action.u.tdls_discover_resp.dialog_token = dialog_token;
-+		mgmt->u.action.u.tdls_discover_resp.capability =
++		mgmt->u.action.action_code = WLAN_PUB_ACTION_TDLS_DISCOVER_RES;
++		mgmt->u.action.tdls_discover_resp.dialog_token = dialog_token;
++		mgmt->u.action.tdls_discover_resp.capability =
 +			cpu_to_le16(rwnx_get_tdls_sta_capab(rwnx_vif, status_code));
 +		break;
 +	default:
@@ -79686,7 +79707,7 @@ index 000000000..34196edac
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tdls.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tdls.h
 new file mode 100644
-index 000000000..590b420f6
+index 0000000..590b420
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tdls.h
 @@ -0,0 +1,54 @@
@@ -79746,7 +79767,7 @@ index 000000000..590b420f6
 +#endif /* RWNX_TDLS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_testmode.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_testmode.c
 new file mode 100644
-index 000000000..ef97354d0
+index 0000000..ef97354
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_testmode.c
 @@ -0,0 +1,230 @@
@@ -79982,7 +80003,7 @@ index 000000000..ef97354d0
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_testmode.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_testmode.h
 new file mode 100644
-index 000000000..9d1bca47e
+index 0000000..9d1bca4
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_testmode.h
 @@ -0,0 +1,64 @@
@@ -80052,7 +80073,7 @@ index 000000000..9d1bca47e
 +#endif /* RWNX_TESTMODE_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tx.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tx.c
 new file mode 100644
-index 000000000..c15f3be6c
+index 0000000..c15f3be
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tx.c
 @@ -0,0 +1,1953 @@
@@ -82011,7 +82032,7 @@ index 000000000..c15f3be6c
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tx.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tx.h
 new file mode 100644
-index 000000000..a4036dc0c
+index 0000000..a4036dc
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_tx.h
 @@ -0,0 +1,188 @@
@@ -82205,7 +82226,7 @@ index 000000000..a4036dc0c
 +#endif /* _RWNX_TX_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_txq.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_txq.c
 new file mode 100644
-index 000000000..5468c3a5e
+index 0000000..5468c3a
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_txq.c
 @@ -0,0 +1,1370 @@
@@ -83581,7 +83602,7 @@ index 000000000..5468c3a5e
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_txq.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_txq.h
 new file mode 100644
-index 000000000..47de68f8b
+index 0000000..47de68f
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_txq.h
 @@ -0,0 +1,402 @@
@@ -83989,7 +84010,7 @@ index 000000000..47de68f8b
 +#endif /* _RWNX_TXQ_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_utils.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_utils.c
 new file mode 100644
-index 000000000..6b3c6f29b
+index 0000000..6b3c6f2
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_utils.c
 @@ -0,0 +1,39 @@
@@ -84034,7 +84055,7 @@ index 000000000..6b3c6f29b
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_utils.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_utils.h
 new file mode 100644
-index 000000000..f71a601c2
+index 0000000..f71a601
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_utils.h
 @@ -0,0 +1,133 @@
@@ -84173,7 +84194,7 @@ index 000000000..f71a601c2
 +#endif /* _RWNX_IPC_UTILS_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_v7.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_v7.c
 new file mode 100644
-index 000000000..72e3c850b
+index 0000000..72e3c85
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_v7.c
 @@ -0,0 +1,195 @@
@@ -84374,7 +84395,7 @@ index 000000000..72e3c850b
 +}
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_v7.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_v7.h
 new file mode 100644
-index 000000000..c2e39765a
+index 0000000..c2e3976
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_v7.h
 @@ -0,0 +1,20 @@
@@ -84400,7 +84421,7 @@ index 000000000..c2e39765a
 +#endif /* _RWNX_V7_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_version.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_version.h
 new file mode 100644
-index 000000000..46ecb5de1
+index 0000000..e93a1d6
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_version.h
 @@ -0,0 +1,12 @@
@@ -84412,13 +84433,13 @@ index 000000000..46ecb5de1
 +static inline void rwnx_print_version(void)
 +{
 +	AICWFDBG(LOGINFO, RWNX_VERS_BANNER"\n");
-+	AICWFDBG(LOGINFO, "RELEASE_DATE:%s \r\n", RELEASE_DATE);
++	AICWFDBG(LOGINFO, "RELEASE_DATE:%s \r", RELEASE_DATE);
 +}
 +
 +#endif /* _RWNX_VERSION_H_ */
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_version_gen.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_version_gen.h
 new file mode 100644
-index 000000000..ed5429ee9
+index 0000000..ed5429e
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_version_gen.h
 @@ -0,0 +1,4 @@
@@ -84428,7 +84449,7 @@ index 000000000..ed5429ee9
 +#define RELEASE_DATE "2024_0327_3561b08f"
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_wakelock.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_wakelock.c
 new file mode 100644
-index 000000000..69bcf3f5d
+index 0000000..e0b66ff
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_wakelock.c
 @@ -0,0 +1,86 @@
@@ -84520,7 +84541,7 @@ index 000000000..69bcf3f5d
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_wakelock.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_wakelock.h
 new file mode 100644
-index 000000000..9c9655a46
+index 0000000..9c9655a
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/rwnx_wakelock.h
 @@ -0,0 +1,21 @@
@@ -84547,7 +84568,7 @@ index 000000000..9c9655a46
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/sdio_host.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/sdio_host.c
 new file mode 100644
-index 000000000..f59409946
+index 0000000..f594099
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/sdio_host.c
 @@ -0,0 +1,137 @@
@@ -84690,7 +84711,7 @@ index 000000000..f59409946
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/sdio_host.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/sdio_host.h
 new file mode 100644
-index 000000000..670e9e086
+index 0000000..670e9e0
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/sdio_host.h
 @@ -0,0 +1,41 @@
@@ -84737,7 +84758,7 @@ index 000000000..670e9e086
 +#endif
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/usb_host.c b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/usb_host.c
 new file mode 100644
-index 000000000..c5c86d0de
+index 0000000..c5c86d0
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/usb_host.c
 @@ -0,0 +1,146 @@
@@ -84889,7 +84910,7 @@ index 000000000..c5c86d0de
 +
 diff --git a/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/usb_host.h b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/usb_host.h
 new file mode 100644
-index 000000000..012b90c97
+index 0000000..012b90c
 --- /dev/null
 +++ b/drivers/net/wireless/aic8800_sdio/aic8800_fdrv/usb_host.h
 @@ -0,0 +1,41 @@
@@ -84934,6 +84955,3 @@ index 000000000..012b90c97
 +extern int aicwf_rwnx_usb_platform_init(struct aic_usb_dev *usbdev);
 +
 +#endif
--- 
-2.49.0
-

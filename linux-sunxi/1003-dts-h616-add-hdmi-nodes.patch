@@ -1,121 +1,8 @@
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
-index eb9d55ba6..17caf73b9 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-h616-orangepi-zero.dtsi
-@@ -22,6 +22,17 @@ chosen {
- 		stdout-path = "serial0:115200n8";
- 	};
- 
-+	connector {
-+		compatible = "hdmi-connector";
-+		type = "d";
-+
-+		port {
-+			hdmi_con_in: endpoint {
-+				remote-endpoint = <&hdmi_out_con>;
-+			};
-+		};
-+	};
-+
- 	leds {
- 		compatible = "gpio-leds";
- 
-@@ -91,6 +102,10 @@ &codec {
- 	status = "okay";
- };
- 
-+&de {
-+	status = "okay";
-+};
-+
- &ehci1 {
- 	status = "okay";
- };
-@@ -108,6 +123,12 @@ &gpu {
- 	status = "okay";
- };
- 
-+&hdmi_out {
-+	hdmi_out_con: endpoint {
-+		remote-endpoint = <&hdmi_con_in>;
-+	};
-+};
-+
- &mdio0 {
- 	ext_rgmii_phy: ethernet-phy@1 {
- 		compatible = "ethernet-phy-ieee802.3-c22";
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
-index 82a8f6945..4d2a5324b 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero2w.dts
-@@ -24,6 +24,17 @@ chosen {
- 		stdout-path = "serial0:115200n8";
- 	};
- 
-+	connector {
-+		compatible = "hdmi-connector";
-+		type = "c";
-+
-+		port {
-+			hdmi_con_in: endpoint {
-+				remote-endpoint = <&hdmi_out_con>;
-+			};
-+		};
-+	};
-+
- 	leds {
- 		compatible = "gpio-leds";
- 
-@@ -90,6 +101,10 @@ &cpu0 {
- 	cpu-supply = <&reg_dcdc2>;
- };
- 
-+&de {
-+	status = "okay";
-+};
-+
- &ehci1 {
- 	status = "okay";
- };
-@@ -101,6 +116,17 @@ &gpu {
- 	status = "okay";
- };
- 
-+&hdmi {
-+	hvcc-supply = <&reg_aldo1>;
-+	status = "okay";
-+};
-+
-+&hdmi_out {
-+	hdmi_out_con: endpoint {
-+		remote-endpoint = <&hdmi_con_in>;
-+	};
-+};
-+
- &mmc0 {
- 	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>;	/* PF6 */
- 	bus-width = <4>;
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
-index c51d4d912..4a1754eeb 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-orangepi-zero3.dts
-@@ -31,6 +31,11 @@ &gpu {
- 	mali-supply = <&reg_dcdc1>;
- };
- 
-+&hdmi {
-+	hvcc-supply = <&reg_aldo1>;
-+	status = "okay";
-+};
-+
- &mmc0 {
- 	/*
- 	 * The schematic shows the card detect pin wired up to PF6, via an
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-index 1a750c5f6..573f2163f 100644
+index 1a750c5..573f216 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024.dts
-@@ -31,6 +31,17 @@ chosen {
+@@ -31,6 +31,17 @@
  		stdout-path = "serial0:115200n8";
  	};
  
@@ -133,7 +20,7 @@ index 1a750c5f6..573f2163f 100644
  	gpio_keys_gamepad: gpio-keys-gamepad {
  		compatible = "gpio-keys";
  
-@@ -196,6 +207,10 @@ &cpu0 {
+@@ -196,6 +207,10 @@
  	cpu-supply = <&reg_dcdc1>;
  };
  
@@ -144,7 +31,7 @@ index 1a750c5f6..573f2163f 100644
  &ehci0 {
  	status = "okay";
  };
-@@ -205,6 +220,17 @@ &gpu {
+@@ -205,6 +220,17 @@
  	status = "okay";
  };
  
@@ -162,7 +49,7 @@ index 1a750c5f6..573f2163f 100644
  &mmc0 {
  	vmmc-supply = <&reg_cldo3>;
  	disable-wp;
-@@ -295,7 +321,10 @@ reg_aldo4: aldo4 {
+@@ -295,7 +321,10 @@
  			};
  
  			reg_bldo1: bldo1 {
@@ -174,6 +61,3 @@ index 1a750c5f6..573f2163f 100644
  			};
  
  			reg_bldo2: bldo2 {
--- 
-2.49.0
-

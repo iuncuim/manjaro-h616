@@ -1,0 +1,382 @@
+diff --git a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
+index 6d07444..46590e7 100644
+--- a/arch/arm64/boot/dts/allwinner/Makefile
++++ b/arch/arm64/boot/dts/allwinner/Makefile
+@@ -59,20 +59,39 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-orangepi-zero3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-transpeed-8k618-t.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-yuzukihd-chameleon.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg28xx.dtb
+-dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-sp.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg28xx-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx.dtb
+-dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024-rev6-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-sp.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-sp-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024.dtb
+-dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-h-rev6-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024-rev6-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024-rev6-panel-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-h.dtb
+-dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-plus-rev6-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-h-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-h-rev6-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-h-rev6-panel-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-plus.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-plus-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-plus-rev6-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-plus-rev6-panel-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-pro.dtb
+-dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-sp-v2-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-pro-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-sp.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-sp-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-sp-v2-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-sp-v2-panel-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-h.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-h-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-h-v2-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-h-v2-panel-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-v.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-v-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-v-v2-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg40xx-v-v2-panel-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rgcubexx.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rgcubexx-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun55i-a527-cubie-a5e.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun55i-h728-x96qpro+.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun55i-t527-avaota-a1.dtb
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg28xx-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg28xx-lpddr3.dts
+new file mode 100644
+index 0000000..dbc239c
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg28xx-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg28xx.dts"
++
++/ {
++	model = "Anbernic RG28XX";
++	compatible = "anbernic,rg28xx", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-lpddr3.dts
+new file mode 100644
+index 0000000..d5b954c
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg34xx.dts"
++
++/ {
++	model = "Anbernic RG34XX";
++	compatible = "anbernic,rg34xx", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-lpddr3.dts
+new file mode 100644
+index 0000000..d3ad169
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg34xx-sp.dts"
++
++/ {
++	model = "Anbernic RG34XX-SP";
++	compatible = "anbernic,rg34xx-sp", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-lpddr3.dts
+new file mode 100644
+index 0000000..24f3962
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-2024.dts"
++
++/ {
++	model = "Anbernic RG35XX 2024";
++	compatible = "anbernic,rg35xx-2024", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-rev6-panel-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-rev6-panel-lpddr3.dts
+new file mode 100644
+index 0000000..ee6971c
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-2024-rev6-panel-lpddr3.dts
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-2024-rev6-panel.dts"
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-lpddr3.dts
+new file mode 100644
+index 0000000..ea3d4d5
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-h.dts"
++
++/ {
++	model = "Anbernic RG35XX H";
++	compatible = "anbernic,rg35xx-h", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-rev6-panel-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-rev6-panel-lpddr3.dts
+new file mode 100644
+index 0000000..b918923
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h-rev6-panel-lpddr3.dts
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-h-rev6-panel.dts"
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-lpddr3.dts
+new file mode 100644
+index 0000000..f6b2607
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-plus.dts"
++
++/ {
++	model = "Anbernic RG35XX Plus";
++	compatible = "anbernic,rg35xx-plus", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-rev6-panel-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-rev6-panel-lpddr3.dts
+new file mode 100644
+index 0000000..09daef1
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-plus-rev6-panel-lpddr3.dts
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-plus-rev6-panel.dts"
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro-lpddr3.dts
+new file mode 100644
+index 0000000..70600dd
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-pro.dts"
++
++/ {
++	model = "Anbernic RG35XX Pro";
++	compatible = "anbernic,rg35xx-pro", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-lpddr3.dts
+new file mode 100644
+index 0000000..e3af899
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-sp.dts"
++
++/ {
++	model = "Anbernic RG35XX SP";
++	compatible = "anbernic,rg35xx-sp", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-v2-panel-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-v2-panel-lpddr3.dts
+new file mode 100644
+index 0000000..9564456
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-sp-v2-panel-lpddr3.dts
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg35xx-sp-v2-panel.dts"
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-lpddr3.dts
+new file mode 100644
+index 0000000..65fc60f
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg40xx-h.dts"
++
++/ {
++	model = "Anbernic RG40XX H";
++	compatible = "anbernic,rg40xx-h", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-v2-panel-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-v2-panel-lpddr3.dts
+new file mode 100644
+index 0000000..bb8ed08
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-v2-panel-lpddr3.dts
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg40xx-h-v2-panel.dts"
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-v2-panel.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-v2-panel.dts
+new file mode 100644
+index 0000000..36c87d4
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h-v2-panel.dts
+@@ -0,0 +1,14 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++/*
++ * Copyright (C) 2024 Philippe Simons <simons.philippe@gmail.com>.
++ */
++
++#include "sun50i-h700-anbernic-rg40xx-h.dts"
++
++/ {
++	rocknix-dt-id = "sun50i-h700-anbernic-rg40xx-h-v2-panel";
++};
++
++&panel {
++	compatible = "anbernic,rg40xx-v2-panel", "panel-mipi-dpi-spi";
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-lpddr3.dts
+new file mode 100644
+index 0000000..bb74306
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg40xx-v.dts"
++
++/ {
++	model = "Anbernic RG40XX V";
++	compatible = "anbernic,rg40xx-V", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-v2-panel-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-v2-panel-lpddr3.dts
+new file mode 100644
+index 0000000..382496c
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-v2-panel-lpddr3.dts
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg40xx-v-v2-panel.dts"
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-v2-panel.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-v2-panel.dts
+new file mode 100644
+index 0000000..28e0463
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v-v2-panel.dts
+@@ -0,0 +1,14 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++/*
++ * Copyright (C) 2024 Philippe Simons <simons.philippe@gmail.com>.
++ */
++
++#include "sun50i-h700-anbernic-rg40xx-v.dts"
++
++/ {
++	rocknix-dt-id = "sun50i-h700-anbernic-rg40xx-v-v2-panel";
++};
++
++&panel {
++	compatible = "anbernic,rg40xx-v2-panel", "panel-mipi-dpi-spi";
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx-lpddr3.dts
+new file mode 100644
+index 0000000..61fd9bd
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx-lpddr3.dts
+@@ -0,0 +1,13 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rgcubexx.dts"
++
++/ {
++	model = "Anbernic RG CubeXX";
++	compatible = "anbernic,rgcubexx", "allwinner,sun50i-h700";
++};
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
