@@ -1,0 +1,99 @@
+# U-Boot: rg35xxh
+# Maintainer: Furkan Kardame  <f.kardame@manjaro.org>
+# Contributor: Mikhail Kalashnikov <iuncuim@gmail.com>
+
+pkgname=uboot-rg35xxh
+pkgver=v2025.01
+_pkgver=v2025.01
+pkgrel=3
+_tfaver=2.12.0
+pkgdesc="U-Boot for rg35xxh"
+arch=('aarch64')
+url='http://www.denx.de/wiki/U-Boot/WebHome'
+license=('GPL')
+makedepends=('bc' 'python' 'python-setuptools' 'swig' 'dtc' 'bison' 'flex')
+provides=('uboot')
+conflicts=('uboot')
+replaces=('uboot-rg35xxh')
+install=${pkgname}.install
+source=("https://source.denx.de/u-boot/u-boot/-/archive/${_pkgver}/u-boot-${_pkgver}.tar.gz"
+        "https://github.com/ARM-software/arm-trusted-firmware/archive/refs/tags/v${_tfaver}.tar.gz"
+        "0001.patch"
+        "0004.patch"
+        "0005-sunxi-H616- dram-Improve-size-scan-procedure.patch"
+        #"0006.patch"
+        #"0007.patch"
+        #"0008.patch"
+        #"0009.patch"
+        )
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            #'SKIP'
+            #'SKIP'
+            #'SKIP'
+            #'SKIP'
+            )
+
+prepare() {
+  apply_patches() {
+      local PATCH
+      for PATCH in "${source[@]}"; do
+          PATCH="${PATCH%%::*}"
+          PATCH="${PATCH##*/}"
+          [[ ${PATCH} = *.patch ]] || continue
+          msg2 "Applying patch: ${PATCH}..."
+          patch -N -p1 < "../${PATCH}"
+      done
+  }
+
+  cd u-boot-${_pkgver}
+  apply_patches
+}
+
+build() {
+  # Avoid build warnings by editing a .config option in place instead of
+  # appending an option to .config, if an option is already present
+  update_config() {
+    if ! grep -q "^$1=$2$" .config; then
+      if grep -q "^# $1 is not set$" .config; then
+        sed -i -e "s/^# $1 is not set$/$1=$2/g" .config
+      elif grep -q "^$1=" .config; then
+        sed -i -e "s/^$1=.*/$1=$2/g" .config
+      else
+        echo "$1=$2" >> .config
+      fi
+    fi
+  }
+
+  unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
+
+  cd arm-trusted-firmware-${_tfaver}
+
+  echo -e "\nBuilding TF-A for H616 devices...\n"
+  # Not performing regulator setup in TF-A allows Linux to boot on
+  # this board correctly, which otherwise fails because the Ethernet
+  # PHY requires a coordinated bringup of two regulators
+  make PLAT=sun50i_h616 SUNXI_SETUP_REGULATORS=0 bl31
+  cp build/sun50i_h616/release/bl31.bin ../u-boot-${_pkgver}
+
+  cd ../u-boot-${_pkgver}
+
+  echo -e "\nBuilding U-Boot for rg35xxh...\n"
+  make anbernic_rg35xx_h700_defconfig
+
+  update_config 'CONFIG_IDENT_STRING' '" Manjaro Linux ARM"'
+  update_config 'CONFIG_OF_LIBFDT_OVERLAY' 'y'
+
+  make EXTRAVERSION=-${pkgrel}
+  cp u-boot-sunxi-with-spl.bin u-boot-sunxi-with-spl-rg35xxh.bin
+}
+
+package() {
+  cd u-boot-${_pkgver}
+
+  mkdir -p "${pkgdir}/boot/extlinux"
+  install -D -m 0644 u-boot-sunxi-with-spl-rg35xxh.bin -t "${pkgdir}/boot"
+}

@@ -1,0 +1,73 @@
+From 51276fad532cd64457f5adf1dedfd91170a6caf8 Mon Sep 17 00:00:00 2001
+From: iuncuim <iuncuim@gmail.com>
+Date: Fri, 26 Jul 2024 20:24:10 +0300
+Subject: [PATCH 1/4] Update sun50i-h616-orangepi-zero.dtsi, clock_sun50i_h6.c,
+ and dram_helpers.c
+
+---
+ dts/upstream/src/arm64/allwinner/sun50i-h616-orangepi-zero.dtsi | 16 +++++++++++++++-
+ arch/arm/mach-sunxi/clock_sun50i_h6.c       |  1 +
+ arch/arm/mach-sunxi/dram_helpers.c          |  1 +
+ 3 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/dts/upstream/src/arm64/allwinner/sun50i-h616-orangepi-zero.dtsi  b/dts/upstream/src/arm64/allwinner/sun50i-h616-orangepi-zero.dtsi
+index fc7315b9440..1ad4bf9bea1 100644
+--- a/dts/upstream/src/arm64/allwinner/sun50i-h616-orangepi-zero.dtsi
++++ b/dts/upstream/src/arm64/allwinner/sun50i-h616-orangepi-zero.dtsi
+@@ -63,7 +63,13 @@
+ 	status = "okay";
+ };
+ 
+-/* USB 2 & 3 are on headers only. */
++&ehci2 {
++	status = "okay";
++};
++
++&ehci3 {
++	status = "okay";
++};
+ 
+ &emac0 {
+ 	pinctrl-names = "default";
+@@ -89,6 +95,14 @@
+ 	status = "okay";
+ };
+ 
++&ohci2 {
++	status = "okay";
++};
++
++&ohci3 {
++	status = "okay";
++};
++
+ &spi0  {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+diff --git a/arch/arm/mach-sunxi/clock_sun50i_h6.c b/arch/arm/mach-sunxi/clock_sun50i_h6.c
+index dac3663e1be..0ade62ce015 100644
+--- a/arch/arm/mach-sunxi/clock_sun50i_h6.c
++++ b/arch/arm/mach-sunxi/clock_sun50i_h6.c
+@@ -15,6 +15,7 @@ void clock_init_safe(void)
+ 		/* this seems to enable PLLs on H616 */
+ 		setbits_le32(&prcm->sys_pwroff_gating, 0x10);
+ 		setbits_le32(&prcm->res_cal_ctrl, 2);
++		writel(0, 0x7010254);
+ 	}
+ 
+ 	if (IS_ENABLED(CONFIG_MACH_SUN50I_H616) ||
+diff --git a/arch/arm/mach-sunxi/dram_helpers.c b/arch/arm/mach-sunxi/dram_helpers.c
+index 83dbe4ca98f..d55a3a407f7 100644
+--- a/arch/arm/mach-sunxi/dram_helpers.c
++++ b/arch/arm/mach-sunxi/dram_helpers.c
+@@ -43,6 +43,7 @@ bool mctl_mem_matches_base(u32 offset, ulong base)
+ 
+ 	/* Try to write different values to RAM at two addresses */
+ 	writel(0, base);
++	dsb();
+ 	writel(0xaa55aa55, base + offset);
+ 	dsb();
+ 	/* Check if the same value is actually observed when reading back */
+-- 
+2.45.2
+

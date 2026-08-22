@@ -1,0 +1,10 @@
+diff --git a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+index 6b37e4ddc48..cfdb20d2d8f 100644
+--- a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
++++ b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+@@ -21,3 +21,3 @@
+-	u8 tfaw		= ns_to_t(40);
+-	u8 trrd		= max(ns_to_t(10), 2);
++	u8 tfaw		= ns_to_t(30);
++	u8 trrd		= max(ns_to_t(7), 2);
+ 	u8 trcd		= max(ns_to_t(18), 2);

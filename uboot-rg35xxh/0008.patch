@@ -1,0 +1,8 @@
+diff --git a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+index 6b37e4ddc48..d45e942d943 100644
+--- a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
++++ b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+@@ -45,1 +45,1 @@
+-	u8 tcl		= 10;
++	u8 tcl		= 9;
+ 	u8 tcwl		= 5;

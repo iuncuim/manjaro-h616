@@ -1,0 +1,24 @@
+diff --git a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+index 24ba30d5e2e..6b37e4ddc48 100644
+--- a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
++++ b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+@@ -17,7 +17,7 @@ void mctl_set_timing_params(const struct dram_para *para)
+ 	struct sunxi_mctl_ctl_reg * const mctl_ctl =
+ 			(struct sunxi_mctl_ctl_reg *)SUNXI_DRAM_CTL0_BASE;
+ 
+-	u8 tccd		= 4;
++	u8 tccd		= 2;
+ 	u8 tfaw		= ns_to_t(40);
+ 	u8 trrd		= max(ns_to_t(10), 2);
+ 	u8 trcd		= max(ns_to_t(18), 2);
+@@ -48,8 +48,8 @@ void mctl_set_timing_params(const struct dram_para *para)
+ 	u8 tphy_wrlat	= 5;
+ 
+ 	u8 twtp		= 24;
+-	u8 twr2rd	= max(trrd, (u8)4) + 14;
+-	u8 trd2wr	= (ns_to_t(4) + 17) - ns_to_t(1);
++	u8 twr2rd	= max(trrd, (u8)4) + 10;
++	u8 trd2wr	= (ns_to_t(4) + 13) - ns_to_t(1);
+ 
+ 	/* set DRAM timing */
+ 	writel((twtp << 24) | (tfaw << 16) | (trasmax << 8) | tras,

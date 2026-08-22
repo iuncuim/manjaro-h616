@@ -1,0 +1,37 @@
+From: lane
+Date: Wed, 5 Aug 2026 20:10:00 +0800
+Subject: [PATCH] sunxi: H616: LPDDR4: tighten row timing group
+
+Tighten remaining row-related timings at DRAM_CLK=840:
+- trtp: 4 -> 3 controller clocks (7.6ns, ~JEDEC spec 7.5ns)
+- txp: 4 -> 3 controller clocks (7.6ns, ~JEDEC spec 7.5ns)
+- trcd: 8 -> 7 controller clocks (16.7ns, below 18ns spec)
+- trp: 9 -> 8 controller clocks (19.0ns, below 21ns spec)
+- twtp: 24 -> 18 controller clocks (field semantics undocumented)
+
+Parameters that were ns-based in the original file keep the ns_to_t
+formulas so the intended ns values stay clock-portable.
+trcd/trp are below JEDEC spec; failure mode is silent data corruption,
+requires extended memtester validation.
+
+---
+ arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+index 6b37e4ddc48..1bd47724da4 100644
+--- a/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
++++ b/arch/arm/mach-sunxi/dram_timings/h616_lpddr4_2133.c
+@@ -23,5 +23,5 @@
+-	u8 trcd		= max(ns_to_t(18), 2);
++	u8 trcd		= max(ns_to_t(16), 2);
+ 	u8 trc		= ns_to_t(65);
+-	u8 txp		= max(ns_to_t(8), 2);
+-	u8 trtp		= 4;
+-	u8 trp		= ns_to_t(21);
++	u8 txp		= max(ns_to_t(7), 2);
++	u8 trtp		= 3;
++	u8 trp		= ns_to_t(19);
+@@ -50,1 +50,1 @@
+-	u8 twtp		= 24;
++	u8 twtp		= 18;
