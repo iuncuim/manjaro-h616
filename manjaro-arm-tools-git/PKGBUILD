@@ -1,0 +1,47 @@
+# Maintainer: Dan Johansen <strit@manjaro.org>
+# Maintainer: Bernhard Landauer <bernhard@manjaro.org>
+# Contributor: Helmut Stult <helmut[at]manjaro[dot]org>
+
+_pkgname=manjaro-arm-tools
+pkgname=$_pkgname-git
+pkgver=2.11.3.r36.g0a8bce0
+pkgrel=1
+pkgdesc="Scripts for building Manjaro-ARM packages and images"
+arch=('any')
+url="https://github.com/iuncuim/manjaro-arm-tools"
+license=('GPL3')
+backup=('etc/manjaro-arm-tools/manjaro-arm-tools.conf')
+depends=('arch-install-scripts'
+    'gawk'
+    'git'
+    'gptfdisk'
+    #'manjaro-arm-qemu-static'
+    'parted'
+    'xz'
+    'zip')
+optdepends=('bmap-tools: create bmap files')
+conflicts=("$_pkgname")
+source=("git+$url.git")
+sha256sums=('SKIP')
+
+pkgver(){
+    cd $_pkgname
+    git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+package() {
+    cd $_pkgname
+    install -dm777 $pkgdir/usr/share/$_pkgname/lib
+    install -dm777 $pkgdir/usr/share/$_pkgname/profiles
+    install -d $pkgdir/usr/bin
+    install -d $pkgdir/etc/$_pkgname/
+    install -dm777 $pkgdir/var/lib/$_pkgname/pkg
+    install -dm777 $pkgdir/var/lib/$_pkgname/img
+    install -dm777 $pkgdir/var/lib/$_pkgname/tmp
+    install -dm777 $pkgdir/var/cache/$_pkgname/pkg
+    install -dm777 $pkgdir/var/cache/$_pkgname/pkg/pkg-cache
+    install -dm777 $pkgdir/var/cache/$_pkgname/img
+    install -Dm755 lib/* $pkgdir/usr/share/$_pkgname/lib/
+    install -Dm755 bin/* $pkgdir/usr/bin/
+    install -Dm755 lib/manjaro-arm-tools.conf $pkgdir/etc/manjaro-arm-tools/
+}
