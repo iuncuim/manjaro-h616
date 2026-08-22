@@ -1,0 +1,23 @@
+[Unit]
+Description=Remap buttons to mouse
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+ExecStart=/usr/bin/evsieve --input /dev/input/by-path/platform-gpio-keys-gamepad-event-joystick \
+        --hook btn:dpad_left:1~2  send-key=key:left \
+        --hook btn:dpad_right:1~2 send-key=key:right \
+        --hook btn:dpad_up:1~2    send-key=key:up \
+        --hook btn:dpad_down:1~2  send-key=key:down \
+        --oscillate key:left key:right key:up key:down period=0.01 \
+        --map yield key:left:1  rel:x:-4 \
+        --map yield key:right:1 rel:x:4 \
+        --map yield key:up:1    rel:y:-4 \
+        --map yield key:down:1  rel:y:4 \
+        --map yield btn:tl:0~1  btn:left \
+        --map yield btn:tr:0~1  btn:right \
+        --block \
+        --output create-link=/dev/input/virt-mouse
+
+[Install]
+WantedBy=multi-user.target

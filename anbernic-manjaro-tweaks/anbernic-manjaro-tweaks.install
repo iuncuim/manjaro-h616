@@ -1,0 +1,13 @@
+post_install() {
+  systemctl enable evsieve
+  systemctl enable anbernic-brightness
+}
+
+post_update() {
+  post_install
+  echo "Tweaks post-update"
+}
+
+post_remove() {
+  echo "Tweaks post-remove"
+}

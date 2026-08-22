@@ -1,0 +1,73 @@
+pkgname=anbernic-manjaro-tweaks
+pkgver=1
+pkgrel=9
+pkgdesc="Sets up anbernic related stuff"
+install=anbernic-manjaro-tweaks.install
+arch=('any')
+license=('GPL')
+depends=('bash')
+
+source=("00-journal-size.conf"
+        "anbernic-suspend-hook.sh"
+        "ignore-power-key.conf"
+        "evsieve.service"
+        "anbernic-brightness.service"
+        "anbernic-tweaks.sh"
+        "anbernic,rg28xx-panel.panel"
+        "anbernic,rg35xx-plus-rev6-panel.panel"
+        "anbernic,rg34xx-panel.panel"
+        "anbernic,rg35xx-sp-v2-panel.panel"
+        "anbernic,rg34xx-sp-panel.panel"
+        "anbernic,rg40xx-panel.panel"
+        "anbernic,rg40xx-v2-panel.panel"
+        "anbernic,rg35xx-plus-panel.panel"
+        "anbernic,rgcubexx-panel.panel"
+        "panels.conf"
+        "mpv.conf"
+      )
+
+md5sums=('SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP'
+         'SKIP')
+
+package() {
+  install -Dm755 "${srcdir}/anbernic-tweaks.sh" -t "${pkgdir}/etc/profile.d"
+  #install -Dm755 "${srcdir}/anbernic-suspend-hook.sh" -t "${pkgdir}/usr/lib/systemd/system-sleep"
+  # 
+  install -Dm644 "${srcdir}/ignore-power-key.conf" -t "${pkgdir}/etc/systemd/logind.conf.d"
+  # Pinephone related stuff
+  #install -Dm644 "${srcdir}/10-proximity.rules" -t "${pkgdir}/usr/lib/udev/rules.d"
+  # button mapping
+  install -Dm644 "${srcdir}"/evsieve.service -t "${pkgdir}"/usr/lib/systemd/system
+  # set max bright
+  install -Dm644 "${srcdir}"/anbernic-brightness.service -t "${pkgdir}"/usr/lib/systemd/system
+  # Reduce Systemd journal
+  install -Dm644 "${srcdir}/00-journal-size.conf" "${pkgdir}/etc/systemd/journald.conf.d/00-journal-size.conf"
+  # Panels
+  install -Dm644 "${srcdir}/anbernic,rg28xx-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rg35xx-plus-rev6-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rg34xx-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rg35xx-sp-v2-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rg34xx-sp-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rg40xx-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rg40xx-v2-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rg35xx-plus-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/anbernic,rgcubexx-panel.panel" -t "${pkgdir}/usr/lib/firmware/panels/"
+  install -Dm644 "${srcdir}/panels.conf" -t "${pkgdir}/etc/modules-load.d/"
+  # mpv
+  install -Dm644 "${srcdir}/mpv.conf" -t "${pkgdir}/etc/mpv/"
+}

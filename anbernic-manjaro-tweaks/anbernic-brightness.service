@@ -1,0 +1,10 @@
+[Unit]
+Description=Set max brighness
+ConditionFirstBoot=yes
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sh -c "echo 3124 > /sys/devices/platform/backlight/backlight/backlight/brightness"
+
+[Install]
+WantedBy=multi-user.target
