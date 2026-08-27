@@ -5,8 +5,8 @@
 
 pkgbase=linux-sunxi
 pkgver=7.2
-_pkgver=7.2-rc4
-pkgrel=1
+_pkgver=7.2
+pkgrel=7
 _newversion=false
 _stopbuild=false    # Will also stop if ${_newversion} is true
 _srcname="linux-${_pkgver/%.0/}"
@@ -17,7 +17,7 @@ url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
-source=("https://git.kernel.org/torvalds/t/${_srcname}.tar.gz"
+source=("https://mirrors.edge.kernel.org/pub/linux/kernel/v7.x/${_srcname}.tar.gz"
         'config'
         '1000-net-wireless-add-uwe5622.patch'
         '1001-h616-dts-opizero2w3-add-uwe5622-nodes.patch'
@@ -34,6 +34,7 @@ source=("https://git.kernel.org/torvalds/t/${_srcname}.tar.gz"
         '1100-h616-dts-add-t98h2b.patch'
         '1101-h700-dts-add-anbernic-lpddr3.patch'
         '1102-h618-dts-add-walnutpi-1b.patch'
+        '1103-h700-dts-add-anbernic-sticks.patch'
         '1204-regulator-axp20x-force-polyphase-setup-for-axp323.patch'
         '1205-arm64-dts-allwinner-a523-X96Q-Pro-add-sdio-wifi-node.patch'
         '1206-net-wireless-backport-aic8800-sdio-v2024_0327_3561b08f.patch'
@@ -51,8 +52,8 @@ source=("https://git.kernel.org/torvalds/t/${_srcname}.tar.gz"
         'linux.preset'
         '60-linux.hook'
         '90-linux.hook')
-md5sums=('4ade378f5225b171fe772e2de9b1aab4'
-         'f28031b00675b163aba840e788bc064e'
+md5sums=('c9c69715334b2ed3d82ce4e2b9d25fd5'
+         '30677b327e94a6bbdfc252d14d464598'
          'de7236109046e27ebc6e374ada2200f1'
          'c65c5729302e715faa9b2262a30418fd'
          '6b70a87bae27c6e03174358a52ad101c'
@@ -67,7 +68,8 @@ md5sums=('4ade378f5225b171fe772e2de9b1aab4'
          '7dd67e8f6b89e299edc17cf8cba86826'
          '1473f5b85e1173ab41a505cf48b58886'
          '6d507308d7f09002b266fb8f8d67b6b5'
-         'ab11e7a7f31d80c34bbc96c395e58fd7'
+         '33cd292e8d7434b69f3826df1b19aa24'
+         '280f489659a336506159511db350e9de'
          'f23fd0fe8f5be10aa541d7da7e77a0fc'
          '6aacab690e8f62061a498828b53b67f1'
          'd9ba377e09181eaded87cb17ac05e314'

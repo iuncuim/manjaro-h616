@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 7.2.0-rc4-1 Kernel Configuration
+# Linux/arm64 7.2.0-7 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="gcc (GCC) 16.1.1 20260430"
 CONFIG_CC_IS_GCC=y
@@ -7282,6 +7282,7 @@ CONFIG_SND_SOC_RL6231=m
 # CONFIG_SND_SOC_RT5616 is not set
 # CONFIG_SND_SOC_RT5631 is not set
 CONFIG_SND_SOC_RT5640=m
+# CONFIG_SND_SOC_RT5645 is not set
 # CONFIG_SND_SOC_RT5659 is not set
 # CONFIG_SND_SOC_RT5682_SDW is not set
 # CONFIG_SND_SOC_RT700_SDW is not set

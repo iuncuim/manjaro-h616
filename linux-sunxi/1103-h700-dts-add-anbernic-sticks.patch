@@ -1,0 +1,385 @@
+diff --git a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
+index fc86299..861a423 100644
+--- a/arch/arm64/boot/dts/allwinner/Makefile
++++ b/arch/arm64/boot/dts/allwinner/Makefile
+@@ -65,6 +65,8 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-sp.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-sp-lpddr3.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-sp-v2-panel.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg34xx-sp-v2-panel-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024-lpddr3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg35xx-2024-rev6-panel.dtb
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-v2-panel-lpddr3.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-v2-panel-lpddr3.dts
+new file mode 100644
+index 0000000..135e197
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-v2-panel-lpddr3.dts
+@@ -0,0 +1,8 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include "sun50i-h700-anbernic-rg34xx-sp-v2-panel.dts"
++
++&reg_dcdc3 {
++	regulator-min-microvolt = <1200000>;
++	regulator-max-microvolt = <1200000>;
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-v2-panel.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-v2-panel.dts
+new file mode 100644
+index 0000000..8c3b77c
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp-v2-panel.dts
+@@ -0,0 +1,11 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++/*
++ * Copyright (C) 2024 Ryan Walklin <ryan@testtoast.com>.
++ * Copyright (C) 2024 Chris Morgan <macroalpha82@gmail.com>.
++ */
++
++#include "sun50i-h700-anbernic-rg34xx-sp.dts"
++
++&panel {
++	compatible = "anbernic,rg34xx-sp-v2-panel", "panel-mipi-dpi-spi";
++};
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp.dts
+index 54bfa86..28c9439 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg34xx-sp.dts
+@@ -5,12 +5,23 @@
+  */
+ 
+ #include "sun50i-h700-anbernic-rg35xx-sp.dts"
++#include "sun50i-h700-anbernic-sticks.dtsi"
+ 
+ / {
+ 	model = "Anbernic RG34XX-SP";
+ 	compatible = "anbernic,rg34xx-sp", "allwinner,sun50i-h700";
+ };
+ 
++&adc_joystick {
++	axis@2 {
++		abs-range = <4096 0>;
++	};
++
++	axis@3 {
++		abs-range = <0 4096>;
++	};
++};
++
+ &panel {
+ 	compatible = "anbernic,rg34xx-sp-panel", "panel-mipi-dpi-spi";
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h.dts
+index bef4d10..35f1ab0 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-h.dts
+@@ -5,73 +5,12 @@
+  */
+ 
+ #include "sun50i-h700-anbernic-rg35xx-plus.dts"
++#include "sun50i-h700-anbernic-sticks.dtsi"
+ 
+ / {
+ 	model = "Anbernic RG35XX H";
+ 	compatible = "anbernic,rg35xx-h", "allwinner,sun50i-h700";
+ 
+-	adc-joystick {
+-		compatible = "adc-joystick";
+-		io-channels = <&adc_mux 0>,
+-			      <&adc_mux 1>,
+-			      <&adc_mux 2>,
+-			      <&adc_mux 3>;
+-		pinctrl-0 = <&joy_mux_pin>;
+-		pinctrl-names = "default";
+-		poll-interval = <60>;
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+-
+-		axis@0 {
+-			reg = <0>;
+-			abs-flat = <32>;
+-			abs-fuzz = <32>;
+-			abs-range = <4096 0>;
+-			linux,code = <ABS_X>;
+-		};
+-
+-		axis@1 {
+-			reg = <1>;
+-			abs-flat = <32>;
+-			abs-fuzz = <32>;
+-			abs-range = <0 4096>;
+-			linux,code = <ABS_Y>;
+-		};
+-
+-		axis@2 {
+-			reg = <2>;
+-			abs-flat = <32>;
+-			abs-fuzz = <32>;
+-			abs-range = <0 4096>;
+-			linux,code = <ABS_RX>;
+-		};
+-
+-		axis@3 {
+-			reg = <3>;
+-			abs-flat = <32>;
+-			abs-fuzz = <32>;
+-			abs-range = <4096 0>;
+-			linux,code = <ABS_RY>;
+-		};
+-	};
+-
+-	adc_mux: adc-mux {
+-		compatible = "io-channel-mux";
+-		channels = "left_x", "left_y", "right_x", "right_y";
+-		#io-channel-cells = <1>;
+-		io-channels = <&gpadc 0>;
+-		io-channel-names = "parent";
+-		mux-controls = <&gpio_mux>;
+-		settle-time-us = <100>;
+-	};
+-
+-	gpio_mux: mux-controller {
+-		compatible = "gpio-mux";
+-		mux-gpios = <&pio 8 1 GPIO_ACTIVE_LOW>,
+-			    <&pio 8 2 GPIO_ACTIVE_LOW>;
+-		#mux-control-cells = <0>;
+-	};
+-
+ 	reg_vcc3v8_usb: regulator-vcc3v8-usb {
+ 		compatible = "regulator-fixed";
+ 		enable-active-high;
+@@ -92,32 +31,6 @@
+ 	};
+ };
+ 
+-&gpadc {
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-	status = "okay";
+-
+-	channel@0 {
+-		reg = <0>;
+-	};
+-};
+-
+-&gpio_keys_gamepad {
+-	button-thumbl {
+-		label = "GPIO Thumb Left";
+-		gpios = <&pio 4 8 GPIO_ACTIVE_LOW>; /* PE8 */
+-		linux,input-type = <EV_KEY>;
+-		linux,code = <BTN_THUMBL>;
+-	};
+-
+-	button-thumbr {
+-		label = "GPIO Thumb Right";
+-		gpios = <&pio 4 9 GPIO_ACTIVE_LOW>; /* PE9 */
+-		linux,input-type = <EV_KEY>;
+-		linux,code = <BTN_THUMBR>;
+-	};
+-};
+-
+ &ehci1 {
+ 	status = "okay";
+ };
+@@ -126,13 +39,6 @@
+ 	status = "okay";
+ };
+ 
+-&pio {
+-	joy_mux_pin: joy-mux-pin {
+-		pins = "PI0";
+-		function = "gpio_out";
+-	};
+-};
+-
+ &usbphy {
+ 	usb1_vbus-supply = <&reg_vcc5v0_usb>;
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro.dts
+index eeb95d0..e6f7cb8 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg35xx-pro.dts
+@@ -5,6 +5,7 @@
+  */
+ 
+ #include "sun50i-h700-anbernic-rg35xx-plus.dts"
++#include "sun50i-h700-anbernic-sticks.dtsi"
+ 
+ / {
+ 	model = "Anbernic RG35XX Pro";
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h.dts
+index 9f90580..8bb7b21 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-h.dts
+@@ -4,12 +4,23 @@
+  */
+ 
+ #include "sun50i-h700-anbernic-rg35xx-plus.dts"
++#include "sun50i-h700-anbernic-sticks.dtsi"
+ 
+ / {
+ 	model = "Anbernic RG40XX H";
+ 	compatible = "anbernic,rg40xx-h", "allwinner,sun50i-h700";
+ };
+ 
++&adc_joystick {
++	axis@2 {
++		abs-range = <4096 0>;
++	};
++
++	axis@3 {
++		abs-range = <0 4096>;
++	};
++};
++
+ &panel {
+ 	compatible = "anbernic,rg40xx-panel", "panel-mipi-dpi-spi";
+ };
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v.dts
+index 6c27854..ce660fc 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rg40xx-v.dts
+@@ -4,6 +4,7 @@
+  */
+ 
+ #include "sun50i-h700-anbernic-rg35xx-plus.dts"
++#include "sun50i-h700-anbernic-sticks.dtsi"
+ 
+ / {
+ 	model = "Anbernic RG40XX V";
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx.dts b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx.dts
+index 5e10fd5..be21644 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-rgcubexx.dts
+@@ -5,12 +5,23 @@
+  */
+ 
+ #include "sun50i-h700-anbernic-rg35xx-plus.dts"
++#include "sun50i-h700-anbernic-sticks.dtsi"
+ 
+ / {
+ 	model = "Anbernic RG CubeXX";
+ 	compatible = "anbernic,rgcubexx", "allwinner,sun50i-h700";
+ };
+ 
++&adc_joystick {
++	axis@2 {
++		abs-range = <4096 0>;
++	};
++
++	axis@3 {
++		abs-range = <0 4096>;
++	};
++};
++
+ &reg_lcd {
+ 	regulator-min-microvolt = <2800000>;
+ 	regulator-max-microvolt = <2800000>;
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-sticks.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-sticks.dtsi
+new file mode 100644
+index 0000000..bd0376a
+--- /dev/null
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h700-anbernic-sticks.dtsi
+@@ -0,0 +1,101 @@
++// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/linux-event-codes.h>
++
++/ {
++	adc_joystick: adc-joystick {
++		compatible = "adc-joystick";
++		io-channels = <&adc_mux 0>,
++			      <&adc_mux 1>,
++			      <&adc_mux 2>,
++			      <&adc_mux 3>;
++		pinctrl-0 = <&joy_mux_pin>;
++		pinctrl-names = "default";
++		poll-interval = <60>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		axis@0 {
++			reg = <0>;
++			abs-flat = <32>;
++			abs-fuzz = <32>;
++			abs-range = <4096 0>;
++			linux,code = <ABS_X>;
++		};
++
++		axis@1 {
++			reg = <1>;
++			abs-flat = <32>;
++			abs-fuzz = <32>;
++			abs-range = <0 4096>;
++			linux,code = <ABS_Y>;
++		};
++
++		axis@2 {
++			reg = <2>;
++			abs-flat = <32>;
++			abs-fuzz = <32>;
++			abs-range = <0 4096>;
++			linux,code = <ABS_RX>;
++		};
++
++		axis@3 {
++			reg = <3>;
++			abs-flat = <32>;
++			abs-fuzz = <32>;
++			abs-range = <4096 0>;
++			linux,code = <ABS_RY>;
++		};
++	};
++
++	adc_mux: adc-mux {
++		compatible = "io-channel-mux";
++		channels = "left_x", "left_y", "right_x", "right_y";
++		#io-channel-cells = <1>;
++		io-channels = <&gpadc 0>;
++		io-channel-names = "parent";
++		mux-controls = <&gpio_mux>;
++		settle-time-us = <100>;
++	};
++
++	gpio_mux: mux-controller {
++		compatible = "gpio-mux";
++		mux-gpios = <&pio 8 1 GPIO_ACTIVE_LOW>,
++			    <&pio 8 2 GPIO_ACTIVE_LOW>;
++		#mux-control-cells = <0>;
++	};
++};
++
++&gpadc {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	channel@0 {
++		reg = <0>;
++	};
++};
++
++&gpio_keys_gamepad {
++	button-thumbl {
++		label = "GPIO Thumb Left";
++		gpios = <&pio 4 8 GPIO_ACTIVE_LOW>; /* PE8 */
++		linux,input-type = <EV_KEY>;
++		linux,code = <BTN_THUMBL>;
++	};
++
++	button-thumbr {
++		label = "GPIO Thumb Right";
++		gpios = <&pio 4 9 GPIO_ACTIVE_LOW>; /* PE9 */
++		linux,input-type = <EV_KEY>;
++		linux,code = <BTN_THUMBR>;
++	};
++};
++
++&pio {
++	joy_mux_pin: joy-mux-pin {
++		pins = "PI0";
++		function = "gpio_out";
++	};
++};

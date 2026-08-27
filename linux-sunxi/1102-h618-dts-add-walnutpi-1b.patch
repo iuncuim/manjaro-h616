@@ -1,3 +1,15 @@
+diff --git a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
+index ec6b86c..fededba 100644
+--- a/arch/arm64/boot/dts/allwinner/Makefile
++++ b/arch/arm64/boot/dts/allwinner/Makefile
+@@ -57,6 +57,7 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-longanpi-3h.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-orangepi-zero2w.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-orangepi-zero3.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-transpeed-8k618-t.dtb
++dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-walnutpi-1b.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h618-yuzukihd-chameleon.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg28xx.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h700-anbernic-rg28xx-lpddr3.dtb
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
 index 8c676a4..864e624 100644
 --- a/arch/arm64/boot/dts/allwinner/sun50i-h616.dtsi
@@ -47,7 +59,7 @@ index 8c676a4..864e624 100644
  			reg = <0x05093000 0x400>;
 diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h618-walnutpi-1b.dts b/arch/arm64/boot/dts/allwinner/sun50i-h618-walnutpi-1b.dts
 new file mode 100644
-index 0000000..7375643
+index 0000000..a439f20
 --- /dev/null
 +++ b/arch/arm64/boot/dts/allwinner/sun50i-h618-walnutpi-1b.dts
 @@ -0,0 +1,290 @@
@@ -276,7 +288,7 @@ index 0000000..7375643
 +			reg_dcdc1: dcdc1 {
 +				regulator-always-on;
 +				regulator-min-microvolt = <810000>;
-+				regulator-max-microvolt = <990000>;
++				regulator-max-microvolt = <900000>;
 +				regulator-name = "vdd-gpu-sys";
 +			};
 +
