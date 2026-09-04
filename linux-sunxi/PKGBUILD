@@ -4,9 +4,9 @@
 # Contributor: Dragan Simic <dsimic@buserror.io>
 
 pkgbase=linux-sunxi
-pkgver=7.2
-_pkgver=7.2
-pkgrel=7
+pkgver=7.3
+_pkgver=7.3-rc1
+pkgrel=1
 _newversion=false
 _stopbuild=false    # Will also stop if ${_newversion} is true
 _srcname="linux-${_pkgver/%.0/}"
@@ -17,7 +17,7 @@ url="http://www.kernel.org/"
 license=('GPL2')
 makedepends=('xmlto' 'docbook-xsl' 'kmod' 'inetutils' 'bc' 'git' 'dtc')
 options=('!strip')
-source=("https://mirrors.edge.kernel.org/pub/linux/kernel/v7.x/${_srcname}.tar.gz"
+source=("https://git.kernel.org/torvalds/t/${_srcname}.tar.gz"
         'config'
         '1000-net-wireless-add-uwe5622.patch'
         '1001-h616-dts-opizero2w3-add-uwe5622-nodes.patch'
@@ -38,7 +38,6 @@ source=("https://mirrors.edge.kernel.org/pub/linux/kernel/v7.x/${_srcname}.tar.g
         '1204-regulator-axp20x-force-polyphase-setup-for-axp323.patch'
         '1205-arm64-dts-allwinner-a523-X96Q-Pro-add-sdio-wifi-node.patch'
         '1206-net-wireless-backport-aic8800-sdio-v2024_0327_3561b08f.patch'
-        '1207-net-wireless-mm2-fixes-aic8800-sdio-v2024_0327_3561b08f.patch'
         '1208-thermal-drivers-sun8i-Add-initial-support-for-A523-T.patch'
         '1210-arm64-dts-allwinner-add-emac1-support-for-x96qpro.patch'
         '1212-a523-Add-CPU-Operating-Performance-Points-table.patch'
@@ -52,17 +51,17 @@ source=("https://mirrors.edge.kernel.org/pub/linux/kernel/v7.x/${_srcname}.tar.g
         'linux.preset'
         '60-linux.hook'
         '90-linux.hook')
-md5sums=('c9c69715334b2ed3d82ce4e2b9d25fd5'
-         '30677b327e94a6bbdfc252d14d464598'
-         'de7236109046e27ebc6e374ada2200f1'
+md5sums=('052fe9c88ee123a1e79c395341c52dc0'
+         '4a5d5f053a8e86f3ae726220430fb594'
+         'b0b74630b9ab233e0a674d03c85ce123'
          'c65c5729302e715faa9b2262a30418fd'
-         '6b70a87bae27c6e03174358a52ad101c'
+         '581cd0f60858446093b2266c9feae88a'
          '24eeceefd23d2da3fedd7600312eecc9'
          '2248782c350eed7cc10a786614f128ec'
          'dfa0ea7030d5c3b8c8550a4979f4bc4b'
          '9b97b7065dc20041f45548adee15bb88'
          'dadebcc941ff3655a1fb3264b1d45dca'
-         '742be2d4c01318e56fd2c1d0c2351a7d'
+         '941999ee72c0d84654ad096e91da8d46'
          'ccda0428055db37c049360e6d770c64e'
          'cf9d1002d2e87982a37730fbdda23ab0'
          '7dd67e8f6b89e299edc17cf8cba86826'
@@ -72,11 +71,10 @@ md5sums=('c9c69715334b2ed3d82ce4e2b9d25fd5'
          '280f489659a336506159511db350e9de'
          'f23fd0fe8f5be10aa541d7da7e77a0fc'
          '6aacab690e8f62061a498828b53b67f1'
-         'd9ba377e09181eaded87cb17ac05e314'
-         'f1520536dc28eca9bde8f20fb899483f'
+         '11ad9164b17437e1f70c0587223d220d'
          '7eb3b54de64083ad8cc6fc1fd5ee88e9'
          'ee217476a215dfbcc3c28107e48eeb87'
-         '55474343399d2e7145fd1034fe405048'
+         '7285fa105394020b7700face4dd96a44'
          '09e60d92da8ec64e23a69ef67431d541'
          '91d59b205eb77d0f8156d50bacf4be0c'
          '44aff56f887324d2f0daaf553d8fa9e4'

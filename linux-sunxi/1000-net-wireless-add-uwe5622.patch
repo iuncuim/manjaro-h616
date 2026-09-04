@@ -46830,7 +46830,7 @@ index 000000000..75b9fa1bf
 +static int sprdwl_cfg80211_remain_on_channel(struct wiphy *wiphy,
 +						 struct wireless_dev *wdev,
 +						 struct ieee80211_channel *chan,
-+						 unsigned int duration, u64 *cookie,
++						 unsigned int duration, u64 cookie,
 +						 const u8 *rx_addr)
 +{
 +	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
@@ -46840,17 +46840,17 @@ index 000000000..75b9fa1bf
 +
 +	(void)rx_addr;
 +
-+	*cookie = vif->listen_cookie = ++remain_index;
++	vif->listen_cookie = ++remain_index;
 +	wl_ndev_log(L_DBG, wdev->netdev, "%s %d for %dms, cookie %lld\n",
-+			__func__, chan->center_freq, duration, *cookie);
++			__func__, chan->center_freq, duration, vif->listen_cookie);
 +	memcpy(&vif->listen_channel, chan, sizeof(struct ieee80211_channel));
 +
 +	ret = sprdwl_remain_chan(vif->priv, vif->ctx_id, chan,
-+				 channel_type, duration, cookie);
++				 channel_type, duration, &cookie);
 +	if (ret)
 +		return ret;
 +
-+	cfg80211_ready_on_channel(wdev, *cookie, chan, duration, GFP_KERNEL);
++	cfg80211_ready_on_channel(wdev, cookie, chan, duration, GFP_KERNEL);
 +
 +	return 0;
 +}
@@ -46870,13 +46870,13 @@ index 000000000..75b9fa1bf
 +static int sprdwl_cfg80211_mgmt_tx(struct wiphy *wiphy,
 +				   struct wireless_dev *wdev,
 +				   struct cfg80211_mgmt_tx_params *params,
-+				   u64 *cookie)
++				   u64 cookie)
 +#else
 +static int sprdwl_cfg80211_mgmt_tx(struct wiphy *wiphy,
 +				   struct wireless_dev *wdev,
 +				   struct ieee80211_channel *chan, bool offchan,
 +				   unsigned int wait, const u8 *buf, size_t len,
-+				   bool no_cck, bool dont_wait_for_ack, u64 *cookie)
++				   bool no_cck, bool dont_wait_for_ack, u64 cookie)
 +#endif
 +{
 +	struct sprdwl_vif *vif = container_of(wdev, struct sprdwl_vif, wdev);
@@ -46890,8 +46890,8 @@ index 000000000..75b9fa1bf
 +	static u64 mgmt_index;
 +	int ret = 0;
 +
-+	*cookie = ++mgmt_index;
-+	wl_ndev_log(L_DBG, wdev->netdev, "%s cookie %lld\n", __func__, *cookie);
++	cookie = ++mgmt_index;
++	wl_ndev_log(L_DBG, wdev->netdev, "%s cookie %lld\n", __func__, cookie);
 +
 +	sprdwl_cfg80211_dump_frame_prot_info(1, chan->center_freq, buf, len);
 +	/* send tx mgmt */
@@ -46899,10 +46899,10 @@ index 000000000..75b9fa1bf
 +		ret = sprdwl_tx_mgmt(vif->priv, vif->ctx_id,
 +					 ieee80211_frequency_to_channel
 +					 (chan->center_freq), dont_wait_for_ack,
-+					 wait, cookie, buf, len);
++					 wait, &cookie, buf, len);
 +		if (ret)
 +			if (!dont_wait_for_ack)
-+				cfg80211_mgmt_tx_status(wdev, *cookie, buf, len,
++				cfg80211_mgmt_tx_status(wdev, cookie, buf, len,
 +							0, GFP_KERNEL);
 +	}
 +

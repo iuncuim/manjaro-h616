@@ -2307,3 +2307,16 @@ index 09f668c..1f62152 100644
  	}
  
  	drm_plane_helper_add(&layer->plane, &sun8i_vi_layer_helper_funcs);
+
+diff --git a/drivers/gpu/drm/bridge/Kconfig b/drivers/gpu/drm/bridge/Kconfig
+index 4a57d49..279c45f 100644
+--- a/drivers/gpu/drm/bridge/Kconfig
++++ b/drivers/gpu/drm/bridge/Kconfig
+@@ -26,6 +26,7 @@ config DRM_AUX_HPD_BRIDGE
+ 	tristate
+ 	depends on DRM_BRIDGE && OF
+ 	select AUXILIARY_BUS
++	select DRM_KMS_HELPER
+ 	help
+ 	  Simple bridge that terminates the bridge chain and provides HPD
+ 	  support.

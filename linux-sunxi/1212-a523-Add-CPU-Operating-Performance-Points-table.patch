@@ -730,11 +730,11 @@ index bbec283b9..3b9625824 100644
 --- a/drivers/clk/sunxi-ng/ccu_common.h
 +++ b/drivers/clk/sunxi-ng/ccu_common.h
 @@ -21,6 +21,10 @@
- #define CCU_FEATURE_CLOSEST_RATE	BIT(9)
  #define CCU_FEATURE_DUAL_DIV		BIT(10)
  #define CCU_FEATURE_UPDATE_BIT		BIT(11)
+ #define CCU_FEATURE_IOSC_CALIBRATION	BIT(12)
 +/* Write one bit update the cfg to displl, auto clear */
-+#define CCU_FEATURE_CLEAR_MOD		BIT(12)
++#define CCU_FEATURE_CLEAR_MOD		BIT(13)
 +/* Calculate the frequency and save it in the list first */
 +#define CCU_FEATURE_CLAC_CACHED		BIT(15)
  
